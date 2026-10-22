@@ -17,6 +17,15 @@ Abra o `index.html` no navegador, ou ative o GitHub Pages neste repositório.
 
 **2 jogadores (teclado):** J1 WASD + F/G/Q · J2 setas + L/K/P
 
+## Estrutura do código
+O jogo é escrito em módulos em `src/` (física, regras, golpes, IA, carreira, telas, música…). Depois de editar, rode:
+
+```
+python3 tools/build.py
+```
+
+Isso gera `index.html` (site/app instalável) e `dist/padel.html` (página única). Os modelos de página ficam em `shell/`.
+
 ## Recursos
 - Física com efeito (topspin e slice no ar e no vidro), resistência do ar e rebote imprevisível nos cantos
 - Inércia e split step, peixinho, voleio, contrapared, saque com quique e saída pela porta no por 3/por 4
@@ -26,6 +35,9 @@ Abra o `index.html` no navegador, ou ative o GitHub Pages neste repositório.
 - Paredes de vidro e alambrado, por 3 e por 4, bola na fita, saque liftado e cortado
 - Fôlego, comandos ao parceiro, replay em câmera lenta, torcida
 - 4 quadras e 2 câmeras (aérea e atrás da quadra)
+- Escola de padel com 9 lições e treino livre com máquina de bolas; dicas na primeira vez que cada situação aparece
+- Carreira com notícias, rivais, sala de troféus, estatísticas e metas de patrocinador
+- Trilha chiptune (menu, partida e final)
 - Modo paisagem e tamanho dos botões ajustável (Opções → Botões)
 - Instalável na tela inicial e jogável offline
 - Progresso salvo no próprio navegador
