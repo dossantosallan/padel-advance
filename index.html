@@ -2353,11 +2353,11 @@ function overlay(html){
 }
 async function openExport(){
   const code=await packSave(),n=save.slots.filter(Boolean).length;
-  const o=overlay('<h3>Backup</h3><p>'+n+' carreira(s) salvas. Copie o código e guarde nas Notas, ou baixe o arquivo.</p><textarea id="bkTxt" readonly rows="6"></textarea><div class="sh-row"><button id="bkCopy">Copiar</button><button id="bkFile">Baixar</button><button id="ovClose">Fechar</button></div><p id="bkMsg"></p>');
+  const o=overlay('<h3>Backup</h3><p>'+n+' carreira(s) salvas. Copie o código e guarde nas Notas, ou baixe o arquivo.</p><textarea id="bkTxt" readonly rows="6"></textarea><div class="sh-row"><button id="bkCopy">Copiar</button>'+(window.NO_DL?'':'<button id="bkFile">Baixar</button>')+'<button id="ovClose">Fechar</button></div><p id="bkMsg"></p>');
   const t=o.$('bkTxt');t.value=code;
   o.$('bkCopy').onclick=()=>{const done=()=>{o.$('bkMsg').textContent='Código copiado.'};
     try{navigator.clipboard.writeText(code).then(done,()=>{t.focus();t.select();o.$('bkMsg').textContent='Selecionei o código: use Copiar do sistema.'})}catch(_){t.focus();t.select()}};
-  o.$('bkFile').onclick=()=>{try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([code],{type:'text/plain'}));a.download='padel-advance-backup.txt';document.body.appendChild(a);a.click();a.remove();o.$('bkMsg').textContent='Se o arquivo não baixar, use Copiar.'}catch(_){o.$('bkMsg').textContent='Não deu para baixar aqui. Use Copiar.'}};
+  if(o.$('bkFile'))o.$('bkFile').onclick=()=>{try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([code],{type:'text/plain'}));a.download='padel-advance-backup.txt';document.body.appendChild(a);a.click();a.remove();o.$('bkMsg').textContent='Se o arquivo não baixar, use Copiar.'}catch(_){o.$('bkMsg').textContent='Não deu para baixar aqui. Use Copiar.'}};
 }
 function openImport(){
   const o=overlay('<h3>Restaurar</h3><p>Cole o código do backup ou escolha o arquivo. Isso substitui todo o progresso deste aparelho.</p><textarea id="bkTxt" rows="6" placeholder="PADV..."></textarea><input id="bkFileIn" type="file" accept=".txt,.json,text/plain"><div class="sh-row"><button id="bkGo">Restaurar</button><button id="ovClose">Fechar</button></div><p id="bkMsg"></p>');
