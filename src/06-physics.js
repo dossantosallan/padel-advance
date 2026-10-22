@@ -7,7 +7,7 @@ function flight(o){
   const hs=Math.hypot(o.vx,o.vy),d=1-DRAG*hs;
   o.vx*=d;o.vy*=d;
   o.vz-=G*(1+MAG*(o.w||0)*Math.min(1,hs/2.2));
-  if(o.sv)o.vx+=o.sv*.006;   /* efeito lateral (saque cortado) */
+  if(o.sv)o.vx+=o.sv*.003;   /* efeito lateral (saque cortado) */
 }
 function physics(o,ev){
   flight(o);
@@ -23,7 +23,7 @@ function physics(o,ev){
   if(o.z<=0){o.z=0;if(o.vz<0){const v=-o.vz,c=CT(),w=o.w||0;
     if(o.spin==='kick'){o.vz=o.kickV;o.vx*=.92;o.vy*=.92;o.spin='none'}
     else{o.vz=v>.3?v*clamp(c.bounce+.2*w,.3,.85):0;const f=clamp(c.fric+.07*w,.7,.98);o.vx*=f;o.vy*=f}
-    if(o.sv){o.vx+=o.sv*.35;o.sv*=.3}
+    if(o.sv){o.vx+=o.sv*.1;o.sv=0}
     o.w=w*.5;ev('floor',v)}}
   if(o.out)return;
   let hit=false;

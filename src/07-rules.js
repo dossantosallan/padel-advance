@@ -18,7 +18,7 @@ function onEvent(e,v){
       const inBox=sideOf(b.y)===R&&b.x>=b.box[0]-1&&b.x<=b.box[1]+1&&(R===1?b.y>=SV1-1:b.y<=SV2+1);
       if(inBox&&b.cord){st='point';ptimer=60;msg='LET';sub='REPETE O SAQUE';after=()=>setupServe(true);return}
       if(!inBox)return fault();
-      b.serving=false;b.bounces=1;if(mst&&!demo&&server===P[0]&&faults===0)mst.svIn++;return;
+      b.serving=false;b.bounces=1;b.vx*=.55;b.vy*=.85;if(mst&&!demo&&server===P[0]&&faults===0)mst.svIn++;return;
     }
     return;
   }
@@ -112,14 +112,14 @@ function doServe(s,pow,ctype){
   let place,depth;
   if(human){const C=s.ctrl.cur;place=C.left?(left?'wide':'t'):C.right?(left?'t':'wide'):'body';depth=C.up?'short':C.down?'deep':'mid'}
   else{const r=Math.random();place=r<.4?'t':r<.75?'wide':'body';const d=Math.random();depth=d<.12?'short':d<.5?'deep':'mid'}
-  let tx=place==='t'?(left?x1-6:x0+6):place==='wide'?(left?x0+7:x1-7):mid+rnd(-5,5);
+  let tx=place==='t'?(left?x1-8:x0+8):place==='wide'?(left?x0+13:x1-13):mid+rnd(-5,5);
   const dd=depth==='short'?rnd(14,24):depth==='deep'?rnd(60,66):rnd(38,54);
   let ty=toTop?NET-dd:NET+dd;
   const ctrl=human?(1.3-.1*attrOf(s).pre):isPartner(s)?1:Math.max(.5,1.4-.25*sk(s));
   const e=(2+pow*pow*8)*ctrl*(faults?.7:1);tx+=rnd(-e,e);ty+=rnd(-e,e)*.8;
   b.y=s.y+(toTop?-3:3);b.z=Math.max(2,b.z);
   const sp=(cut?3+1.2*pow:3.4+1.6*pow)*(faults?.9:1),T=Math.hypot(tx-b.x,ty-b.y)/sp,sv=cut?(left?-1:1):0;
-  tx-=.003*sv*T*T;
+  tx-=.0015*sv*T*T;
   const margin=(human?2:2.4)-1.7*pow+rnd(-.6,.6)+(faults?.9:0);
   launch(tx,ty,T,cut?-.8:.7,0,margin);b.sv=sv;
   b.lastTeam=s.team;b.bounces=0;b.serving=true;b.mustBounce=true;b.netTouched=false;b.cord=false;b.out=null;b.spin='none';b.contra=false;
