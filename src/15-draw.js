@@ -303,6 +303,10 @@ function renderInner(){
   }
   if(mode==='career'){dim(.86);drawCareerHub();return}
   if(mode==='school'){drawSchool();return}
+  if(mode==='cmenu'){dim(.88);drawCMenu();return}
+  if(mode==='cslots'){dim(.9);drawSlots();return}
+  if(mode==='cattr'){dim(.9);drawCAttr();return}
+  if(mode==='cevo'){dim(.9);drawCEvo();return}
   if(mode==='cmore'){dim(.9);drawCMore();return}
   if(mode==='cnews'){dim(.92);drawCNews();return}
   if(mode==='ctroph'){dim(.92);drawCTroph();return}

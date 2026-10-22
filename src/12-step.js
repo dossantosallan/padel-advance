@@ -55,6 +55,7 @@ function stepGame(){
   }
   for(const p of P)if(isHuman(p))humanStep(p);
   tipsCheck();if(exclaim&&--exclaim.t<=0)exclaim=null;
+  if(mst&&!demo)mst.run=(mst.run||0)+Math.hypot(P[0].vx||0,P[0].vy||0);
   if(bo3&&!demo&&frame%150===0)cheer=Math.max(cheer,40);
   for(const p of P){
     if(p.hidden)continue;

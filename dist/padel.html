@@ -219,7 +219,7 @@ const BTNS=[['P',.82],['M',1],['G',1.16],['GG',1.3]];
 function applyBtn(){try{document.documentElement.style.setProperty('--cs',BTNS[save.opts.btn][1])}catch(_){}}
 applyBtn();
 function setCam(i){save.opts.cam=i;CAM=CAMS[i];buildCrowd();store()}
-function store(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(save))}catch(_){}}
+function store(){try{syncSlot()}catch(_){}try{localStorage.setItem(SAVE_KEY,JSON.stringify(save))}catch(_){}}
 /* ---------- jogadores e bola ---------- */
 const P=[{team:0,homeX:72},{team:0,homeX:28},{team:1,homeX:28},{team:1,homeX:72}];
 P.forEach(p=>Object.assign(p,{x:p.homeX,y:p.team?40:160,tx:p.homeX,ty:p.team?40:160,swing:0,stype:'drive',cool:0,moving:false,anim:0,lbl:'',lblT:0,
@@ -884,6 +884,7 @@ function stepGame(){
   }
   for(const p of P)if(isHuman(p))humanStep(p);
   tipsCheck();if(exclaim&&--exclaim.t<=0)exclaim=null;
+  if(mst&&!demo)mst.run=(mst.run||0)+Math.hypot(P[0].vx||0,P[0].vy||0);
   if(bo3&&!demo&&frame%150===0)cheer=Math.max(cheer,40);
   for(const p of P){
     if(p.hidden)continue;
@@ -986,7 +987,7 @@ const myRank=()=>indivRank().findIndex(x=>x.i===-1)+1;
 function teamList(){const t=car.teams.map((pr,k)=>({k,pts:PL_(pr[0]).pts+PL_(pr[1]).pts}));t.push({k:-1,pts:car.myPts+PL_(car.partner).pts});return t.sort((x,y)=>y.pts-x.pts)}
 const myTeamPos=()=>teamList().findIndex(t=>t.k===-1)+1;
 /* nível 0..3.6: atributos, raquete, parceiro, química e físico */
-function myLevel(){const a=save.attr,s=a.vel+a.for+a.pre+a.top;return clamp(.4+(s-4)/28*3.2+.1*Object.keys(RKTS[car.rkEq].b).length,.3,3.7)}
+function myLevel(){const a=save.attr,s=a.vel+a.for+a.pre+a.top;return clamp(.7+(s-10)/22*2.9+.1*Object.keys(RKTS[car.rkEq].b).length,.3,3.7)}
 function teamSk(k){if(k>=0)return(PL_(car.teams[k][0]).sk+PL_(car.teams[k][1]).sk)/2;return(.55*myLevel()+.45*PL_(car.partner).sk+car.chem*.25)*(.75+.25*car.cond/100)}
 const winP=(a,c)=>1/(1+Math.exp(-(teamSk(a)-teamSk(c))*1.6));
 function pairObj(k){
@@ -1029,7 +1030,7 @@ function tourMatchDone(win,sim){
   h2hNote(oppK,win);if(win)goalOnWin();
   car.cond=clamp(car.cond-(sim?6:(cat.bo3&&tourIsFinal()?12:8)),0,100);
   car.chem=Math.min(1,car.chem+.04);
-  if(win){t.won++;save.wins++;save.xp+=1}
+  if(win){t.won++;save.wins++}
   t.mine=win?-1:tourOpp();
   playRound(t);
   let injured=false;
@@ -1037,7 +1038,7 @@ function tourMatchDone(win,sim){
   if(!win||t.cur.length===1||injured){
     if(win&&t.cur.length>1&&injured){t.res[-1]=t.r;t.cur=t.cur.map(k=>k===-1?-2:k)}
     t.alive=false;finishTour(t);
-    if(t.champ===-1){car.titles++;car.seasonTitles++;save.titles++;save.xp+=cat.xp;trophyAdd(t)}
+    if(t.champ===-1){car.titles++;car.seasonTitles++;save.titles++;gainSpread(cat.xp*.3);trophyAdd(t)}
     else pushNews('VOCES CAIRAM '+ROUNDNA(Math.pow(2,t.R-(t.res[-1]||0)))+' EM '+t.city);
     goalOnTour(t);
     car.money+=t.prize||0;
@@ -1191,7 +1192,7 @@ const isRival=k=>{const h=h2hOf(k);return h.w+h.l>=3||h.l>=2};
 function h2hNote(k,win){
   if(k<0)return;carEnsure();const h=car.h2h[k]||(car.h2h[k]={w:0,l:0}),owed=h.l>=2&&h.l>h.w;
   if(win)h.w++;else h.l++;
-  if(win&&owed){save.xp+=1;pushNews('VINGANCA CONTRA '+teamKeyName(k)+'! +1 XP')}
+  if(win&&owed){gain(car.focus,.25);pushNews('VINGANCA CONTRA '+teamKeyName(k)+'!')}
   else if(!win&&h.l===2)pushNews(teamKeyName(k)+' VIRA SEU RIVAL');
 }
 function newGoal(){
@@ -1269,6 +1270,92 @@ function drawCStats(){
   txt('CONTA JOGOS DE VERDADE',80,232,MUT,'center');txt('(NAO OS SIMULADOS)',80,244,MUT,'center');
   txt('B VOLTA',80,262,MUT,'center');
 }
+/* ---------- carreiras salvas e evolução ----------
+   Até 3 carreiras. Cada uma guarda o próprio personagem (perfil) e a liga.
+   Ao entrar numa carreira, o perfil dela substitui o perfil base (usado em amistoso/2P) até você sair. */
+const PROF_KEYS=['me','attr','xp','stats','titles','wins','season'];
+const clone=o=>JSON.parse(JSON.stringify(o===undefined?null:o));
+function profSnap(){const o={};for(const k of PROF_KEYS)o[k]=clone(save[k]);return o}
+function profApply(o){for(const k of PROF_KEYS)if(o[k]!==undefined)save[k]=clone(o[k])}
+if(!save.slots){save.slots=[null,null,null];if(save.car){save.slots[0]={prof:profSnap(),car:save.car};save.car=null;car=null}}
+/* recuperação: se o app fechou dentro de uma carreira, devolve os dados para o slot e restaura o perfil base */
+if(save.active!=null&&save.slots[save.active]){save.slots[save.active]={prof:profSnap(),car:save.car};if(save.base)profApply(save.base)}
+else if(save.base)profApply(save.base);
+save.active=null;save.base=null;save.car=null;car=null;
+let creatingSlot=null,slotMode='load',slotConfirm=false,lvlUps=[],startPts=6;
+function syncSlot(){if(save.active==null||!car)return;save.slots[save.active]={prof:profSnap(),car}}
+function enterSlot(i){save.base=profSnap();const s=save.slots[i];profApply(s.prof);car=save.car=s.car;save.active=i;carEnsure();if(!car.prog){car.prog={vel:0,for:0,pre:0,top:0};car.focus='pre'}store()}
+function leaveSlot(){if(save.active!=null){syncSlot();if(save.base)profApply(save.base)}save.base=null;save.active=null;car=save.car=null;store()}
+function slotMeta(s){if(!s)return null;const c=s.car,p=s.prof;return{n:p.me.name||'?',season:c.season,week:c.week,titles:(c.trophies||[]).length,pts:c.myPts}}
+function beginCreate(i){
+  save.base=profSnap();
+  profApply({me:{name:'',hs:0,hair:0,skin:0,shirt:0,side:0,lefty:0,style:0,acc:0,accC:0,shoe:0,rkt:0,c2:0,pat:0,team:''},attr:{vel:1,for:1,pre:1,top:1},xp:0,stats:null,titles:0,wins:0,season:1});
+  creatingSlot=i;startPts=6;car=save.car=null;mode='create';cpage=0;cur=0;openName('me');
+}
+function cancelCreate(){if(save.base)profApply(save.base);save.base=null;creatingSlot=null;store();mode='cmenu';cur=0}
+function finishCreate(){
+  const i=creatingSlot;creatingSlot=null;
+  newCareer();car.prog={vel:0,for:0,pre:0,top:0};car.focus=['vel','for','pre','top'].sort((a,c)=>save.attr[a]-save.attr[c])[0];
+  save.slots[i]={prof:profSnap(),car};save.active=i;store();mode='career';cur=0;sfx.fanfare();
+}
+/* evolução: pontos de progresso viram nível; cada nível custa mais (de 2 em 2 até 12,5) */
+const NEED=[0,1.8,2.4,3.2,4.5,6.5,9,12];
+const ATN={vel:'VELOCIDADE',for:'FORCA',pre:'PRECISAO',top:'POR CIMA'};
+function gain(k,u){
+  if(!car||!car.prog)return;
+  car.prog[k]+=u;
+  while(save.attr[k]<8&&car.prog[k]>=NEED[save.attr[k]]){car.prog[k]-=NEED[save.attr[k]];save.attr[k]++;lvlUps.push(k);pushNews(ATN[k]+' SUBIU PARA '+save.attr[k]+'!');car.msg=ATN[k]+' '+save.attr[k]+'!'}
+  if(save.attr[k]>=8)car.prog[k]=0;
+}
+function gainSpread(u){for(const k of['vel','for','pre','top'])gain(k,u/4)}
+/* partida jogada de verdade: o que você mais fez em quadra é o que mais evolui */
+function matchGains(win){
+  if(!mst)return gainSpread(win?.25:.15);
+  const sh=mst.shots,over=(sh.smash||0)+(sh.bandeja||0)+(sh.vibora||0);
+  const w={top:over+1,for:mst.win+(sh.drive||0)*.25+1,pre:Math.max(1,6-mst.err)+mst.svIn*.3,vel:(mst.run||0)/180+1};
+  const tot=w.top+w.for+w.pre+w.vel,budget=win?.75:.45;
+  for(const k in w)gain(k,budget*w[k]/tot);
+}
+function drawSlots(){
+  txt(slotMode==='new'?'NOVA CARREIRA':'CARREGAR',80,32,ACC,'center');
+  for(let i=0;i<3;i++){const m=slotMeta(save.slots[i]),y=58+i*52,on=i===cur;
+    R(8,y-6,144,44,on?'#2b3470':'#141a3c');if(on)R(8,y-6,3,44,ACC);
+    txt('CARREIRA '+(i+1),18,y,on?ACC:MUT);
+    if(m){txt(m.n,18,y+12,WHITE);txt('TEMP '+m.season+'  SEM '+(m.week+1),18,y+24,MUT);txt(m.titles+' TIT',148,y+24,ACC,'right')}
+    else txt('VAZIO',18,y+12,'#55507a');
+  }
+  const on=cur===3;txt((on?'> ':'  ')+'VOLTAR',40,222,on?ACC:WHITE);
+  if(slotConfirm){cx.fillStyle='rgba(5,7,26,.95)';cx.fillRect(10,96,140,64);R(10,96,140,1,RED);R(10,159,140,1,RED);
+    txt('APAGAR CARREIRA',80,106,RED,'center');txt((cur+1)+' E COMECAR?',80,120,WHITE,'center');txt('A SIM   B NAO',80,142,ACC,'center')}
+  else txt('A ESCOLHE  B VOLTA',80,262,MUT,'center');
+}
+function drawCMenu(){
+  txt('CARREIRA',80,40,ACC,'center',F16);
+  const n=save.slots.filter(Boolean).length;
+  ['NOVA CARREIRA','CARREGAR ('+n+'/3)','VOLTAR'].forEach((s,i)=>{const on=i===cur;txt((on?'> ':'  ')+s,24,100+i*22,on?ACC:(i===1&&!n?'#55507a':WHITE))});
+  txt('CRIE SEU ATLETA',80,196,MUT,'center');txt('E SUBA NO RANKING',80,208,MUT,'center');
+  txt('ATE 3 CARREIRAS',80,232,MUT,'center');
+}
+function drawCAttr(){
+  txt('INICIO',80,30,ACC,'center',F16);
+  txt('DISTRIBUA OS PONTOS',80,54,WHITE,'center');txt('RESTAM '+startPts,80,66,startPts?ACC:GRN,'center');
+  const K=['vel','for','pre','top'];
+  K.forEach((k,i)=>{const y=88+i*24,on=cur===i,v=save.attr[k];txt(ATN[k],8,y,on?ACC:WHITE);for(let j=0;j<4;j++)R(110+j*10,y,8,7,j<v?(on?ACC:GRN):'#2b3470')});
+  const on=cur===4;txt((on?'> ':'  ')+'COMECAR',40,192,on?(startPts?MUT:ACC):WHITE);
+  const me=save.me;txt('BONUS: '+STYLE_N[me.style]+', '+SIDE_N[me.side],80,214,BLU,'center');
+  txt('< > AJUSTA (MAX 4)',80,240,MUT,'center');txt('B VOLTA AO VISUAL',80,254,MUT,'center');
+}
+function drawCEvo(){
+  txt('EVOLUCAO',80,30,ACC,'center',F16);
+  const K=['vel','for','pre','top'];
+  K.forEach((k,i)=>{const y=56+i*34,on=cur===i,v=save.attr[k],foc=car.focus===k;
+    txt((foc?'*':' ')+ATN[k],6,y,on?ACC:WHITE);txt(String(v),154,y,ACC,'right');
+    for(let j=0;j<8;j++)R(10+j*9,y+12,7,5,j<v?(foc?ACC:GRN):'#2b3470');
+    if(v<8){const p=car.prog[k]/NEED[v];R(88,y+12,64,5,'#05071a');R(89,y+13,Math.round(62*clamp(p,0,1)),3,BLU)}else txt('MAX',152,y+11,GRN,'right')});
+  txt('* = FOCO DO TREINO',80,196,ACC,'center');
+  txt('TREINO: +1 NO FOCO',80,212,MUT,'center');txt('JOGOS: O QUE VOCE',80,224,MUT,'center');txt('MAIS FAZ EM QUADRA',80,236,MUT,'center');
+  txt('A MUDA FOCO  B VOLTA',80,262,MUT,'center');
+}
 /* ---------- partidas, torneio e menus ---------- */
 function setupTeams(oppId,skill){
   const pair=typeof oppId==='object'?oppId:(PAIRS[oppId]||PAIRS[0]),me=save.me,my=SHIRTS[me.shirt],my2=KIT2[me.c2];
@@ -1297,7 +1384,7 @@ function enterDemo(){
   pts=[0,0];games=[0,0];serveTeam=0;cur=0;setupServe();
 }
 function startMatch(k,oppId,skill,best3){
-  mstReset();exclaim=null;
+  mstReset();exclaim=null;lvlUps=[];
   kind=k;demo=false;twoP=k==='2p';opp=oppId;mode='game';paused=false;replay=null;replayPending=false;bo3=!!best3;sets=[0,0];
   pts=[0,0];games=[0,0];serveTeam=0;faults=0;partnerMode=['AUTO','AUTO'];
   setupTeams(oppId,skill);rec.length=0;setupServe();sfx.game();
@@ -1323,7 +1410,7 @@ function endMatch(w){
       else{resNext='player';nextAfterPlayer='bracket';resLines=['PROXIMA FASE',RN[t.round],'+2 PONTOS']}
     }else{save.xp+=1;save.tour=null;resNext='player';nextAfterPlayer='title';resLines=['ELIMINADOS',RN_NA[r],'+1 PONTO']}
   }else if(kind==='car'&&car&&car.tour){
-    const t=car.tour,rn=ROUNDN(t.cur.length),inj=tourMatchDone(w===0,false);
+    matchGains(w===0);const t=car.tour,rn=ROUNDN(t.cur.length),inj=tourMatchDone(w===0,false);
     careerResultLines(w===0,rn,inj);
   }else if(kind==='friendly'){
     resNext='title';if(w===0){save.wins++;save.xp+=1;resLines=['AMISTOSO','+1 PONTO']}else resLines=['AMISTOSO','SEM PONTOS']
@@ -1337,10 +1424,11 @@ function careerResultLines(win,rn,inj){
   const t=car.tour;
   if(inj){resLines=['LESAO!','FORA POR '+car.inj+' SEM.'];resNext='cdone';return}
   if(!t.alive){resLines=t.champ===-1?['CAMPEOES DO','TORNEIO!']:['ELIMINADOS',ROUNDNA(Math.pow(2,t.R-(t.res[-1]||0)))];resNext='cdone'}
-  else{resLines=['PROXIMA FASE',ROUNDN(t.cur.length),'+1 XP'];resNext='ctour'}
+  else{resLines=['PROXIMA FASE',ROUNDN(t.cur.length)];resNext='ctour'}
+  if(lvlUps.length)resLines.push('SUBIU: '+[...new Set(lvlUps)].map(k=>ATN[k]).join(' ').slice(0,18));
 }
 function simCareerMatch(){
-  const t=car.tour,o=tourOpp(),win=Math.random()<winP(-1,o),rn=ROUNDN(t.cur.length);
+  lvlUps=[];mst=null;const t=car.tour,o=tourOpp(),win=Math.random()<winP(-1,o),rn=ROUNDN(t.cur.length);gainSpread(win?.22:.14);
   const best3=CATS[t.code].bo3&&t.cur.length===2;
   kind='car';demo=false;twoP=false;bo3=false;sets=[0,0];oppPair=pairObj(o);
   const lo=(Math.random()*3)|0;games=win?[4,lo]:[lo,4];pts=[0,0];
@@ -1363,7 +1451,7 @@ function update(){
       if(prs(menu,'a')||prs(menu,'start')){
         sfx.ui();
         if(!save.me.name&&cur!==5){mode='create';cpage=0;cur=0}
-        else if(cur===0){if(!car)newCareer();kind='car';mode=car.week>=CAL.length?'cseason':car.tour?(car.tour.alive?'ctour':'cdone'):'career';cur=0}
+        else if(cur===0){mode='cmenu';cur=0}
         else if(cur===1){mode='school';cur=0}
         else if(cur===2){mode='friendly';cur=0}
         else if(cur===3){mode='twop'}
@@ -1424,8 +1512,8 @@ function update(){
         if(!me.name||(cpage===0&&cur===0))openName('me');
         else if(cpage===0&&(cur===11||prs(menu,'start'))){cpage=1;cur=0}
         else if(cpage===1&&cur===0&&!prs(menu,'start'))openName('team');
-        else if(cpage===1&&(cur===4||prs(menu,'start'))){store();enterDemo()}
-      }else if(back()){if(cpage===1){cpage=0;cur=11}else if(me.name){store();enterDemo()}else openName('me')}
+        else if(cpage===1&&(cur===4||prs(menu,'start'))){store();if(creatingSlot!=null){mode='cattr';cur=0}else enterDemo()}
+      }else if(back()){if(cpage===1){cpage=0;cur=11}else if(creatingSlot!=null)cancelCreate();else if(me.name){store();enterDemo()}else openName('me')}
       break;}
     case 'name':{
       const put=ch=>{if(ch==='<')nameBuf=nameBuf.slice(0,-1);else if(nameBuf.length<nameMax()&&!(ch===' '&&(!nameBuf||nameBuf.endsWith(' '))))nameBuf+=ch;sfx.ui()};
@@ -1452,15 +1540,15 @@ function update(){
         }else if(cur===1){
           if(car.inj>0){sfx.fault();car.msg='LESIONADO: DESCANSE'}
           else if(car.money<400){sfx.fault();car.msg='SEM DINHEIRO'}
-          else{car.money-=400;const x=2+(car.coach?1:0);save.xp+=x;car.msg='TREINO: +'+x+' XP';nextWeek('train')}
+          else{car.money-=400;lvlUps=[];car.msg='TREINO: '+ATN[car.focus];gain(car.focus,1.3+(car.coach?.6:0));nextWeek('train')}
         }else if(cur===2){car.msg=car.inj>0?'RECUPERANDO':'DESCANSO: FISICO +35';nextWeek(car.inj>0?'inj':'rest')}
         else if(cur===3){mode='crank';rkOff=Math.max(0,myRank()-8)}
         else if(cur===4){mode='cpartner';cur=0}
         else if(cur===5){mode='cteam';cur=0}
-        else if(cur===6){mode='player';nextAfterPlayer='career';cur=0}
+        else if(cur===6){mode='cevo';cur=['vel','for','pre','top'].indexOf(car.focus)}
         else if(cur===7){mode='cmore';cur=0}
-        else{store();enterDemo()}
-      }else if(back()){store();enterDemo()}
+        else{leaveSlot();enterDemo()}
+      }else if(back()){leaveSlot();enterDemo()}
       break;}
     case 'ctour':
       nav(3);
@@ -1500,6 +1588,34 @@ function update(){
         store();
       }else if(back()){mode='career';cur=5}
       break;}
+    case 'cmenu':
+      nav(3);
+      if(prs(menu,'a')||prs(menu,'start')){sfx.ui();const has=save.slots.some(Boolean);
+        if(cur===0){slotMode='new';mode='cslots';const e=save.slots.findIndex(s=>!s);cur=e<0?0:e}
+        else if(cur===1){if(has){slotMode='load';mode='cslots';cur=save.slots.findIndex(Boolean)}else sfx.fault()}
+        else enterDemo()}
+      else if(back())enterDemo();
+      break;
+    case 'cslots':
+      if(slotConfirm){if(prs(menu,'a')||prs(menu,'start')){slotConfirm=false;beginCreate(cur)}else if(back())slotConfirm=false;break}
+      nav(4);
+      if(prs(menu,'a')||prs(menu,'start')){
+        if(cur===3){mode='cmenu';cur=slotMode==='new'?0:1}
+        else if(slotMode==='load'){if(save.slots[cur]){enterSlot(cur);kind='car';mode=car.week>=CAL.length?'cseason':car.tour?(car.tour.alive?'ctour':'cdone'):'career';cur=0;sfx.game()}else sfx.fault()}
+        else{if(save.slots[cur])slotConfirm=true;else beginCreate(cur)}
+      }else if(back()){mode='cmenu';cur=slotMode==='new'?0:1}
+      break;
+    case 'cattr':{
+      nav(5);const K=['vel','for','pre','top'],dv=prs(menu,'right')-prs(menu,'left');
+      if(cur<4&&dv){const k=K[cur];if(dv>0&&startPts>0&&save.attr[k]<4){save.attr[k]++;startPts--;sfx.ui()}else if(dv<0&&save.attr[k]>1){save.attr[k]--;startPts++;sfx.ui()}else sfx.fault()}
+      if((prs(menu,'a')||prs(menu,'start'))&&cur===4){if(startPts===0)finishCreate();else sfx.fault()}
+      else if(back()){mode='create';cpage=1;cur=4}
+      break;}
+    case 'cevo':
+      nav(4);
+      if(prs(menu,'a')){car.focus=['vel','for','pre','top'][cur];sfx.ui();store()}
+      else if(back()){mode='career';cur=6}
+      break;
     case 'cmore':
       nav(4);
       if(prs(menu,'a')){sfx.ui();if(cur===0)mode='cnews';else if(cur===1)mode='ctroph';else if(cur===2)mode='cstats';else{mode='career';cur=7}}
@@ -1852,6 +1968,10 @@ function renderInner(){
   }
   if(mode==='career'){dim(.86);drawCareerHub();return}
   if(mode==='school'){drawSchool();return}
+  if(mode==='cmenu'){dim(.88);drawCMenu();return}
+  if(mode==='cslots'){dim(.9);drawSlots();return}
+  if(mode==='cattr'){dim(.9);drawCAttr();return}
+  if(mode==='cevo'){dim(.9);drawCEvo();return}
   if(mode==='cmore'){dim(.9);drawCMore();return}
   if(mode==='cnews'){dim(.92);drawCNews();return}
   if(mode==='ctroph'){dim(.92);drawCTroph();return}
@@ -1948,7 +2068,7 @@ function drawCareerHub(){
   txt('RANK #'+rk,8,128,WHITE);txt('DUPLA '+pos+'o',152,128,MUT,'right');
   txt(money$(car.money),8,140,GRN);txt(car.myPts+' PTS',152,140,ACC,'right');
   txt(pa.n.split(' ')[0]+' '+'*'.repeat(stars(pa.sk)),8,152,MUT);bar(112,153,40,car.chem,BLU);
-  const items=[car.inj>0?'(LESIONADO)':'JOGAR TORNEIO','TREINAR $400','DESCANSAR','RANKING','PARCEIRO','EQUIPE','EVOLUCAO'+(save.xp?' ('+save.xp+')':''),'CARREIRA','SAIR'];
+  const items=[car.inj>0?'(LESIONADO)':'JOGAR TORNEIO','TREINAR $400','DESCANSAR','RANKING','PARCEIRO','EQUIPE','EVOLUCAO','CARREIRA','SAIR'];
   items.forEach((s,i)=>{const on=i===cur,y=162+i*11;txt((on?'> ':'  ')+s,14,y,on?ACC:(i===0&&(!el||car.inj>0)?'#55507a':WHITE))});
   carEnsure();const nw=car.news[0];
   if(car.msg)txt(car.msg.slice(0,19),80,262,BLU,'center');
@@ -2012,7 +2132,7 @@ function drawCTeam(){
   txt('PATROC.: '+sp[1],80,70,WHITE,'center');txt('SALARIO '+money$(sp[2])+'/MES',80,82,MUT,'center');
   const rows=[['FISIO $1.500',car.physio===car.week?'FEITO':'+30 FIS'],['TECNICO',car.coach?'SIM':'NAO'],['RAQUETE',rk.n],['VOLTAR','']];
   rows.forEach(([l,val],i)=>{const y=106+i*20,on=i===cur;txt((on?'>':' ')+l,6,y,on?ACC:WHITE);txt(val,154,y,on?ACC:MUT,'right')});
-  txt(car.coach?'TREINO +1 XP  -$1.500/MES':'TECNICO: TREINO +1 XP',80,190,MUT,'center');
+  txt(car.coach?'TREINO +50%  -$1.500/MES':'TECNICO: TREINO +50%',80,190,MUT,'center');
   const bn=Object.keys(rk.b).map(k=>({pre:'PRECISAO',for:'FORCA',top:'POR CIMA'}[k]+' +1')).join(' ')||'SEM BONUS';
   txt(bn.slice(0,19),80,206,BLU,'center');
   txt(car.rkEq===v?'EM USO':own?'A EQUIPA':'A COMPRA '+money$(rk.c),80,220,own?GRN:ACC,'center');

@@ -13,7 +13,7 @@ function drawCareerHub(){
   txt('RANK #'+rk,8,128,WHITE);txt('DUPLA '+pos+'o',152,128,MUT,'right');
   txt(money$(car.money),8,140,GRN);txt(car.myPts+' PTS',152,140,ACC,'right');
   txt(pa.n.split(' ')[0]+' '+'*'.repeat(stars(pa.sk)),8,152,MUT);bar(112,153,40,car.chem,BLU);
-  const items=[car.inj>0?'(LESIONADO)':'JOGAR TORNEIO','TREINAR $400','DESCANSAR','RANKING','PARCEIRO','EQUIPE','EVOLUCAO'+(save.xp?' ('+save.xp+')':''),'CARREIRA','SAIR'];
+  const items=[car.inj>0?'(LESIONADO)':'JOGAR TORNEIO','TREINAR $400','DESCANSAR','RANKING','PARCEIRO','EQUIPE','EVOLUCAO','CARREIRA','SAIR'];
   items.forEach((s,i)=>{const on=i===cur,y=162+i*11;txt((on?'> ':'  ')+s,14,y,on?ACC:(i===0&&(!el||car.inj>0)?'#55507a':WHITE))});
   carEnsure();const nw=car.news[0];
   if(car.msg)txt(car.msg.slice(0,19),80,262,BLU,'center');
@@ -77,7 +77,7 @@ function drawCTeam(){
   txt('PATROC.: '+sp[1],80,70,WHITE,'center');txt('SALARIO '+money$(sp[2])+'/MES',80,82,MUT,'center');
   const rows=[['FISIO $1.500',car.physio===car.week?'FEITO':'+30 FIS'],['TECNICO',car.coach?'SIM':'NAO'],['RAQUETE',rk.n],['VOLTAR','']];
   rows.forEach(([l,val],i)=>{const y=106+i*20,on=i===cur;txt((on?'>':' ')+l,6,y,on?ACC:WHITE);txt(val,154,y,on?ACC:MUT,'right')});
-  txt(car.coach?'TREINO +1 XP  -$1.500/MES':'TECNICO: TREINO +1 XP',80,190,MUT,'center');
+  txt(car.coach?'TREINO +50%  -$1.500/MES':'TECNICO: TREINO +50%',80,190,MUT,'center');
   const bn=Object.keys(rk.b).map(k=>({pre:'PRECISAO',for:'FORCA',top:'POR CIMA'}[k]+' +1')).join(' ')||'SEM BONUS';
   txt(bn.slice(0,19),80,206,BLU,'center');
   txt(car.rkEq===v?'EM USO':own?'A EQUIPA':'A COMPRA '+money$(rk.c),80,220,own?GRN:ACC,'center');

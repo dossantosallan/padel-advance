@@ -8,7 +8,7 @@ const isRival=k=>{const h=h2hOf(k);return h.w+h.l>=3||h.l>=2};
 function h2hNote(k,win){
   if(k<0)return;carEnsure();const h=car.h2h[k]||(car.h2h[k]={w:0,l:0}),owed=h.l>=2&&h.l>h.w;
   if(win)h.w++;else h.l++;
-  if(win&&owed){save.xp+=1;pushNews('VINGANCA CONTRA '+teamKeyName(k)+'! +1 XP')}
+  if(win&&owed){gain(car.focus,.25);pushNews('VINGANCA CONTRA '+teamKeyName(k)+'!')}
   else if(!win&&h.l===2)pushNews(teamKeyName(k)+' VIRA SEU RIVAL');
 }
 function newGoal(){

@@ -8,4 +8,4 @@ const BTNS=[['P',.82],['M',1],['G',1.16],['GG',1.3]];
 function applyBtn(){try{document.documentElement.style.setProperty('--cs',BTNS[save.opts.btn][1])}catch(_){}}
 applyBtn();
 function setCam(i){save.opts.cam=i;CAM=CAMS[i];buildCrowd();store()}
-function store(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(save))}catch(_){}}
+function store(){try{syncSlot()}catch(_){}try{localStorage.setItem(SAVE_KEY,JSON.stringify(save))}catch(_){}}

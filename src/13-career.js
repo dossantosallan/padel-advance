@@ -42,7 +42,7 @@ const myRank=()=>indivRank().findIndex(x=>x.i===-1)+1;
 function teamList(){const t=car.teams.map((pr,k)=>({k,pts:PL_(pr[0]).pts+PL_(pr[1]).pts}));t.push({k:-1,pts:car.myPts+PL_(car.partner).pts});return t.sort((x,y)=>y.pts-x.pts)}
 const myTeamPos=()=>teamList().findIndex(t=>t.k===-1)+1;
 /* nível 0..3.6: atributos, raquete, parceiro, química e físico */
-function myLevel(){const a=save.attr,s=a.vel+a.for+a.pre+a.top;return clamp(.4+(s-4)/28*3.2+.1*Object.keys(RKTS[car.rkEq].b).length,.3,3.7)}
+function myLevel(){const a=save.attr,s=a.vel+a.for+a.pre+a.top;return clamp(.7+(s-10)/22*2.9+.1*Object.keys(RKTS[car.rkEq].b).length,.3,3.7)}
 function teamSk(k){if(k>=0)return(PL_(car.teams[k][0]).sk+PL_(car.teams[k][1]).sk)/2;return(.55*myLevel()+.45*PL_(car.partner).sk+car.chem*.25)*(.75+.25*car.cond/100)}
 const winP=(a,c)=>1/(1+Math.exp(-(teamSk(a)-teamSk(c))*1.6));
 function pairObj(k){
@@ -85,7 +85,7 @@ function tourMatchDone(win,sim){
   h2hNote(oppK,win);if(win)goalOnWin();
   car.cond=clamp(car.cond-(sim?6:(cat.bo3&&tourIsFinal()?12:8)),0,100);
   car.chem=Math.min(1,car.chem+.04);
-  if(win){t.won++;save.wins++;save.xp+=1}
+  if(win){t.won++;save.wins++}
   t.mine=win?-1:tourOpp();
   playRound(t);
   let injured=false;
@@ -93,7 +93,7 @@ function tourMatchDone(win,sim){
   if(!win||t.cur.length===1||injured){
     if(win&&t.cur.length>1&&injured){t.res[-1]=t.r;t.cur=t.cur.map(k=>k===-1?-2:k)}
     t.alive=false;finishTour(t);
-    if(t.champ===-1){car.titles++;car.seasonTitles++;save.titles++;save.xp+=cat.xp;trophyAdd(t)}
+    if(t.champ===-1){car.titles++;car.seasonTitles++;save.titles++;gainSpread(cat.xp*.3);trophyAdd(t)}
     else pushNews('VOCES CAIRAM '+ROUNDNA(Math.pow(2,t.R-(t.res[-1]||0)))+' EM '+t.city);
     goalOnTour(t);
     car.money+=t.prize||0;
