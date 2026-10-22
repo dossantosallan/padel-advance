@@ -20,7 +20,9 @@ function setupTeams(oppId,skill){
   P.forEach(p=>{p.stam=1;p.lblT=0;p.hidden=false});
   if(inCar)P[0].stam=clamp(car.cond/100,.45,1);
 }
+let friendlySwap=false;
 function enterDemo(){
+  if(friendlySwap){if(save.base)profApply(save.base);save.base=null;friendlySwap=false;store()}
   mode='title';kind='demo';demo=true;twoP=false;paused=false;replay=null;replayPending=false;bo3=false;sets=[0,0];
   setupTeams((Math.random()*PAIRS.length)|0,1.5);P[1].skill=P[0].skill=1.5;
   pts=[0,0];games=[0,0];serveTeam=0;cur=0;setupServe();
@@ -84,7 +86,7 @@ const nameMax=()=>nameTarget==='team'?10:8;
 function nav(n){if(prs(menu,'up')){cur=(cur+n-1)%n;sfx.ui()}if(prs(menu,'down')){cur=(cur+1)%n;sfx.ui()}}
 const back=()=>prs(menu,'b');
 function update(){
-  readInput();frame++;if(cheer>0)cheer--;
+  readInput();frame++;if(sharing)return;if(cheer>0)cheer--;
   switch(mode){
     case 'boot':stepBoot();break;
     case 'intro':stepIntro();break;
@@ -106,10 +108,15 @@ function update(){
       else if(back()){enterDemo()}
       break;
     case 'friendly':
-      nav(2);
+      nav(3);
       {const dv=prs(menu,'right')-prs(menu,'left');
-        if(dv){sfx.ui();if(cur===0)friendly.pair=(friendly.pair+PAIRS.length+dv)%PAIRS.length;else friendly.lvl=(friendly.lvl+3+dv)%3}}
-      if(prs(menu,'a')||prs(menu,'start'))startMatch('friendly',friendly.pair,[0,1.5,3][friendly.lvl]);
+        if(dv){sfx.ui();if(cur===0)friendly.pair=(friendly.pair+PAIRS.length+dv)%PAIRS.length;else if(cur===1)friendly.lvl=(friendly.lvl+3+dv)%3;
+          else{const opts=[-1,...save.slots.map((s,i)=>s?i:null).filter(i=>i!==null)];friendly.ath=opts[(opts.indexOf(friendly.ath??-1)+opts.length+dv)%opts.length]}}}
+      if(prs(menu,'a')||prs(menu,'start')){
+        const a=friendly.ath??-1;
+        if(a>=0&&save.slots[a]){save.base=profSnap();profApply({me:save.slots[a].prof.me,attr:save.slots[a].prof.attr});friendlySwap=true}
+        startMatch('friendly',friendly.pair,[0,1.5,3][friendly.lvl]);
+      }
       else if(back())enterDemo();
       break;
     case 'twop':
@@ -171,13 +178,15 @@ function update(){
       else if(prs(menu,'b')){if(nameBuf)put('<');else if(nameTarget==='team'){mode='create';cpage=1;cur=0}else if(save.me.name){mode='create';cpage=0;cur=0}}
       break;}
     case 'career':{
+      if(car.needOffer){car.needOffer=false;offerContract();break}
       const IT=9;nav(IT);
+      if(cur===0){const o=weekOpts(),dv=prs(menu,'right')-prs(menu,'left');if(dv&&o.length>1){car.pick=((car.pick||0)+1)%o.length;sfx.ui()}}
       if(prs(menu,'a')){
         sfx.ui();
         if(cur===0){
           if(car.inj>0){sfx.fault();car.msg='LESIONADO: DESCANSE'}
           else if(!eligible()){sfx.fault();car.msg='SEM RANKING PARA ESTE'}
-          else if(car.money<weekInfo().cat.cost){sfx.fault();car.msg='SEM DINHEIRO P/ VIAGEM'}
+          else if(car.money<weekInfo().cost){sfx.fault();car.msg='SEM DINHEIRO P/ VIAGEM'}
           else{enterTour();mode='ctour';cur=0}
         }else if(cur===1){
           if(car.inj>0){sfx.fault();car.msg='LESIONADO: DESCANSE'}
@@ -196,12 +205,13 @@ function update(){
       nav(3);
       if(prs(menu,'a')){
         const t=car.tour,o=tourOpp();
-        if(cur===0)startMatch('car',pairObj(o),teamSk(o),CATS[t.code].bo3&&t.cur.length===2);
+        if(cur===0)startMatch('car',pairObj(o),clamp(teamSk(o)+DIFF_ADJ[car.diff??1],.2,3.7),CATS[t.code].bo3&&t.cur.length===2);
         else if(cur===1)simCareerMatch();
         else{const inj=tourMatchDone(false,true);careerResultLines(false,'',inj);mode='cdone'}
       }
       break;
     case 'cdone':
+      if(back()&&car.tour&&car.tour.champ===-1){shareCard('title');break}
       if(prs(menu,'a')||prs(menu,'start')){sfx.ui();const c=car.tour;car.msg=c&&c.champ===-1?'CAMPEAO EM '+c.city+'!':'VOLTANDO PRA CASA';nextWeek('played');if(mode!=='cseason'){mode='career';cur=0}}
       break;
     case 'crank':
@@ -220,11 +230,12 @@ function update(){
       }else if(back()){mode='career';cur=4}
       break;}
     case 'cteam':{
-      nav(4);const dv=prs(menu,'right')-prs(menu,'left');
+      nav(5);if(cur===3){const d=prs(menu,'right')-prs(menu,'left')||(prs(menu,'a')?1:0);if(d){car.diff=((car.diff??1)+3+d)%3;sfx.ui();store()}}const dv=prs(menu,'right')-prs(menu,'left');
       if(cur===2&&dv){car.rkView=((car.rkView||0)+RKTS.length+dv)%RKTS.length;sfx.ui()}
       if(prs(menu,'a')){
         if(cur===0){if(car.physio===car.week||car.money<1500)sfx.fault();else{car.money-=1500;car.cond=Math.min(100,car.cond+30);car.physio=car.week;sfx.game()}}
         else if(cur===1){car.coach=!car.coach;sfx.ui()}
+        else if(cur===3){}
         else if(cur===2){const v=car.rkView||0;if(car.rk.includes(v)){car.rkEq=v;sfx.ui()}else if(car.money>=RKTS[v].c){car.money-=RKTS[v].c;car.rk.push(v);car.rkEq=v;sfx.game()}else sfx.fault()}
         else{mode='career';cur=5}
         store();
@@ -243,14 +254,15 @@ function update(){
       nav(4);
       if(prs(menu,'a')||prs(menu,'start')){
         if(cur===3){mode='cmenu';cur=slotMode==='new'?0:1}
-        else if(slotMode==='load'){if(save.slots[cur]){enterSlot(cur);kind='car';mode=car.week>=CAL.length?'cseason':car.tour?(car.tour.alive?'ctour':'cdone'):'career';cur=0;sfx.game()}else sfx.fault()}
+        else if(slotMode==='load'){if(save.slots[cur]){enterSlot(cur);kind='car';mode=car.retired?'cretire':car.week>=CAL.length?'cseason':car.tour?(car.tour.alive?'ctour':'cdone'):'career';cur=0;sfx.game()}else sfx.fault()}
         else{if(save.slots[cur])slotConfirm=true;else beginCreate(cur)}
       }else if(back()){mode='cmenu';cur=slotMode==='new'?0:1}
       break;
     case 'cattr':{
-      nav(5);const K=['vel','for','pre','top'],dv=prs(menu,'right')-prs(menu,'left');
+      nav(6);const K=['vel','for','pre','top'],dv=prs(menu,'right')-prs(menu,'left');
+      if(cur===4&&dv){newDiff=(newDiff+3+dv)%3;sfx.ui()}
       if(cur<4&&dv){const k=K[cur];if(dv>0&&startPts>0&&save.attr[k]<START_MAX){save.attr[k]++;startPts--;sfx.ui()}else if(dv<0&&save.attr[k]>START_BASE){save.attr[k]--;startPts++;sfx.ui()}else sfx.fault()}
-      if((prs(menu,'a')||prs(menu,'start'))&&cur===4){if(startPts===0)finishCreate();else sfx.fault()}
+      if((prs(menu,'a')||prs(menu,'start'))&&cur===5){if(startPts===0)finishCreate();else sfx.fault()}
       else if(back()){mode='create';cpage=1;cur=4}
       break;}
     case 'cevo':
@@ -264,6 +276,7 @@ function update(){
       else if(back()){mode='career';cur=7}
       break;
     case 'cnews':case 'ctroph':case 'cstats':
+      if(mode==='ctroph'&&prs(menu,'a')){shareCard('season');break}
       if(back()||prs(menu,'a')){mode='cmore';cur={cnews:0,ctroph:1,cstats:2}[mode]}
       break;
     case 'school':{
@@ -272,8 +285,22 @@ function update(){
       if(prs(menu,'a')||prs(menu,'start')){if(cur<LESSONS.length)startTrain(cur);else startTrain(null,freeSel)}
       else if(back())enterDemo();
       break;}
-    case 'cseason':
-      if(prs(menu,'a')||prs(menu,'start')){newSeason();mode='career';cur=0;sfx.fanfare()}
+    case 'cseason':{
+      const canRet=car.age>=RETIRE_AGE,force=car.age>=FORCE_RETIRE;
+      if(canRet&&!force)nav(2);
+      if(back()){shareCard('season');break}
+      if(prs(menu,'a')||prs(menu,'start')){
+        if(force||(canRet&&cur===1))retire();
+        else{newSeason();mode='career';cur=0;sfx.fanfare()}
+      }
+      break;}
+    case 'csponsor':
+      nav(2);
+      if(prs(menu,'a')||prs(menu,'start')){signContract(cur);mode='career';cur=0;sfx.game()}
+      break;
+    case 'cretire':
+      if(back()){shareCard('retire');break}
+      if(prs(menu,'a')||prs(menu,'start')){leaveSlot();enterDemo()}
       break;
     case 'game':
       if(prs(menu,'start')&&st!=='replay'){paused=!paused;pauseCur=0;sfx.ui();break}

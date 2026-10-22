@@ -76,7 +76,7 @@ function drawCTroph(){
   const last=car.trophies[car.trophies.length-1];
   if(last)txt('ULTIMO: '+last.city,80,214,ACC,'center');
   txt('TEMPORADA '+car.season,80,228,MUT,'center');
-  txt('B VOLTA',80,262,MUT,'center');
+  txt('A COMPARTILHA  B VOLTA',80,262,MUT,'center');
 }
 function drawCStats(){
   txt('NUMEROS',80,32,ACC,'center',F16);

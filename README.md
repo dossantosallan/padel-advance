@@ -24,13 +24,21 @@ O jogo é escrito em módulos em `src/` (física, regras, golpes, IA, carreira, 
 python3 tools/build.py
 ```
 
-Isso gera `index.html` (site/app instalável) e `dist/padel.html` (página única). Os modelos de página ficam em `shell/`.
+Para testar antes de publicar (precisa de node e playwright):
+
+```
+python3 tools/test.py
+```
+
+O `build.py` gera `index.html` (site/app instalável) e `dist/padel.html` (página única). Os modelos de página ficam em `shell/`.
 
 ## Recursos
 - Física com efeito (topspin e slice no ar e no vidro), resistência do ar e rebote imprevisível nos cantos
 - Inércia e split step, peixinho, voleio, contrapared, saque com quique e saída pela porta no por 3/por 4
 - IA com leitura imperfeita da bola e tática de dupla
 - Até 3 carreiras salvas (nova/carregar), cada uma com atleta próprio: visual, lado da quadra, mão, estilo e pontos iniciais; os atributos (escala 40–99) evoluem devagar e sozinhos com treino (foco escolhido) e com o que você faz em quadra
+- Carreira estratégica: duas opções de torneio por semana (maior e longe ou menor e perto), parceiro com confiança que pode sair da dupla, contratos de patrocínio, idade e aposentadoria, dificuldade ajustável e cartão para compartilhar
+- Amistoso com o atleta de qualquer carreira
 - Modo carreira: calendário de 20 semanas, categorias FIP Bronze/Silver/Gold, P2, P1, Major e Finals com pontuação no estilo Premier Padel, ranking da liga, salário de patrocínio, prêmios, cansaço e lesões, parceiros e raquetes
 - Criação de personagem: nome, lado (direita/esquerda), mão, estilo, visual, acessórios e uniforme da dupla
 - Paredes de vidro e alambrado, por 3 e por 4, bola na fita, saque liftado e cortado

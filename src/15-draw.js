@@ -275,10 +275,11 @@ function renderInner(){
   if(mode==='friendly'){
     dim(.8);const pr=PAIRS[friendly.pair];
     txt('AMISTOSO',80,50,ACC,'center',F16);
-    const rows=[['DUPLA',pr.n],['NIVEL',['FACIL','MEDIO','DIFICIL'][friendly.lvl]]];
-    rows.forEach(([l,v],i)=>{const y=84+i*76,on=cur===i;txt(l,80,y,on?ACC:MUT,'center');txt((on?'< ':'')+v+(on?' >':''),80,y+14,WHITE,'center')});
-    txt(pr.p[0][0],80,114,WHITE,'center');txt(pr.p[1][0],80,126,WHITE,'center');txt(STY[pr.s].n,80,140,MUT,'center');
-    if(friendly.lvl===0)txt('COM MARCA',80,190,MUT,'center'),txt('DE QUIQUE',80,202,MUT,'center');
+    const a=friendly.ath??-1,an=a>=0&&save.slots[a]?save.slots[a].prof.me.name:'PADRAO';
+    const rows=[['DUPLA',pr.n,76],['NIVEL',['FACIL','MEDIO','DIFICIL'][friendly.lvl],140],['SEU ATLETA',an,180]];
+    rows.forEach(([l,v,y],i)=>{const on=cur===i;txt(l,80,y,on?ACC:MUT,'center');txt((on?'< ':'')+v+(on?' >':''),80,y+14,WHITE,'center')});
+    txt(pr.p[0][0],80,104,WHITE,'center');txt(pr.p[1][0],80,116,WHITE,'center');txt(STY[pr.s].n,80,128,MUT,'center');
+    if(friendly.lvl===0)txt('COM MARCA DE QUIQUE',80,212,MUT,'center');
     if(Math.floor(frame/28)%2)txt('A JOGAR',80,240,ACC,'center');txt('B VOLTAR',80,256,MUT,'center');
     return;
   }
@@ -304,6 +305,8 @@ function renderInner(){
   if(mode==='career'){dim(.86);drawCareerHub();return}
   if(mode==='school'){drawSchool();return}
   if(mode==='cmenu'){dim(.88);drawCMenu();return}
+  if(mode==='csponsor'){dim(.92);drawCSponsor();return}
+  if(mode==='cretire'){dim(.92);drawCRetire();return}
   if(mode==='cslots'){dim(.9);drawSlots();return}
   if(mode==='cattr'){dim(.9);drawCAttr();return}
   if(mode==='cevo'){dim(.9);drawCEvo();return}

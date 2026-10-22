@@ -34,4 +34,4 @@ if(dpEl){
   dpEl.addEventListener('pointermove',e=>{if(e.buttons||e.pointerType==='touch')dpSet(e)});
   ['pointerup','pointercancel','lostpointercapture'].forEach(t=>dpEl.addEventListener(t,dpClear));
 }
-document.addEventListener('contextmenu',e=>e.preventDefault());
+document.addEventListener('contextmenu',e=>{if(!(e.target&&e.target.closest&&e.target.closest('#shareOv')))e.preventDefault()});

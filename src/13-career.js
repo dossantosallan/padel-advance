@@ -27,11 +27,11 @@ function newCareer(){
   for(let i=0;i<N;i++){
     let n;do{n=FN[(r()*FN.length)|0]+' '+LN[(r()*LN.length)|0]}while(used.has(n)||n.length>13);used.add(n);
     const sk=clamp(3.6-3.3*Math.pow(i/(N-1),.8)+(r()-.5)*.2,.25,3.7);
-    players.push({n,hs:HS[(r()*3)|0],hair:HAIRS[(r()*5)|0],skin:(r()*5)|0,sk:+sk.toFixed(2),st:['equil','parede','rede','globo','canhoto'][(r()*5)|0],pts:Math.round(30+Math.pow(sk,2.6)*140+r()*60)});
+    players.push({n,age:19+((r()*16)|0),hs:HS[(r()*3)|0],hair:HAIRS[(r()*5)|0],skin:(r()*5)|0,sk:+sk.toFixed(2),st:['equil','parede','rede','globo','canhoto'][(r()*5)|0],pts:Math.round(30+Math.pow(sk,2.6)*140+r()*60)});
   }
   const free=[20,38,52,64,74,84,92,99],rest=players.map((_,i)=>i).filter(i=>!free.includes(i)),teams=[];
   for(let i=0;i<rest.length;i+=2)teams.push([rest[i],rest[i+1]]);
-  car=save.car={v:1,season:1,week:0,money:3000,cond:100,inj:0,myPts:0,players,teams,free:free.filter(i=>i!==99),partner:99,chem:0,coach:false,rk:[0],rkEq:0,wc:-1,physio:-1,tour:null,hist:[],titles:0,seasonTitles:0,msg:'BEM-VINDO!',last:null};
+  car=save.car={v:1,season:1,week:0,money:3000,cond:100,inj:0,myPts:0,players,teams,free:free.filter(i=>i!==99),partner:99,chem:0,coach:false,rk:[0],rkEq:0,wc:-1,physio:-1,tour:null,hist:[],titles:0,seasonTitles:0,msg:'BEM-VINDO!',last:null,pick:0,pmor:.7,age:19,diff:newDiff,contract:null,needOffer:true};
   carEnsure();pushNews('SUA CARREIRA COMECA!');newGoal();
   store();
 }
@@ -49,11 +49,11 @@ function pairObj(k){
   const t=car.teams[k],a=PL_(t[0]),c=PL_(t[1]);
   return{n:teamKeyName(k),p:[[a.n,a.hs,a.hair,a.skin],[c.n,c.hs,c.hair,c.skin]],s:a.st,c:TEAMCOL[k%TEAMCOL.length],pat:k%4};
 }
-function weekInfo(){const code=CAL[car.week];return{code,cat:CATS[code],city:CITIES[car.week]}}
-function eligible(){const{code,cat}=weekInfo(),pos=myTeamPos();if(code==='FI')return pos<=8;return pos<=cat.req||car.wc===car.week}
+function weekInfo(){const o=weekOpts();return o[Math.min(car.pick||0,o.length-1)]}
+function eligible(){return canEnter(weekInfo(),car.pick||0)}
 function seedOrder(n){let s=[1,2];while(s.length<n){const m=s.length*2+1;s=s.flatMap(x=>[x,m-x])}return s}
-function buildDraw(code,withMe){
-  const cat=CATS[code],list=teamList();
+function buildDraw(code,withMe,ex){
+  const cat=CATS[code],list=teamList().filter(t=>!(ex&&ex.has(t.k)));
   let field=list.slice(cat.range[0]-1,cat.range[1]).filter(t=>t.k!==-1).slice(0,cat.size);
   if(withMe){if(field.length>=cat.size)field=field.slice(0,cat.size-1);field.push(list.find(t=>t.k===-1))}
   field.sort((x,y)=>y.pts-x.pts);
@@ -73,9 +73,10 @@ function finishTour(t){
 }
 function simWeekAI(){const{code,city}=weekInfo();const t={code,city,cur:buildDraw(code,false),res:{},r:0,R:Math.log2(CATS[code].size)};finishTour(t);car.last={city:weekInfo().city,code,champ:teamKeyName(t.champ)}}
 function enterTour(){
-  const{code,cat,city}=weekInfo();
-  car.money-=cat.cost;car.cond=Math.max(0,car.cond-3);
-  car.tour={code,city,cur:buildDraw(code,true),res:{},r:0,R:Math.log2(cat.size),won:0,alive:true,myPts:0,prize:0};
+  const W=weekInfo(),{code,cat,city}=W;
+  car.money-=W.cost;car.cond=Math.max(0,car.cond-W.tired);car.pickPlayed=car.pick||0;
+  const draw=buildDraw(code,true);car.usedKeys=draw.filter(k=>k>=0);
+  car.tour={code,city,cur:draw,res:{},r:0,R:Math.log2(cat.size),won:0,alive:true,myPts:0,prize:0};
   store();
 }
 const tourOpp=()=>{const t=car.tour,i=t.cur.indexOf(-1);return t.cur[i^1]};
@@ -85,7 +86,7 @@ function tourMatchDone(win,sim){
   h2hNote(oppK,win);if(win)goalOnWin();
   car.cond=clamp(car.cond-(sim?6:(cat.bo3&&tourIsFinal()?12:8)),0,100);
   car.chem=Math.min(1,car.chem+.04);
-  if(win){t.won++;save.wins++}
+  if(win){t.won++;save.wins++;partnerAfterWin();contractWin()}
   t.mine=win?-1:tourOpp();
   playRound(t);
   let injured=false;
@@ -93,7 +94,8 @@ function tourMatchDone(win,sim){
   if(!win||t.cur.length===1||injured){
     if(win&&t.cur.length>1&&injured){t.res[-1]=t.r;t.cur=t.cur.map(k=>k===-1?-2:k)}
     t.alive=false;finishTour(t);
-    if(t.champ===-1){car.titles++;car.seasonTitles++;save.titles++;gainSpread(cat.xp*.3);trophyAdd(t)}
+    partnerAfterTour(t);
+    if(t.champ===-1){car.titles++;car.seasonTitles++;save.titles++;gainSpread(cat.xp*.3);trophyAdd(t);contractTitle()}
     else pushNews('VOCES CAIRAM '+ROUNDNA(Math.pow(2,t.R-(t.res[-1]||0)))+' EM '+t.city);
     goalOnTour(t);
     car.money+=t.prize||0;
@@ -105,7 +107,8 @@ function tourMatchDone(win,sim){
 }
 function nextWeek(action){
   carEnsure();const r0=myRank();
-  if(action!=='played')simWeekAI();
+  depthEnsure();
+  if(action!=='played')simWeekAll(-1);else simWeekAll(car.pickPlayed,car.usedKeys);
   const rec={played:6,train:15,rest:35,inj:25}[action]||10;
   car.cond=clamp(car.cond+rec,0,100);
   if(car.inj>0&&action!=='played')car.inj--;
@@ -114,18 +117,21 @@ function nextWeek(action){
   const r1=myRank();car.best=Math.min(car.best,r1);
   if(r0-r1>=5)pushNews('VOCE SOBE PARA #'+r1+' NO RANKING');else if(r1-r0>=5)pushNews('VOCE CAI PARA #'+r1);
   if(Math.random()<.14)pushNews(PL_(car.partner).n.split(' ')[0]+' '+PARTNER_TALK[(Math.random()*PARTNER_TALK.length)|0]);
+  partnerWeekCheck();
   if(car.week>=CAL.length){store();mode='cseason';return}
-  goalOnWeek();
+  goalOnWeek();if(car.week===10)car.needOffer=true;
   car.wc=-1;
-  if(!eligible()&&CAL[car.week]!=='FI'&&myTeamPos()<=CATS[CAL[car.week]].req+10&&Math.random()<.3){car.wc=car.week;car.msg='CONVITE PARA '+CATS[CAL[car.week]].n+'!'}
+  if(!canEnter(weekOpts()[0],0)&&CAL[car.week]!=='FI'&&myTeamPos()<=CATS[CAL[car.week]].req+10&&Math.random()<.3){car.wc=car.week;car.msg='CONVITE PARA '+CATS[CAL[car.week]].n+'!'}
+  defaultPick();
   store();
 }
 const sponsor=()=>{const r=myRank();return SPONS.find(s=>r<=s[0])};
-const salary=()=>sponsor()[2];
+const salary=()=>car.contract?car.contract.fixed:sponsor()[2];
 function newSeason(){
   car.season++;save.season=car.season;car.week=0;car.cond=100;car.inj=0;car.seasonTitles=0;car.hist=[];car.tour=null;
   car.myPts=Math.round(car.myPts*.35);
-  for(const p of car.players){p.pts=Math.round(p.pts*.35);p.sk=+clamp(p.sk+rnd(-.15,.15),.25,3.7).toFixed(2)}
+  for(const p of car.players)p.pts=Math.round(p.pts*.35);
+  ageSeason();car.pmor=Math.max(car.pmor,.5);car.needOffer=true;car.pick=0;defaultPick();
   car.msg='TEMPORADA '+car.season+' COMECOU';pushNews('TEMPORADA '+car.season+' COMECOU');car.goal=null;newGoal();store();
 }
 const reqRankFor=sk=>sk>=3?15:sk>=2.3?35:sk>=1.5?60:999;

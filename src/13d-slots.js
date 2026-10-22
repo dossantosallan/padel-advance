@@ -10,10 +10,12 @@ if(!save.slots){save.slots=[null,null,null];if(save.car){save.slots[0]={prof:pro
 if(save.active!=null&&save.slots[save.active]){save.slots[save.active]={prof:profSnap(),car:save.car};if(save.base)profApply(save.base)}
 else if(save.base)profApply(save.base);
 save.active=null;save.base=null;save.car=null;car=null;
+/* perfil base (amistoso/2P) joga com nível intermediário */
+for(const k in save.attr)save.attr[k]=Math.max(save.attr[k],55);
 let creatingSlot=null,slotMode='load',slotConfirm=false,lvlUps=[],startPts=20;
 const START_BASE=40,START_MAX=55;
 function syncSlot(){if(save.active==null||!car)return;save.slots[save.active]={prof:profSnap(),car}}
-function enterSlot(i){save.base=profSnap();const s=save.slots[i];profApply(s.prof);car=save.car=s.car;save.active=i;carEnsure();if(!car.prog){car.prog={vel:0,for:0,pre:0,top:0};car.focus='pre'}store()}
+function enterSlot(i){save.base=profSnap();const s=save.slots[i];profApply(s.prof);car=save.car=s.car;save.active=i;carEnsure();depthEnsure();if(!car.prog){car.prog={vel:0,for:0,pre:0,top:0};car.focus='pre'}store()}
 function leaveSlot(){if(save.active!=null){syncSlot();if(save.base)profApply(save.base)}save.base=null;save.active=null;car=save.car=null;store()}
 function slotMeta(s){if(!s)return null;const c=s.car,p=s.prof;return{n:p.me.name||'?',season:c.season,week:c.week,titles:(c.trophies||[]).length,pts:c.myPts}}
 function beginCreate(i){
@@ -24,7 +26,7 @@ function beginCreate(i){
 function cancelCreate(){if(save.base)profApply(save.base);save.base=null;creatingSlot=null;store();mode='cmenu';cur=0}
 function finishCreate(){
   const i=creatingSlot;creatingSlot=null;
-  newCareer();car.prog={vel:0,for:0,pre:0,top:0};car.focus=['vel','for','pre','top'].sort((a,c)=>save.attr[a]-save.attr[c])[0];
+  newCareer();depthEnsure();car.prog={vel:0,for:0,pre:0,top:0};car.focus=['vel','for','pre','top'].sort((a,c)=>save.attr[a]-save.attr[c])[0];
   save.slots[i]={prof:profSnap(),car};save.active=i;store();mode='career';cur=0;sfx.fanfare();
 }
 /* evolução: cada ponto de atributo custa mais que o anterior (0,3 no começo, ~3 perto de 99).
@@ -72,8 +74,9 @@ function drawCAttr(){
   txt('DISTRIBUA '+20+' PONTOS',80,54,WHITE,'center');txt('RESTAM '+startPts,80,66,startPts?ACC:GRN,'center');
   const K=['vel','for','pre','top'];
   K.forEach((k,i)=>{const y=88+i*24,on=cur===i,v=save.attr[k],bn=attrBonus(k);txt(ATN[k],8,y,on?ACC:WHITE);txt(String(v)+(bn?'+'+bn:''),152,y,on?ACC:WHITE,'right');R(8,y+11,144,4,'#05071a');R(8,y+11,Math.round(144*v/99),4,on?ACC:GRN);if(bn)R(8+Math.round(144*v/99),y+11,Math.round(144*bn/99),4,BLU)});
-  const on=cur===4;txt((on?'> ':'  ')+'COMECAR',40,192,on?(startPts?MUT:ACC):WHITE);
-  const me=save.me;txt('BONUS: '+STYLE_N[me.style]+', '+SIDE_N[me.side],80,214,BLU,'center');
+  const dOn=cur===4;txt('DIFICULDADE',8,186,dOn?ACC:WHITE);txt((dOn?'< ':'')+DIFF_N[newDiff]+(dOn?' >':''),152,186,dOn?ACC:MUT,'right');
+  const on=cur===5;txt((on?'> ':'  ')+'COMECAR',40,204,on?(startPts?MUT:ACC):WHITE);
+  const me=save.me;txt('BONUS: '+STYLE_N[me.style]+', '+SIDE_N[me.side],80,222,BLU,'center');
   txt('< > AJUSTA (MAX '+START_MAX+')',80,240,MUT,'center');txt('B VOLTA AO VISUAL',80,254,MUT,'center');
 }
 function drawCEvo(){

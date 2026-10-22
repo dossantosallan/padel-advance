@@ -2,12 +2,15 @@
 function catBadge(code,x,y){const c=CATS[code];cx.font=F8;const w=cx.measureText(c.s).width+6;R(x-w/2,y-2,w,11,'#05071a');R(x-w/2,y-2,w,1,c.col);txt(c.s,x,y,c.col,'center')}
 function bar(x,y,w,v,col){R(x,y,w,5,'#05071a');R(x+1,y+1,Math.round((w-2)*clamp(v,0,1)),3,col)}
 function drawCareerHub(){
-  const{code,cat,city}=weekInfo(),el=eligible(),pos=myTeamPos(),rk=myRank(),pa=PL_(car.partner);
-  txt('TEMP '+car.season+'  SEMANA '+(car.week+1)+'/'+CAL.length,80,34,MUT,'center');
-  txt(city,80,48,WHITE,'center');catBadge(code,80,62);
-  txt('CAMPEAO '+cat.pts[0]+' PTS',80,76,ACC,'center');
-  txt(code==='FI'?(el?'CLASSIFICADO!':'SO TOP 8 DUPLAS'):car.wc===car.week?'CONVITE!':cat.req<99?'TOP '+cat.req+' DUPLAS':'ABERTO',80,88,el?GRN:RED,'center');
-  txt('CUSTO '+money$(cat.cost),80,100,MUT,'center');
+  depthEnsure();
+  const W=weekInfo(),{code,cat,city}=W,el=eligible(),pos=myTeamPos(),rk=myRank(),pa=PL_(car.partner),nop=weekOpts().length;
+  txt('T'+car.season+' SEM '+(car.week+1)+'/'+CAL.length+' '+car.age+' ANOS',80,34,MUT,'center');
+  const sel=cur===0&&nop>1;
+  txt((nop>1?(sel?'< ':'  '):'')+city+(nop>1?(sel?' >':'  '):''),80,46,WHITE,'center');catBadge(code,80,60);
+  if(nop>1)txt((car.pick||0)+1+'/2',152,60,MUT,'right');
+  txt('CAMPEAO '+cat.pts[0]+' PTS',80,74,ACC,'center');
+  txt(code==='FI'?(el?'CLASSIFICADO!':'SO TOP 8 DUPLAS'):(car.pick||0)===0&&car.wc===car.week?'CONVITE!':cat.req<99?'TOP '+cat.req+' DUPLAS':'ABERTO',80,86,el?GRN:RED,'center');
+  txt(money$(W.cost)+(W.far?' LONGE':' PERTO'),80,98,W.far?ACC:MUT,'center');
   txt('FISICO',8,116,WHITE);bar(64,117,88,car.cond/100,car.cond<35?RED:car.cond<65?ACC:GRN);
   if(car.inj>0)txt('LESAO '+car.inj+' SEM',152,116,RED,'right');
   txt('RANK #'+rk,8,128,WHITE);txt('DUPLA '+pos+'o',152,128,MUT,'right');
@@ -39,13 +42,13 @@ function drawCTour(){
 function drawCDone(){
   const t=car.tour;if(!t){txt('...',80,140,WHITE,'center');return}
   const champ=t.champ===-1,idx=t.R-(t.res[-1]||0);
-  if(champ){const bob=Math.round(Math.sin(frame*.08)*2);drawTrophy(80,40+bob,2);txt('CAMPEOES!',80,82,ACC,'center',F16)}
+  if(champ){const bob=Math.round(Math.sin(frame*.08)*2);drawTrophy(80,40+bob,2);txt('CAMPEOES!',80,82,ACC,'center',F16);txt('B COMPARTILHA',80,234,BLU,'center')}
   else{txt(t.injured?'LESAO':'ELIMINADOS',80,60,t.injured?RED:WHITE,'center',F16);txt(ROUNDNA(Math.pow(2,idx)),80,82,MUT,'center')}
   txt(t.city,80,104,WHITE,'center');catBadge(t.code,80,118);
   txt('PONTOS +'+(t.myPts||0),80,138,ACC,'center');
   txt('PREMIO +'+money$(t.prize||0),80,152,GRN,'center');
   txt('VITORIAS '+t.won,80,166,WHITE,'center');
-  if(!champ)txt('CAMPEOES:',80,186,MUT,'center'),txt(teamKeyName(t.champ),80,198,WHITE,'center');
+  if(!champ&&t.champ!==undefined)txt('CAMPEOES:',80,186,MUT,'center'),txt(teamKeyName(t.champ),80,198,WHITE,'center');
   if(car.inj>0)txt('LESAO: '+car.inj+' SEMANA(S)',80,216,RED,'center');
   if(Math.floor(frame/28)%2)txt('A CONTINUA',80,250,ACC,'center');
 }
@@ -62,7 +65,8 @@ function drawCRank(){
 function drawCPartner(){
   const L=freeSorted(),pa=PL_(car.partner),r=myRank();
   txt('PARCEIRO',80,34,ACC,'center',F16);
-  txt('ATUAL: '+pa.n,80,56,WHITE,'center');txt('*'.repeat(stars(pa.sk))+'  QUIMICA '+Math.round(car.chem*100)+'%',80,68,MUT,'center');
+  txt('ATUAL: '+pa.n+' '+(pa.age||'')+'a',80,52,WHITE,'center');txt('*'.repeat(stars(pa.sk))+'  QUIMICA '+Math.round(car.chem*100)+'%',80,64,MUT,'center');
+  txt('CONFIANCA',8,76,MUT);bar(80,77,72,car.pmor??.7,(car.pmor??.7)<.35?RED:(car.pmor??.7)<.6?ACC:GRN);
   txt('DISPONIVEIS',80,88,MUT,'center');
   L.forEach((id,i)=>{const p=PL_(id),y=104+i*16,on=i===cur,need=reqRankFor(p.sk),ok=r<=need;
     txt((on?'>':' ')+p.n.split(' ')[0][0]+'.'+p.n.split(' ').pop(),6,y,on?ACC:ok?WHITE:'#55507a');
@@ -74,13 +78,13 @@ function drawCTeam(){
   const v=car.rkView||0,rk=RKTS[v],own=car.rk.includes(v),sp=sponsor();
   txt('EQUIPE',80,34,ACC,'center',F16);
   txt('SALDO '+money$(car.money),80,56,GRN,'center');
-  txt('PATROC.: '+sp[1],80,70,WHITE,'center');txt('SALARIO '+money$(sp[2])+'/MES',80,82,MUT,'center');
-  const rows=[['FISIO $1.500',car.physio===car.week?'FEITO':'+30 FIS'],['TECNICO',car.coach?'SIM':'NAO'],['RAQUETE',rk.n],['VOLTAR','']];
-  rows.forEach(([l,val],i)=>{const y=106+i*20,on=i===cur;txt((on?'>':' ')+l,6,y,on?ACC:WHITE);txt(val,154,y,on?ACC:MUT,'right')});
-  txt(car.coach?'TREINO +50%  -$1.500/MES':'TECNICO: TREINO +50%',80,190,MUT,'center');
+  const ct=car.contract;txt('PATROC.: '+(ct?ct.n:sp[1]),80,68,WHITE,'center');txt('FIXO '+money$(salary())+'/MES',80,80,MUT,'center');
+  if(ct&&ct.win)txt('+'+money$(ct.win)+' VIT +'+money$(ct.title)+' TIT',80,92,BLU,'center');
+  const rows=[['FISIO $1.500',car.physio===car.week?'FEITO':'+30 FIS'],['TECNICO',car.coach?'SIM':'NAO'],['RAQUETE',rk.n],['DIFICULDADE',DIFF_N[car.diff??1]],['VOLTAR','']];
+  rows.forEach(([l,val],i)=>{const y=108+i*17,on=i===cur;txt((on?'>':' ')+l,6,y,on?ACC:WHITE);txt(val,154,y,on?ACC:MUT,'right')});
+  txt(cur===3?'SO MUDA OS RIVAIS EM':car.coach?'TREINO +50%  -$1.500/MES':'TECNICO: TREINO +50%',80,196,MUT,'center');if(cur===3)txt('QUADRA, NAO A EVOLUCAO',80,206,MUT,'center');
   const bn=Object.keys(rk.b).map(k=>({pre:'PRECISAO',for:'FORCA',top:'POR CIMA'}[k]+' +1')).join(' ')||'SEM BONUS';
-  txt(bn.slice(0,19),80,206,BLU,'center');
-  txt(car.rkEq===v?'EM USO':own?'A EQUIPA':'A COMPRA '+money$(rk.c),80,220,own?GRN:ACC,'center');
+  if(cur===2){txt(bn.slice(0,19),80,212,BLU,'center');txt(car.rkEq===v?'EM USO':own?'A EQUIPA':'A COMPRA '+money$(rk.c),80,224,own?GRN:ACC,'center')}
   if(cur===2)txt('< > TROCA RAQUETE',80,236,MUT,'center');
   txt('B VOLTA',80,262,MUT,'center');
 }
@@ -93,6 +97,9 @@ function drawCSeason(){
   txt('TITULOS '+car.seasonTitles,80,148,ACC,'center');
   txt('SALDO '+money$(car.money),80,162,GRN,'center');
   const top=indivRank()[0];txt('NUMERO 1:',80,184,MUT,'center');txt(top.i===-1?myName():top.n,80,196,WHITE,'center');
-  txt('35% DOS PONTOS',80,218,MUT,'center');txt('VAO PRA PROXIMA',80,230,MUT,'center');
-  if(Math.floor(frame/28)%2)txt('A NOVA TEMPORADA',80,254,ACC,'center');
+  txt('IDADE '+car.age+'  35% DOS PONTOS FICAM',80,210,MUT,'center');
+  txt('B COMPARTILHA',80,224,BLU,'center');
+  if(car.age>=FORCE_RETIRE){if(Math.floor(frame/28)%2)txt('A APOSENTAR',80,254,ACC,'center')}
+  else if(car.age>=RETIRE_AGE){['CONTINUAR','APOSENTAR'].forEach((s,i)=>txt((cur===i?'> ':'  ')+s,40,242+i*12,cur===i?ACC:WHITE))}
+  else if(Math.floor(frame/28)%2)txt('A NOVA TEMPORADA',80,254,ACC,'center');
 }
