@@ -49,13 +49,15 @@ function point(w,why){
   if(!demo&&humanWon&&big&&Math.random()<.6)exclaim={s:EXC[(Math.random()*EXC.length)|0],t:95};
   if(['WINNER!','POR 3!','POR 4!','NA FITA!','PONTO DELES'].includes(why)){cheer=why.startsWith('POR')?100:55;applause(humanWon?30:12,humanWon?.06:.03)}
   if(why.startsWith('POR'))shake=16;
+  if(w===0&&why.startsWith('POR'))dailyPor=true;
+  if(!demo)setMoods(w,why);
   replayPending=!demo&&(why==='POR 3!'||why==='POR 4!');
   if(replayPending)ptimer=80;
   if(pts[w]>=4&&(golden()||pts[w]-pts[l]>=2)){
     games[w]++;pts=[0,0];serveTeam=1-serveTeam;
     sub='GAME '+teamName(w);
     sfx.game();ptimer=Math.max(ptimer,140);
-    const won=(games[w]>=4&&games[w]-games[l]>=2)||games[w]>=5;
+    const won=matchTo?games[w]>=matchTo:(games[w]>=4&&games[w]-games[l]>=2)||games[w]>=5;
     if(won&&bo3&&!demo){sets[w]++;if(sets[w]<2){sub='SET '+teamName(w)+' '+sets[0]+'-'+sets[1];games=[0,0];after=()=>setupServe();return}}
     if(won){
       if(demo)after=()=>{games=[0,0];setupServe()};
@@ -63,6 +65,7 @@ function point(w,why){
       return;
     }
   }else{sub=callLine();sfx.point(w)}
+  if(msg.startsWith('GAME')||sub.startsWith('GAME')){if(!demo&&(games[0]+games[1])%2===1){msg='TROCA DE LADO';ptimer=Math.max(ptimer,170)}}
   after=()=>setupServe();
 }
 function fault(){
@@ -84,7 +87,7 @@ function setupServe(keepFault){
     else if(p===recv){p.x=p.homeX>50?78:22;p.y=rT===0?190:10}
     else{p.x=p.homeX;p.y=rT===0?162:38}
     Object.assign(p,{tx:p.x,ty:p.y,vx:0,vy:0,swing:0,cool:0,moving:false,charging:false,charge:0,lunge:0,relPow:0,dive:0,split:0,react:0,readDelay:0,tossing:false,diveTried:false});
-    p.stam=Math.min(1,p.stam+.16*(p===P[0]&&kind==='car'&&car?(.4+.6*car.cond/100):1));
+    p.stam=Math.min(p===P[0]?stamCap:1,p.stam+.16*(p===P[0]&&kind==='car'&&car?(.4+.6*car.cond/100):1));p.mood=0;
   });
   b.vx=b.vy=b.vz=0;b.w=0;b.lastTeam=serveTeam;b.bounces=0;b.serving=false;b.mustBounce=false;b.spin='none';b.out=null;b.outAx=null;b.cord=false;b.contra=false;b.trail=[];
   toss=null;chase=null;marker=null;st='serve';timer=0;

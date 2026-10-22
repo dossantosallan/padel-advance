@@ -8,7 +8,7 @@ const MAP2B={left:['ArrowLeft'],right:['ArrowRight'],up:['ArrowUp'],down:['Arrow
 const GAMEKEYS=new Set(Object.values(MAP1).flat().concat(Object.values(MAP2A).flat(),Object.values(MAP2B).flat()));
 const mkPad=()=>({cur:{},prev:{}});
 const pad1=mkPad(),pad2=mkPad(),menu=mkPad();
-addEventListener('keydown',e=>{if(mode==='name'){const ch=/^Key[A-Z]$/.test(e.code)?e.code[3]:e.code==='Space'?' ':e.code==='Backspace'?'<':null;if(ch){e.preventDefault();typeQ.push(ch);unlock();return}}if(GAMEKEYS.has(e.code))e.preventDefault();if(!e.repeat)tapped.add(e.code);down.add(e.code);unlock()});
+addEventListener('keydown',e=>{if(e.target&&/^(TEXTAREA|INPUT)$/.test(e.target.tagName))return;if(mode==='name'){const ch=/^Key[A-Z]$/.test(e.code)?e.code[3]:e.code==='Space'?' ':e.code==='Backspace'?'<':null;if(ch){e.preventDefault();typeQ.push(ch);unlock();return}}if(GAMEKEYS.has(e.code))e.preventDefault();if(!e.repeat)tapped.add(e.code);down.add(e.code);unlock()});
 addEventListener('keyup',e=>{down.delete(e.code)});
 addEventListener('blur',()=>{down.clear();BTN.forEach(k=>{tc[k]=0;dp[k]=0})});
 function fill(pad,map,touch){for(const k of BTN){pad.prev[k]=pad.cur[k]||0;pad.cur[k]=(map[k].some(c=>down.has(c)||tapped.has(c))||(touch&&(tc[k]||tcTap[k]||dp[k])))?1:0}}

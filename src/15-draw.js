@@ -6,6 +6,8 @@ function buildBg(C){
   const c=document.createElement('canvas');c.width=CW;c.height=CH;const g=c.getContext('2d');
   g.fillStyle=C.out;g.fillRect(0,0,CW,CH);g.fillStyle=C.out2;
   for(let y=30;y<CH;y+=4)for(let x=2;x<CW;x+=6)g.fillRect(x+((y>>2)%2)*3,y,1,1);
+  if(C.roof){g.fillStyle='#0a080e';g.fillRect(0,0,CW,34);for(const y of[10,24]){g.fillStyle='#2a2433';g.fillRect(0,y,CW,2);for(let x=14;x<CW;x+=32){g.fillStyle='#fff2c0';g.fillRect(x,y+2,10,2);g.fillStyle='rgba(255,242,192,.08)';g.fillRect(x-6,y+4,22,10)}}}
+  if(C.beach){g.fillStyle='#1f5a78';for(let y=32;y<CH;y+=7)for(let x=(y*3)%11;x<CW;x+=11)g.fillRect(x,y,4,1);g.fillStyle='#f4e2b0';g.fillRect(0,CH-4,CW,4)}
   return c;
 }
 function buildCourt(C){
@@ -15,7 +17,7 @@ function buildCourt(C){
   const lampW=C.night?[[-8,-4],[108,-4],[-8,100],[108,100],[-8,204],[108,204]]:[];
   const lamps=lampW.map(([x,y])=>proj(x,y,0));
   const light=(x,y)=>{let f=0;for(const[lx,ly]of lamps){const d2=(x-lx)**2+(y-ly)**2;f+=Math.exp(-d2/(2*46*46))}return clamp(f,0,1)};
-  const zone=y=>{const yd=Math.min(y,L-y);return yd<40?'glass':(yd>=50&&yd<=70)?'door':'fence'};
+  const zone=y=>{const yd=Math.min(y,L-y);return yd<40?'glass':(yd>=50&&yd<=70)?'door':C.pano?'glass':'fence'};
   const top=proj(0,0,0),bot=proj(0,L,0);
   if(!back3d){
     R(top[0]-3,T-3,CW-2*(top[0]-3),3,C.glass);
@@ -56,6 +58,7 @@ function buildCourt(C){
       if(t==='g'){poly(strip(X,y0,y1,0,30),glassF);poly(strip(X,y0,y1,30,40),fenceF);
         for(let y=y0;y<=y1;y+=4)ln(proj(X,y,30),proj(X,y,40),mesh);
         ln(proj(X,y0,30),proj(X,y1,30),edge);ln(proj(X,y0,40),proj(X,y1,40),mesh)}
+      else if(C.pano){poly(strip(X,y0,y1,0,30),glassF);ln(proj(X,y0,30),proj(X,y1,30),edge)}
       else{poly(strip(X,y0,y1,0,30),fenceF);for(let y=y0;y<=y1;y+=4)ln(proj(X,y,0),proj(X,y,30),mesh);ln(proj(X,y0,30),proj(X,y1,30),mesh)}
     }
     for(const yd of[50,70,130,150])for(const X of[0,100])ln(proj(X,yd,0),proj(X,yd,30),'#9aa3c8');
@@ -70,14 +73,14 @@ function buildCrowd(){
   crowd=[];const cols=['#ff5a52','#2e86ff','#ffd23f','#20c070','#f2f2f2','#b05cff','#ff9f1c','#3fd0ff'],skins=['#f2c18d','#c68642','#8d5524','#ffdbac'];
   const night=!!COURTS[save.opts.court].night;
   const add=(x,y)=>{let c=cols[(Math.random()*cols.length)|0],s=skins[(Math.random()*skins.length)|0];
-    if(night){c=mix(c,'#000000',.55);s=mix(s,'#000000',.55)}crowd.push({x,y,c,s,ph:(Math.random()*100)|0})};
+    if(night){c=mix(c,'#000000',.55);s=mix(s,'#000000',.55)}crowd.push({x,y,c,s,ph:(Math.random()*100)|0,flag:Math.random()<.05,fc:cols[(Math.random()*cols.length)|0]})};
   if(CAM===CAMS[1]){const tp=Math.round(proj(0,0,40)[1]);for(let sy=36;sy<=tp-3;sy+=5)for(let x=3+((sy/5)&1);x<156;x+=3)add(x,sy)}
   for(let sy=CAM.oy+3;sy<CAM.oy+CAM.h-2;sy+=5){
     const xl=Math.round(proj(0,yAt(sy),0)[0])-3,off=(Math.floor((sy-CAM.oy)/5)%2)*1;
     for(let x=2+off;x<=xl-5;x+=3)for(const side of[0,1]){
       let c=cols[(Math.random()*cols.length)|0],s=skins[(Math.random()*skins.length)|0];
       if(night){c=mix(c,'#000000',.55);s=mix(s,'#000000',.55)}
-      crowd.push({x:side?CW-x-2:x,y:sy,c,s,ph:(Math.random()*100)|0});
+      crowd.push({x:side?CW-x-2:x,y:sy,c,s,ph:(Math.random()*100)|0,flag:Math.random()<.05,fc:cols[(Math.random()*cols.length)|0]});
     }
   }
 }
@@ -87,6 +90,7 @@ function drawCrowd(){
     if(cheer>0)dy=((frame+c.ph)>>2)%2?-1:0;else if((frame+c.ph*7)%300<5)dy=-1;
     cx.fillStyle=c.c;cx.fillRect(c.x,c.y+dy,2,2);cx.fillStyle=c.s;cx.fillRect(c.x,c.y-2+dy,2,2);
     if(cheer>0&&((frame+c.ph)>>3)%3===0){cx.fillStyle=c.s;cx.fillRect(c.x+((c.ph%2)?2:-1),c.y-3+dy,1,2)}
+    if(c.flag||(bo3&&c.ph%11===0)){const wv=((frame+c.ph)>>3)%2;cx.fillStyle='#c8c8d8';cx.fillRect(c.x+1,c.y-6+dy,1,5);cx.fillStyle=c.fc;cx.fillRect(c.x+2,c.y-6+dy+wv,3,2)}
   }
 }
 const R=(x,y,w,h,c)=>{cx.fillStyle=c;cx.fillRect(Math.round(x),Math.round(y),w,h)};
@@ -97,6 +101,10 @@ function pline(x0,y0,x1,y1,c){x0=Math.round(x0);y0=Math.round(y0);x1=Math.round(
 function along(path,t){const n=path.length-1,f=clamp(t*n,0,n-1e-6),i=Math.floor(f),u=f-i;return[lerp(path[i][0],path[i+1][0],u),lerp(path[i][1],path[i+1][1],u)]}
 function pose(p,X,B){
   const m=rmOf(p),s=m*(p.hand==='bh'?-1:1),over=OVER.includes(p.stype);
+  if(p.mood&&st==='point'&&p.swing===0&&!demo){
+    if(p.mood>0)return{r:[X+m*2,B-21],free:[X-m*3,B-20],jump:(frame>>3)%2?2:0,tw:0};   /* comemora: braços para cima */
+    return{r:[X+m*3,B-4],free:[X-1,B-14],jump:0,tw:0};                                  /* frustração: mão na cabeça */
+  }
   if(p.swing>0){
     const t=1-p.swing/SW;
     if(over){
@@ -254,7 +262,7 @@ function renderInner(){
     cx.font=F16;cx.textAlign='center';cx.textBaseline='top';
     cx.fillStyle='#ef3e36';cx.fillText('PADEL',82,44);cx.fillStyle=WHITE;cx.fillText('PADEL',80,42);
     txt('ADVANCE',80,64,ACC,'center');
-    menuList(TITLE_ITEMS(),94,17,cur);
+    menuList(TITLE_ITEMS(),88,15,cur);
     txt(save.me.name?save.me.name:'CRIE SEU ATLETA',80,196,save.me.name?WHITE:ACC,'center');
     if(car)txt('TEMP '+car.season+' SEM '+(car.week+1)+' #'+myRank(),80,212,MUT,'center');
     if(Math.floor(frame/28)%2)txt('A ESCOLHE',80,250,ACC,'center');
@@ -304,6 +312,8 @@ function renderInner(){
   }
   if(mode==='career'){dim(.86);drawCareerHub();return}
   if(mode==='school'){drawSchool();return}
+  if(mode==='chal'){dim(.88);drawChal();return}
+  if(mode==='backup'){dim(.9);drawBackup();return}
   if(mode==='cmenu'){dim(.88);drawCMenu();return}
   if(mode==='csponsor'){dim(.92);drawCSponsor();return}
   if(mode==='cretire'){dim(.92);drawCRetire();return}
@@ -322,7 +332,7 @@ function renderInner(){
   if(mode==='cseason'){dim(.9);drawCSeason();return}
   if(mode==='options'){
     dim(.82);txt('OPCOES',80,40,ACC,'center',F16);const o=save.opts;
-    const rows=[['QUADRA',COURTS[o.court].n],['CAMERA',CAMS[o.cam].n],['40-40',o.golden?'OURO':'VANTAGEM'],['QUIQUE',o.marker?'MARCA':'NAO'],['BOTOES',BTNS[o.btn][0]],['SOM',o.sound?'SIM':'NAO'],['TELA',o.full?'CHEIA':'GBA'],['MUSICA',o.music?'SIM':'NAO'],['DICAS',o.tips?'SIM':'NAO']];
+    const rows=[['QUADRA',COURTS[o.court].n],['CAMERA',CAMS[o.cam].n],['40-40',o.golden?'OURO':'VANTAGEM'],['QUIQUE',o.marker?'MARCA':'NAO'],['BOTOES',BTNS[o.btn][0]],['SOM',o.sound?'SIM':'NAO'],['TELA',o.full?'CHEIA':'GBA'],['MUSICA',o.music?'SIM':'NAO'],['DICAS',o.tips?'SIM':'NAO'],['BACKUP','>']];
     rows.forEach(([l,v],i)=>{const y=62+i*17,on=cur===i;txt(l,10,y,on?ACC:WHITE);txt(v,150,y,on?ACC:MUT,'right');
       if(on&&Math.floor(frame/16)%2)txt('<',150-v.length*8-12,y,ACC)});
     txt('CAMISA E VISUAL',80,226,MUT,'center');txt('EM PERSONAGEM',80,238,MUT,'center');
@@ -386,8 +396,9 @@ function renderInner(){
     const y=98;cx.fillStyle='rgba(13,19,51,.95)';cx.fillRect(14,y,132,118);R(14,y,132,1,ACC);R(14,y+117,132,1,ACC);
     txt('PAUSA',80,y+8,ACC,'center');
     ['CONTINUAR','CAM: '+CAMS[save.opts.cam].n,'SOM: '+(save.opts.sound?'SIM':'NAO'),'TELA: '+(save.opts.full?'CHEIA':'GBA'),'SAIR'].forEach((s,i)=>txt((i===pauseCur?'> ':'  ')+s,20,y+28+i*16,i===pauseCur?ACC:WHITE));
-  }else if(st==='point')banner(msg,sub,msg==='WINNER!'||msg.startsWith('POR')||msg==='NA FITA!'||msg.startsWith('GAME')?ACC:msg==='PONTO DELES'?RED:ACC);
+  }else if(st==='point'&&msg==='TROCA DE LADO')drawChangeEnds();
+  else if(st==='point')banner(msg,sub,msg==='WINNER!'||msg.startsWith('POR')||msg==='NA FITA!'||msg.startsWith('GAME')?ACC:msg==='PONTO DELES'?RED:ACC);
   else if(st==='serve'&&timer<50&&pts[0]+pts[1]===0&&!faults)banner(bo3&&games[0]+games[1]===0&&sets[0]+sets[1]===0?'GRANDE FINAL':'SAQUE '+teamName(serveTeam),bo3&&games[0]+games[1]===0&&sets[0]+sets[1]===0?'MELHOR DE 3':'GAMES '+games[0]+'-'+games[1]);
-  if(exclaim&&st==='point'&&!paused){const a=exclaim;cx.font=F16;txt(a.s,80,104,a.t%8<4?ACC:WHITE,'center',F16)}
+  if(exclaim&&st==='point'&&!paused&&msg!=='TROCA DE LADO'){const a=exclaim;cx.font=F16;txt(a.s,80,104,a.t%8<4?ACC:WHITE,'center',F16)}
   if(mode==='game'&&!paused)drawTip();
 }

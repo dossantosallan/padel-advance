@@ -123,6 +123,9 @@ body.full .pill{opacity:.6}
 .sh-box p{margin:0;font:8px/1.7 var(--pixel);color:var(--muted);text-align:center}
 .sh-row{display:flex;gap:12px}
 .sh-row button{font:9px var(--pixel);padding:12px 14px;border:0;border-radius:8px;background:var(--btn);color:var(--ink);cursor:pointer}
+.sh-box h3{margin:0;font:12px var(--pixel);color:var(--accent)}
+.sh-box textarea{width:100%;box-sizing:border-box;font:11px/1.4 ui-monospace,Menlo,monospace;color:var(--ink);background:#0b0a18;border:1px solid #3a3470;border-radius:6px;padding:8px;-webkit-user-select:text;user-select:text;touch-action:auto;resize:none}
+.sh-box input[type=file]{font:10px var(--pixel);color:var(--muted);max-width:100%}
 .sh-row button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 /* iOS: sem zoom por duplo toque, sem rolagem/elástico, sem menu de toque longo */
 html,body{overflow:hidden;overscroll-behavior:none;touch-action:manipulation;-webkit-text-size-adjust:100%}
@@ -157,7 +160,7 @@ body{position:fixed;inset:0;-webkit-touch-callout:none;-webkit-user-select:none;
 document.addEventListener('touchend',e=>{const n=Date.now();if(n-last<350)e.preventDefault();last=n},{passive:false});
 document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
 ['gesturestart','gesturechange','gestureend'].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
-document.addEventListener('touchmove',e=>{if(e.touches.length>1||!e.target.closest('.hint'))e.preventDefault()},{passive:false});
+document.addEventListener('touchmove',e=>{if(e.touches.length>1||!e.target.closest('.hint,#shareOv'))e.preventDefault()},{passive:false});
 })();
 </script>
 <script>

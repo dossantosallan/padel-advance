@@ -39,6 +39,9 @@ O `build.py` gera `index.html` (site/app instalável) e `dist/padel.html` (pági
 - IA com leitura imperfeita da bola e tática de dupla
 - Até 3 carreiras salvas (nova/carregar), cada uma com atleta próprio: visual, lado da quadra, mão, estilo e pontos iniciais; os atributos (escala 40–99) evoluem devagar e sozinhos com treino (foco escolhido) e com o que você faz em quadra
 - Carreira estratégica: duas opções de torneio por semana (maior e longe ou menor e perto), parceiro com confiança que pode sair da dupla, contratos de patrocínio, idade e aposentadoria, dificuldade ajustável e cartão para compartilhar
+- Desafio do dia (com sequência) e partida relâmpago de 1 game
+- Backup: exportar e restaurar todo o progresso (Opções → Backup)
+- Comemoração e frustração dos jogadores, troca de lado, torcida com bandeiras e 7 quadras (incluindo panorâmica, coberta e praia)
 - Amistoso com o atleta de qualquer carreira
 - Modo carreira: calendário de 20 semanas, categorias FIP Bronze/Silver/Gold, P2, P1, Major e Finals com pontuação no estilo Premier Padel, ranking da liga, salário de patrocínio, prêmios, cansaço e lesões, parceiros e raquetes
 - Criação de personagem: nome, lado (direita/esquerda), mão, estilo, visual, acessórios e uniforme da dupla

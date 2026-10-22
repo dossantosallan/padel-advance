@@ -4,6 +4,9 @@ const COURTS=[
   {n:'VERDE',turf:'#2f9a4c',dot:'#2a8a44',line:'#f0fff2',out:'#0d1a13',out2:'#15261d',glass:'#7fd0c8',fence:'#2f3a33',bounce:.64,fric:.93},
   {n:'SAIBRO',turf:'#c8643a',dot:'#b45632',line:'#fff3e6',out:'#1d120d',out2:'#2a1a12',glass:'#9fd0d9',fence:'#3a2e2a',bounce:.56,fric:.84},
   {n:'NOITE',turf:'#3270e6',dark:'#0f2350',dot:'#2558c2',line:'#d9e4ff',out:'#04060d',out2:'#0a0f22',glass:'#3f7f9e',fence:'#1c2033',bounce:.62,fric:.9,night:true},
+  {n:'PANORAMICA',turf:'#1f6fd1',dot:'#1b63bd',line:'#ffffff',out:'#0b1530',out2:'#132048',glass:'#a8e8ff',fence:'#a8e8ff',bounce:.62,fric:.9,pano:true},
+  {n:'COBERTA',turf:'#2d7d6f',dot:'#276e62',line:'#f4fff8',out:'#141018',out2:'#1e1824',glass:'#8fc9c0',fence:'#2b2a33',bounce:.6,fric:.88,roof:true},
+  {n:'PRAIA',turf:'#e2c48a',dot:'#d3b175',line:'#2e86ff',out:'#0f3a52',out2:'#164b66',glass:'#bfefff',fence:'#3a4a55',bounce:.5,fric:.8,beach:true},
 ];
 const SHIRTS=['#ef3e36','#2e86ff','#ffb000','#20c070','#b05cff','#ff5ca8','#f2f2f2'];
 const HAIRS=['#3b2416','#1b1b1b','#d9a441','#8a4b20','#e0e0e0','#c0392b'];

@@ -100,7 +100,7 @@ try:
     from playwright.sync_api import sync_playwright
 except ImportError:
     check('navegador',False,'playwright não instalado');sys.exit(1)
-EXPOSE="enterDemo();applyScreen();window.__T={get mode(){return mode},setMode:m=>{mode=m;cur=0},P,b,pad1,save,set st(v){st=v},get st(){return st},startMatch,beginCreate,finishCreate,get car(){return car},enterTour,offerContract,startTrain,applyBtn,shareCard,get sharing(){return sharing},set paused(v){paused=v},applyScreen};"
+EXPOSE="enterDemo();applyScreen();window.__T={get mode(){return mode},setMode:m=>{mode=m;cur=0},P,b,pad1,save,set st(v){st=v},get st(){return st},startMatch,beginCreate,finishCreate,get car(){return car},enterTour,offerContract,startTrain,applyBtn,shareCard,get sharing(){return sharing},set paused(v){paused=v},applyScreen,packSave,unpackSave,startChallenge,buildCrowd,setCourt:i=>{save.opts.court=i;buildCrowd()},COURTS,get games(){return games},set games(v){games=v},point:(w,y)=>point(w,y),get msg(){return msg}};"
 td=tempfile.mkdtemp()
 try:
     for n in ['manifest.webmanifest','sw.js']:shutil.copy(os.path.join(ROOT,n),td)
@@ -140,7 +140,7 @@ try:
             check(f'botão {key.upper()} responde',v==1)
         # todas as telas
         pg.evaluate("__T.beginCreate(1);__T.save.me.name='TESTE';__T.finishCreate();__T.car.needOffer=false")
-        modes=['title','school','friendly','twop','create','name','options','cmenu','cslots','cattr','career','crank','cpartner','cteam','cevo','cmore','cnews','ctroph','cstats','cseason']
+        modes=['title','chal','backup','school','friendly','twop','create','name','options','cmenu','cslots','cattr','career','crank','cpartner','cteam','cevo','cmore','cnews','ctroph','cstats','cseason']
         bad=[]
         for m in modes:
             n0=len(errs);pg.evaluate(f"__T.setMode('{m}')");pg.wait_for_timeout(120)
@@ -161,6 +161,18 @@ try:
             pg.wait_for_timeout(100)
             if len(errs)>n0:bad.append('cartao '+k+': '+errs[-1][:100])
         ov=pg.evaluate("!!document.querySelector('#shareOv img')")
+        # backup: ida e volta do código
+        rt=pg.evaluate("(async()=>{const c=await __T.packSave();const d=await __T.unpackSave(c);return [c.slice(0,6),JSON.stringify(d.slots.map(Boolean))===JSON.stringify(__T.save.slots.map(Boolean)),c.length]})()")
+        check('backup: exporta e restaura',rt[1] and rt[0] in ('PADV2:','PADV1:'),f'formato {rt[0]} {rt[2]} caracteres')
+        # desafios e quadras
+        n0=len(errs)
+        for k in ['daily','quick']:
+            pg.evaluate(f"__T.startChallenge('{k}')");pg.wait_for_timeout(400)
+        pg.evaluate("__T.games=[0,0];__T.point(0,'WINNER!');__T.point(0,'WINNER!');__T.point(0,'WINNER!');__T.point(0,'WINNER!')");pg.wait_for_timeout(100)
+        for i in range(pg.evaluate('__T.COURTS.length')):
+            for cam in [0,1]:
+                pg.evaluate(f"__T.save.opts.cam={cam};__T.setCourt({i});__T.setMode('title')");pg.wait_for_timeout(120)
+        check('desafios e todas as quadras sem erro',len(errs)==n0,'; '.join(errs[n0:])[:200])
         check('todas as telas sem erro',not bad and not errs,'; '.join(bad)+('; '+errs[0][:120] if errs else ''))
         check('cartão para compartilhar',ov)
         br.close()

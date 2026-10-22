@@ -22,13 +22,14 @@ function setupTeams(oppId,skill){
 }
 let friendlySwap=false;
 function enterDemo(){
+  resetRules();
   if(friendlySwap){if(save.base)profApply(save.base);save.base=null;friendlySwap=false;store()}
   mode='title';kind='demo';demo=true;twoP=false;paused=false;replay=null;replayPending=false;bo3=false;sets=[0,0];
   setupTeams((Math.random()*PAIRS.length)|0,1.5);P[1].skill=P[0].skill=1.5;
   pts=[0,0];games=[0,0];serveTeam=0;cur=0;setupServe();
 }
 function startMatch(k,oppId,skill,best3){
-  mstReset();exclaim=null;lvlUps=[];
+  resetRules();mstReset();exclaim=null;lvlUps=[];
   kind=k;demo=false;twoP=k==='2p';opp=oppId;mode='game';paused=false;replay=null;replayPending=false;bo3=!!best3;sets=[0,0];
   pts=[0,0];games=[0,0];serveTeam=0;faults=0;partnerMode=['AUTO','AUTO'];
   setupTeams(oppId,skill);rec.length=0;setupServe();sfx.game();
@@ -44,7 +45,8 @@ const simWinner=(a,c,s)=>Math.random()<1/(1+Math.exp(-(lvlOf(a,s)-lvlOf(c,s))*1.
 const nameOf=id=>id<0?myName():PAIRS[id].n;
 function endMatch(w){
   mode='result';resultW=w;resLines=[];
-  if(kind==='tour'&&save.tour){
+  if(kind==='daily'||kind==='quick'){challengeEnd(w)}
+  else if(kind==='tour'&&save.tour){
     const t=save.tour,r=t.round,ids=t.rounds[r],me=ids.indexOf(-1),winners=[];
     for(let i=0;i<ids.length;i+=2){if(i===(me&~1))winners.push(w===0?-1:ids[me^1]);else winners.push(simWinner(ids[i],ids[i+1],t.season))}
     t.rounds.push(winners);
@@ -63,7 +65,7 @@ function endMatch(w){
   if(w===0||twoP)sfx.fanfare();
 }
 const tourOppId=()=>{const t=save.tour,ids=t.rounds[t.round];return ids[ids.indexOf(-1)^1]};
-const TITLE_ITEMS=()=>[car?'CONT. CARREIRA':'CARREIRA','ESCOLA','AMISTOSO','2 JOGADORES','PERSONAGEM','OPCOES'];
+const TITLE_ITEMS=()=>['CARREIRA','DESAFIOS','ESCOLA','AMISTOSO','2 JOGADORES','PERSONAGEM','OPCOES'];
 function careerResultLines(win,rn,inj){
   const t=car.tour;
   if(inj){resLines=['LESAO!','FORA POR '+car.inj+' SEM.'];resNext='cdone';return}
@@ -91,15 +93,16 @@ function update(){
     case 'boot':stepBoot();break;
     case 'intro':stepIntro();break;
     case 'title':{
-      nav(6);
+      nav(7);
       if(prs(menu,'a')||prs(menu,'start')){
         sfx.ui();
-        if(!save.me.name&&cur!==5){mode='create';cpage=0;cur=0}
+        if(!save.me.name&&cur!==6){mode='create';cpage=0;cur=0}
         else if(cur===0){mode='cmenu';cur=0}
-        else if(cur===1){mode='school';cur=0}
-        else if(cur===2){mode='friendly';cur=0}
-        else if(cur===3){mode='twop'}
-        else if(cur===4){mode='create';cpage=0;cur=0}
+        else if(cur===1){mode='chal';cur=0}
+        else if(cur===2){mode='school';cur=0}
+        else if(cur===3){mode='friendly';cur=0}
+        else if(cur===4){mode='twop'}
+        else if(cur===5){mode='create';cpage=0;cur=0}
         else{mode='options';cur=0}
       }else{quiet=true;stepGame();quiet=false}
       break;}
@@ -129,8 +132,9 @@ function update(){
       if(back()||prs(menu,'start')){store();if(nextAfterPlayer==='career'&&car){mode='career';cur=6}else enterDemo()}
       break;
     case 'options':{
-      nav(9);const dv=prs(menu,'right')-prs(menu,'left')||(prs(menu,'a')?1:0);
-      if(dv){
+      nav(10);const dv=prs(menu,'right')-prs(menu,'left')||(prs(menu,'a')?1:0);
+      if(cur===9){if(prs(menu,'a')){mode='backup';cur=0;sfx.ui()}}
+      else if(dv){
         const o=save.opts;sfx.ui();
         if(cur===0){o.court=(o.court+COURTS.length+dv)%COURTS.length;buildCrowd()}
         else if(cur===1)setCam(1-o.cam);
@@ -270,6 +274,16 @@ function update(){
       if(prs(menu,'a')){car.focus=['vel','for','pre','top'][cur];sfx.ui();store()}
       else if(back()){mode='career';cur=6}
       break;
+    case 'chal':
+      nav(3);
+      if(prs(menu,'a')||prs(menu,'start')){sfx.ui();if(cur===0)startChallenge('daily');else if(cur===1)startChallenge('quick');else enterDemo()}
+      else if(back())enterDemo();
+      break;
+    case 'backup':
+      nav(3);
+      if(prs(menu,'a')||prs(menu,'start')){sfx.ui();if(cur===0)openExport();else if(cur===1)openImport();else{mode='options';cur=9}}
+      else if(back()){mode='options';cur=9}
+      break;
     case 'cmore':
       nav(4);
       if(prs(menu,'a')){sfx.ui();if(cur===0)mode='cnews';else if(cur===1)mode='ctroph';else if(cur===2)mode='cstats';else{mode='career';cur=7}}
@@ -320,7 +334,8 @@ function update(){
       break;
     case 'result':
       if(prs(menu,'a')||prs(menu,'start')){
-        if(resNext==='ctour'){mode='ctour';cur=0}
+        if(resNext==='chal'){mode='chal';cur=0}
+        else if(resNext==='ctour'){mode='ctour';cur=0}
         else if(resNext==='cdone'){mode='cdone'}
         else if(resNext==='champion'){mode='champion'}
         else if(resNext==='player'){mode='player';cur=0}
