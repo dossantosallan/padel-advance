@@ -21,8 +21,8 @@ Abra o `index.html` no navegador, ou ative o GitHub Pages neste repositório.
 - Física com efeito (topspin e slice no ar e no vidro), resistência do ar e rebote imprevisível nos cantos
 - Inércia e split step, peixinho, voleio, contrapared, saque com quique e saída pela porta no por 3/por 4
 - IA com leitura imperfeita da bola e tática de dupla
-- Torneio de 16 duplas com estilos de jogo diferentes e evolução do atleta
-- Criação de personagem com nome
+- Modo carreira: calendário de 20 semanas, categorias FIP Bronze/Silver/Gold, P2, P1, Major e Finals com pontuação no estilo Premier Padel, ranking da liga, salário de patrocínio, prêmios, cansaço e lesões, parceiros e raquetes
+- Criação de personagem: nome, lado (direita/esquerda), mão, estilo, visual, acessórios e uniforme da dupla
 - Paredes de vidro e alambrado, por 3 e por 4, bola na fita, saque liftado e cortado
 - Fôlego, comandos ao parceiro, replay em câmera lenta, torcida
 - 4 quadras e 2 câmeras (aérea e atrás da quadra)
