@@ -18,12 +18,18 @@ const attrOf=()=>{
   if(twoP)return{vel:3,for:3,pre:3,top:3};
   const a=save.attr,me=save.me,o={};
   const bon={vel:0,for:0,pre:0,top:0};
-  if(me.style===1){bon.for++;bon.top++}else if(me.style===2){bon.vel++;bon.pre++}else bon.pre+=.5;
-  if(me.side===1)bon.top++;else bon.pre++;
-  if(typeof car!=='undefined'&&car)for(const k in RKTS[car.rkEq].b)bon[k]+=RKTS[car.rkEq].b[k];
-  for(const k in bon)o[k]=Math.min(5.5,1+(a[k]+bon[k]-1)*.6);
+  for(const k in bon)bon[k]=attrBonus(k);
+  /* 40 = iniciante, 99 = elite; vira a escala interna do jogo (1 a 5,5) */
+  for(const k in bon)o[k]=clamp(1+(Math.min(99,a[k]+bon[k])-40)/59*4.5,.8,5.5);
   return o;
 };
+function attrBonus(k){
+  const me=save.me;let v=0;
+  if(me.style===1&&(k==='for'||k==='top'))v+=3;else if(me.style===2&&(k==='vel'||k==='pre'))v+=3;else if(me.style===0&&k==='pre')v+=2;
+  if(me.side===1&&k==='top')v+=3;else if(me.side===0&&k==='pre')v+=3;
+  if(typeof car!=='undefined'&&car&&RKTS[car.rkEq].b[k])v+=3*RKTS[car.rkEq].b[k];
+  return v;
+}
 const myName=()=>save.me.name||'VOCE';
 let oppPair=null,bo3=false,sets=[0,0],cpage=0,nameTarget='me',rkOff=0;
 const teamName=t=>twoP?(t?'J2':'J1'):(t?(oppPair||PAIRS[0]).n:(kind==='car'&&car?teamKeyName(-1):(save.me.team||myName())));

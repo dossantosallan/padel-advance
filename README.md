@@ -30,7 +30,7 @@ Isso gera `index.html` (site/app instalável) e `dist/padel.html` (página únic
 - Física com efeito (topspin e slice no ar e no vidro), resistência do ar e rebote imprevisível nos cantos
 - Inércia e split step, peixinho, voleio, contrapared, saque com quique e saída pela porta no por 3/por 4
 - IA com leitura imperfeita da bola e tática de dupla
-- Até 3 carreiras salvas (nova/carregar), cada uma com atleta próprio: visual, lado da quadra, mão, estilo e pontos iniciais; os atributos evoluem sozinhos com treino (foco escolhido) e com o que você faz em quadra
+- Até 3 carreiras salvas (nova/carregar), cada uma com atleta próprio: visual, lado da quadra, mão, estilo e pontos iniciais; os atributos (escala 40–99) evoluem devagar e sozinhos com treino (foco escolhido) e com o que você faz em quadra
 - Modo carreira: calendário de 20 semanas, categorias FIP Bronze/Silver/Gold, P2, P1, Major e Finals com pontuação no estilo Premier Padel, ranking da liga, salário de patrocínio, prêmios, cansaço e lesões, parceiros e raquetes
 - Criação de personagem: nome, lado (direita/esquerda), mão, estilo, visual, acessórios e uniforme da dupla
 - Paredes de vidro e alambrado, por 3 e por 4, bola na fita, saque liftado e cortado

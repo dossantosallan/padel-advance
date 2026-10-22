@@ -10,15 +10,16 @@ if(!save.slots){save.slots=[null,null,null];if(save.car){save.slots[0]={prof:pro
 if(save.active!=null&&save.slots[save.active]){save.slots[save.active]={prof:profSnap(),car:save.car};if(save.base)profApply(save.base)}
 else if(save.base)profApply(save.base);
 save.active=null;save.base=null;save.car=null;car=null;
-let creatingSlot=null,slotMode='load',slotConfirm=false,lvlUps=[],startPts=6;
+let creatingSlot=null,slotMode='load',slotConfirm=false,lvlUps=[],startPts=20;
+const START_BASE=40,START_MAX=55;
 function syncSlot(){if(save.active==null||!car)return;save.slots[save.active]={prof:profSnap(),car}}
 function enterSlot(i){save.base=profSnap();const s=save.slots[i];profApply(s.prof);car=save.car=s.car;save.active=i;carEnsure();if(!car.prog){car.prog={vel:0,for:0,pre:0,top:0};car.focus='pre'}store()}
 function leaveSlot(){if(save.active!=null){syncSlot();if(save.base)profApply(save.base)}save.base=null;save.active=null;car=save.car=null;store()}
 function slotMeta(s){if(!s)return null;const c=s.car,p=s.prof;return{n:p.me.name||'?',season:c.season,week:c.week,titles:(c.trophies||[]).length,pts:c.myPts}}
 function beginCreate(i){
   save.base=profSnap();
-  profApply({me:{name:'',hs:0,hair:0,skin:0,shirt:0,side:0,lefty:0,style:0,acc:0,accC:0,shoe:0,rkt:0,c2:0,pat:0,team:''},attr:{vel:1,for:1,pre:1,top:1},xp:0,stats:null,titles:0,wins:0,season:1});
-  creatingSlot=i;startPts=6;car=save.car=null;mode='create';cpage=0;cur=0;openName('me');
+  profApply({me:{name:'',hs:0,hair:0,skin:0,shirt:0,side:0,lefty:0,style:0,acc:0,accC:0,shoe:0,rkt:0,c2:0,pat:0,team:''},attr:{vel:START_BASE,for:START_BASE,pre:START_BASE,top:START_BASE},xp:0,stats:null,titles:0,wins:0,season:1});
+  creatingSlot=i;startPts=20;car=save.car=null;mode='create';cpage=0;cur=0;openName('me');
 }
 function cancelCreate(){if(save.base)profApply(save.base);save.base=null;creatingSlot=null;store();mode='cmenu';cur=0}
 function finishCreate(){
@@ -26,14 +27,16 @@ function finishCreate(){
   newCareer();car.prog={vel:0,for:0,pre:0,top:0};car.focus=['vel','for','pre','top'].sort((a,c)=>save.attr[a]-save.attr[c])[0];
   save.slots[i]={prof:profSnap(),car};save.active=i;store();mode='career';cur=0;sfx.fanfare();
 }
-/* evolução: pontos de progresso viram nível; cada nível custa mais (de 2 em 2 até 12,5) */
-const NEED=[0,1.8,2.4,3.2,4.5,6.5,9,12];
+/* evolução: cada ponto de atributo custa mais que o anterior (0,3 no começo, ~3 perto de 99).
+   Em média uma temporada rende ~25 unidades: sair de 45 para 75 num atributo leva umas 3 temporadas. */
+const costAt=v=>.25*Math.pow(1.045,v-40);
 const ATN={vel:'VELOCIDADE',for:'FORCA',pre:'PRECISAO',top:'POR CIMA'};
 function gain(k,u){
   if(!car||!car.prog)return;
   car.prog[k]+=u;
-  while(save.attr[k]<8&&car.prog[k]>=NEED[save.attr[k]]){car.prog[k]-=NEED[save.attr[k]];save.attr[k]++;lvlUps.push(k);pushNews(ATN[k]+' SUBIU PARA '+save.attr[k]+'!');car.msg=ATN[k]+' '+save.attr[k]+'!'}
-  if(save.attr[k]>=8)car.prog[k]=0;
+  while(save.attr[k]<99&&car.prog[k]>=costAt(save.attr[k])){car.prog[k]-=costAt(save.attr[k]);save.attr[k]++;lvlUps.push(k);
+    if(save.attr[k]%5===0){pushNews(ATN[k]+' CHEGOU A '+save.attr[k]);car.msg=ATN[k]+' '+save.attr[k]+'!'}}
+  if(save.attr[k]>=99)car.prog[k]=0;
 }
 function gainSpread(u){for(const k of['vel','for','pre','top'])gain(k,u/4)}
 /* partida jogada de verdade: o que você mais fez em quadra é o que mais evolui */
@@ -66,21 +69,21 @@ function drawCMenu(){
 }
 function drawCAttr(){
   txt('INICIO',80,30,ACC,'center',F16);
-  txt('DISTRIBUA OS PONTOS',80,54,WHITE,'center');txt('RESTAM '+startPts,80,66,startPts?ACC:GRN,'center');
+  txt('DISTRIBUA '+20+' PONTOS',80,54,WHITE,'center');txt('RESTAM '+startPts,80,66,startPts?ACC:GRN,'center');
   const K=['vel','for','pre','top'];
-  K.forEach((k,i)=>{const y=88+i*24,on=cur===i,v=save.attr[k];txt(ATN[k],8,y,on?ACC:WHITE);for(let j=0;j<4;j++)R(110+j*10,y,8,7,j<v?(on?ACC:GRN):'#2b3470')});
+  K.forEach((k,i)=>{const y=88+i*24,on=cur===i,v=save.attr[k],bn=attrBonus(k);txt(ATN[k],8,y,on?ACC:WHITE);txt(String(v)+(bn?'+'+bn:''),152,y,on?ACC:WHITE,'right');R(8,y+11,144,4,'#05071a');R(8,y+11,Math.round(144*v/99),4,on?ACC:GRN);if(bn)R(8+Math.round(144*v/99),y+11,Math.round(144*bn/99),4,BLU)});
   const on=cur===4;txt((on?'> ':'  ')+'COMECAR',40,192,on?(startPts?MUT:ACC):WHITE);
   const me=save.me;txt('BONUS: '+STYLE_N[me.style]+', '+SIDE_N[me.side],80,214,BLU,'center');
-  txt('< > AJUSTA (MAX 4)',80,240,MUT,'center');txt('B VOLTA AO VISUAL',80,254,MUT,'center');
+  txt('< > AJUSTA (MAX '+START_MAX+')',80,240,MUT,'center');txt('B VOLTA AO VISUAL',80,254,MUT,'center');
 }
 function drawCEvo(){
   txt('EVOLUCAO',80,30,ACC,'center',F16);
   const K=['vel','for','pre','top'];
-  K.forEach((k,i)=>{const y=56+i*34,on=cur===i,v=save.attr[k],foc=car.focus===k;
-    txt((foc?'*':' ')+ATN[k],6,y,on?ACC:WHITE);txt(String(v),154,y,ACC,'right');
-    for(let j=0;j<8;j++)R(10+j*9,y+12,7,5,j<v?(foc?ACC:GRN):'#2b3470');
-    if(v<8){const p=car.prog[k]/NEED[v];R(88,y+12,64,5,'#05071a');R(89,y+13,Math.round(62*clamp(p,0,1)),3,BLU)}else txt('MAX',152,y+11,GRN,'right')});
+  K.forEach((k,i)=>{const y=56+i*34,on=cur===i,v=save.attr[k],foc=car.focus===k,bn=attrBonus(k);
+    txt((foc?'*':' ')+ATN[k],6,y,on?ACC:WHITE);txt(String(v)+(bn?'+'+bn:''),154,y,ACC,'right');
+    R(8,y+12,144,5,'#05071a');R(9,y+13,Math.round(142*v/99),3,foc?ACC:GRN);
+    if(v<99){const p=car.prog[k]/costAt(v);R(9,y+19,Math.round(142*clamp(p,0,1)),1,BLU)}});
   txt('* = FOCO DO TREINO',80,196,ACC,'center');
-  txt('TREINO: +1 NO FOCO',80,212,MUT,'center');txt('JOGOS: O QUE VOCE',80,224,MUT,'center');txt('MAIS FAZ EM QUADRA',80,236,MUT,'center');
+  txt('TREINO: SOBE O FOCO',80,212,MUT,'center');txt('JOGOS: O QUE VOCE',80,224,MUT,'center');txt('MAIS FAZ EM QUADRA',80,236,MUT,'center');
   txt('A MUDA FOCO  B VOLTA',80,262,MUT,'center');
 }

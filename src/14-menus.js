@@ -67,7 +67,7 @@ function careerResultLines(win,rn,inj){
   if(inj){resLines=['LESAO!','FORA POR '+car.inj+' SEM.'];resNext='cdone';return}
   if(!t.alive){resLines=t.champ===-1?['CAMPEOES DO','TORNEIO!']:['ELIMINADOS',ROUNDNA(Math.pow(2,t.R-(t.res[-1]||0)))];resNext='cdone'}
   else{resLines=['PROXIMA FASE',ROUNDN(t.cur.length)];resNext='ctour'}
-  if(lvlUps.length)resLines.push('SUBIU: '+[...new Set(lvlUps)].map(k=>ATN[k]).join(' ').slice(0,18));
+  if(lvlUps.length){const c={};for(const k of lvlUps)c[k]=(c[k]||0)+1;resLines.push(Object.keys(c).map(k=>({vel:'VEL',for:'FOR',pre:'PRE',top:'CIMA'})[k]+'+'+c[k]).join(' '))}
 }
 function simCareerMatch(){
   lvlUps=[];mst=null;const t=car.tour,o=tourOpp(),win=Math.random()<winP(-1,o),rn=ROUNDN(t.cur.length);gainSpread(win?.22:.14);
@@ -118,7 +118,7 @@ function update(){
       break;
     case 'player':
       nav(4);
-      if(prs(menu,'a')){const k=ATTR[cur][0],c=save.attr[k];if(c<8&&save.xp>=c){save.attr[k]++;save.xp-=c;store();sfx.game()}else sfx.fault()}
+      if(prs(menu,'a')){const k=ATTR[cur][0];if(save.attr[k]<99&&save.xp>0){save.attr[k]=Math.min(99,save.attr[k]+3);save.xp--;store();sfx.game()}else sfx.fault()}
       if(back()||prs(menu,'start')){store();if(nextAfterPlayer==='career'&&car){mode='career';cur=6}else enterDemo()}
       break;
     case 'options':{
@@ -249,7 +249,7 @@ function update(){
       break;
     case 'cattr':{
       nav(5);const K=['vel','for','pre','top'],dv=prs(menu,'right')-prs(menu,'left');
-      if(cur<4&&dv){const k=K[cur];if(dv>0&&startPts>0&&save.attr[k]<4){save.attr[k]++;startPts--;sfx.ui()}else if(dv<0&&save.attr[k]>1){save.attr[k]--;startPts++;sfx.ui()}else sfx.fault()}
+      if(cur<4&&dv){const k=K[cur];if(dv>0&&startPts>0&&save.attr[k]<START_MAX){save.attr[k]++;startPts--;sfx.ui()}else if(dv<0&&save.attr[k]>START_BASE){save.attr[k]--;startPts++;sfx.ui()}else sfx.fault()}
       if((prs(menu,'a')||prs(menu,'start'))&&cur===4){if(startPts===0)finishCreate();else sfx.fault()}
       else if(back()){mode='create';cpage=1;cur=4}
       break;}
