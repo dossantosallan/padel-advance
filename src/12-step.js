@@ -29,7 +29,7 @@ function humanStep(h){
   let mx=C.right-C.left,my=C.down-C.up;
   if(isServer){my=0;if(h.charging)mx=0}
   const n=Math.hypot(mx,my),sp=humanSpeed(h)*(h.charging?.62:h.swing>0?.55:1);
-  accel(h,n?mx/n*sp:0,n?my/n*sp:0,n?.13:.2);
+  accel(h,n?mx/n*sp:0,n?my/n*sp:0,n?.22:.3);
   h.x+=h.vx;h.y+=h.vy;h.moving=Math.hypot(h.vx,h.vy)>.12;
   if(isServer){const r=h.homeX>50;h.x=clamp(h.x,r?54:6,r?94:46)}
   constrain(h);
