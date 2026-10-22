@@ -28,6 +28,7 @@ function onEvent(e,v){
       b.bounces=1;b.land={x:b.x,y:b.y};
     }else return point(hitT,b.cord?'NA FITA!':(twoP||hitT===0)?'WINNER!':'PONTO DELES');
   }
+  if(e==='wall'&&b.bounces===1)b.offWall=true;
   if(e==='wall'&&b.bounces===0){
     if(sideOf(b.y)===hitT){b.contra=true;return}   /* contrapared: vidro do próprio lado vale */
     return point(R,'FORA!');
@@ -74,6 +75,7 @@ function fault(){
   st='point';ptimer=70;msg='FALTA';sub='2o SAQUE';after=()=>setupServe(true);
 }
 function setupServe(keepFault){
+  P.forEach(p=>{if(p.homeX0!=null)p.homeX=p.homeX0});
   if(!keepFault)faults=0;
   const even=(pts[0]+pts[1])%2===0;
   server=serveTeam===0?(even?P[0]:P[1]):(even?P[2]:P[3]);

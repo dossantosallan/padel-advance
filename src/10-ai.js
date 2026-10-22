@@ -43,7 +43,9 @@ function planTeam(team){
   if(st!=='play'||b.lastTeam===team||!mates.length)return;
   const cand=predictFor(team);if(!cand.length)return;
   const hu=P.find(q=>q.team===team&&isHuman(q));
-  const skip=q=>hu&&(hu.homeX>50?q.x>54:q.x<46);
+  /* o parceiro deixa as bolas do seu lado, exceto o lob que passa por cima de você e você não alcança */
+  const over=q=>hu&&(team===0?q.y>hu.y+8:q.y<hu.y-8)&&Math.hypot(q.x-hu.x,q.y-hu.y)/humanSpeed(hu)>q.t+4;
+  const skip=q=>hu&&(hu.homeX>50?q.x>54:q.x<46)&&!over(q);
   let best=null;
   for(const p of mates){
     if(p.dive>0)continue;

@@ -12,7 +12,8 @@ Abra o `index.html` no navegador, ou ative o GitHub Pages neste repositório.
 - Segure A ou B para carregar a força e solte (ou deixe a bola chegar).
 - Saque: A = liftado (rápido, quica alto e corre pro vidro), B = cortado (quica baixo e escorrega pra lateral). Na hora do golpe, ←/→ escolhem T ou aberto, ↑ saque curto, ↓ saque fundo.
 - Bola baixa: A drive, B lob, ↑+A dejada.
-- Bola alta: A remate, B bandeja, ↑+A víbora.
+- Mira: segure ←/→ durante a carga (toque = meia-lateral, segurar = lateral); ↓ = mais fundo.
+- Bola baixa: ↑+B chiquita. Bola alta: A remate, B bandeja, ↑+A víbora, ↓+A rulo. Bola que volta do vidro do fundo: A bajada de pared.
 - Bola passou e vai pro vidro: ↓+B = contrapared. Bola longe: A/B = peixinho.
 - Por 3/por 4 na lateral: corra até a porta e aperte A para devolver de fora.
 
@@ -34,6 +35,8 @@ python3 tools/test.py
 O `build.py` gera `index.html` (site/app instalável) e `dist/padel.html` (página única). Os modelos de página ficam em `shell/`.
 
 ## Recursos
+- Parceiro cobre o lob que passa por cima de você e vocês trocam de lado
+- Indicador de tempo de golpe, anel de bola alta e sombra que mostra a altura
 - Física com efeito (topspin e slice no ar e no vidro), resistência do ar e rebote imprevisível nos cantos
 - Inércia e split step, peixinho, voleio, contrapared, saque com quique e saída pela porta no por 3/por 4
 - IA com leitura imperfeita da bola e tática de dupla

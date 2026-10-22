@@ -6,7 +6,8 @@ function humanStep(h){
   const pa=prs(pd,'a'),pb=prs(pd,'b'),isServer=st==='serve'&&server===h;
   if(isServer&&toss)return;
   if((pa||pb)&&!isServer&&h.swing===0&&canHit(h)&&reachInfo(h,1)===2){diveHit(h,pb?'lob':'drive');return}
-  if(!h.charging&&(pa||pb)&&(h.swing===0||isServer)){h.charging=true;h.charge=0;h.ctype=pa?'a':'b';h.lastD=1e9;h.hand=handFor(h)}
+  if(!h.charging&&(pa||pb)&&(h.swing===0||isServer)){h.charging=true;h.charge=0;h.ctype=pa?'a':'b';h.lastD=1e9;h.hand=handFor(h);h.aim=0}
+  if(h.charging&&!isServer){if(C.left)h.aim=Math.max(-2,(h.aim||0)-1/14);if(C.right)h.aim=Math.min(2,(h.aim||0)+1/14)}
   if(h.charging){
     h.charge=Math.min(1,h.charge+1/(44-2*attrOf(h).for));
     if(isServer){if(!C[h.ctype])startToss(h,.25+.75*h.charge,h.ctype)}

@@ -17,7 +17,7 @@ function setupTeams(oppId,skill){
     for(const p of[P[2],P[3]])Object.assign(p,{shirt:c2,pat:0,style:'equil',lefty:false,skill:1.6});
     P[3].ctrl=pad2;P[3].first='J2';P[0].first='J1';
   }
-  P.forEach(p=>{p.stam=1;p.lblT=0;p.hidden=false});
+  P.forEach(p=>{p.stam=1;p.lblT=0;p.hidden=false;p.homeX0=p.homeX});
   if(inCar)P[0].stam=clamp(car.cond/100,.45,1);
 }
 let friendlySwap=false;
@@ -132,8 +132,9 @@ function update(){
       if(back()||prs(menu,'start')){store();if(nextAfterPlayer==='career'&&car){mode='career';cur=6}else enterDemo()}
       break;
     case 'options':{
-      nav(10);const dv=prs(menu,'right')-prs(menu,'left')||(prs(menu,'a')?1:0);
-      if(cur===9){if(prs(menu,'a')){mode='backup';cur=0;sfx.ui()}}
+      nav(11);const dv=prs(menu,'right')-prs(menu,'left')||(prs(menu,'a')?1:0);
+      if(cur===10&&dv){save.opts.timing=!save.opts.timing;store();sfx.ui()}
+      else if(cur===9){if(prs(menu,'a')){mode='backup';cur=0;sfx.ui()}}
       else if(dv){
         const o=save.opts;sfx.ui();
         if(cur===0){o.court=(o.court+COURTS.length+dv)%COURTS.length;buildCrowd()}

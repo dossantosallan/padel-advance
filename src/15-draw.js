@@ -188,6 +188,7 @@ function drawPlayer(p){
   const B=drawSprite(p,X,Y,true);
   if(isHuman(p)){
     const mc=p===P[0]?ACC:BLU;
+    if(p.charging&&save.opts.timing!==false&&st==='play'&&canHit(p)){const ri=reachInfo(p,1),a=attrOf(p),dxx=Math.abs(b.x-p.x),dyy=depthOf(p),qq=clamp((1-clamp(Math.abs(dxx-5)/(8+.5*a.pre),0,1))*.4+(1-clamp(Math.abs(dyy+1)/8,0,1))*.6,0,1);R(X-5,Y+4,11,2,'#05071a');R(X-4,Y+4,9,1,ri!==1?'#3a3f6a':qq>.8?GRN:qq>.55?ACC:RED)}
     if(p.charging){const pw=(.25+.75*p.charge)*(.75+.25*p.stam),w=Math.round(12*pw);R(X-7,B-21,14,4,'#05071a');R(X-6,B-20,w,2,pw<.55?GRN:pw<.85?ACC:RED)}
     else if(st==='serve'&&server===p&&!toss){if(Math.floor(frame/16)%2)txt('SAQUE',clamp(X,24,136),B-27,mc,'center')}
     else if(st==='chase'&&chase&&chase.p===p){if(chase.ready?Math.floor(frame/5)%2:Math.floor(frame/14)%2)txt(chase.ready?'A!':'CORRE',clamp(X,24,136),B-27,chase.ready?RED:mc,'center')}
@@ -212,11 +213,14 @@ function drawBall(){
     for(let i=1;i<b.trail.length;i++){const t=b.trail[i],[tx,ty]=proj(t.x,t.y,t.z);cx.fillStyle=`rgba(${col},${al*(1-i/b.trail.length)})`;cx.fillRect(Math.round(tx)-(i<3?1:0),Math.round(ty)-2+(i<3?0:1),i<3?2:1,i<3?2:1)}
   }
   R(X,Y,3,3,'#dfff3a');R(X,Y,1,1,'#ffffff');R(X+2,Y+2,1,1,'#93ab12');
+  /* anel: bola na altura do golpe por cima e ao alcance */
+  const h=P[0];if(st==='play'&&isHuman(h)&&canHit(h)&&b.z>16&&reachInfo(h,1.3)===1&&Math.floor(frame/5)%2){cx.strokeStyle=ACC;cx.lineWidth=1;cx.strokeRect(X-2.5,Y-2.5,8,8)}
 }
 function drawWorld(){
   for(const d of parts){const[px,py]=proj(d.x,d.y,(14-d.t)*.25);cx.fillStyle=`rgba(210,225,255,${d.t/28})`;cx.fillRect(Math.round(px),Math.round(py),1,1)}
   if(marker&&st==='play'&&b.bounces===0&&Math.floor(frame/6)%2){const[mx,my]=proj(marker.x,marker.y,0),X=Math.round(mx),Y=Math.round(my);R(X-2,Y-1,1,1,ACC);R(X+2,Y-1,1,1,ACC);R(X-1,Y,3,1,ACC);R(X-2,Y+1,1,1,ACC);R(X+2,Y+1,1,1,ACC);R(X,Y-1,1,3,ACC)}
-  if(!b.out||b.z>-5){const[sx,sy]=proj(b.x,b.y,0);if(b.x>=-2&&b.x<=102&&b.y>=-2&&b.y<=202)R(sx-1,sy,3,1,'rgba(0,0,20,.5)')}
+  if(!b.out||b.z>-5){const[sx,sy]=proj(b.x,b.y,0);if(b.x>=-2&&b.x<=102&&b.y>=-2&&b.y<=202){const sw=b.z<3?5:b.z<10?4:3;cx.fillStyle=`rgba(0,0,20,${clamp(.7-b.z*.014,.25,.7).toFixed(2)})`;cx.fillRect(Math.round(sx-sw/2),Math.round(sy),sw,1)}}
+  for(const h of P)if(isHuman(h)&&h.charging&&st==='play'&&h===P[0]){const C=h.ctrl.cur,lv=aimLevel(h.aim||0),ty=h.team===0?(C.down?18:C.up?78:40):(C.down?182:C.up?122:160),[ax,ay]=proj(AIM_X[lv],ty,0);if(Math.floor(frame/6)%2){const X=Math.round(ax),Y=Math.round(ay);R(X-2,Y,5,1,ACC);R(X,Y-1,1,3,ACC)}}
   const items=P.filter(p=>!p.hidden).map(p=>({y:p.y,f:()=>drawPlayer(p)}));
   if(kind==='train'&&!demo)items.push({y:4,f:drawMachine});
   items.push({y:NET,f:drawNet},{y:b.y+.01,f:drawBall});
@@ -333,10 +337,10 @@ function renderInner(){
   if(mode==='cseason'){dim(.9);drawCSeason();return}
   if(mode==='options'){
     dim(.82);txt('OPCOES',80,40,ACC,'center',F16);const o=save.opts;
-    const rows=[['QUADRA',COURTS[o.court].n],['CAMERA',CAMS[o.cam].n],['40-40',o.golden?'OURO':'VANTAGEM'],['QUIQUE',o.marker?'MARCA':'NAO'],['BOTOES',BTNS[o.btn][0]],['SOM',o.sound?'SIM':'NAO'],['TELA',o.full?'CHEIA':'GBA'],['MUSICA',o.music?'SIM':'NAO'],['DICAS',o.tips?'SIM':'NAO'],['BACKUP','>']];
-    rows.forEach(([l,v],i)=>{const y=62+i*17,on=cur===i;txt(l,10,y,on?ACC:WHITE);txt(v,150,y,on?ACC:MUT,'right');
+    const rows=[['QUADRA',COURTS[o.court].n],['CAMERA',CAMS[o.cam].n],['40-40',o.golden?'OURO':'VANTAGEM'],['QUIQUE',o.marker?'MARCA':'NAO'],['BOTOES',BTNS[o.btn][0]],['SOM',o.sound?'SIM':'NAO'],['TELA',o.full?'CHEIA':'GBA'],['MUSICA',o.music?'SIM':'NAO'],['DICAS',o.tips?'SIM':'NAO'],['BACKUP','>'],['TEMPO GOLPE',o.timing!==false?'SIM':'NAO']];
+    rows.forEach(([l,v],i)=>{const y=58+i*15,on=cur===i;txt(l,10,y,on?ACC:WHITE);txt(v,150,y,on?ACC:MUT,'right');
       if(on&&Math.floor(frame/16)%2)txt('<',150-v.length*8-12,y,ACC)});
-    txt('CAMISA E VISUAL',80,226,MUT,'center');txt('EM PERSONAGEM',80,238,MUT,'center');
+    txt('CAMISA E VISUAL',80,232,MUT,'center');txt('EM PERSONAGEM',80,242,MUT,'center');
     txt('B VOLTAR',80,264,MUT,'center');
     return;
   }

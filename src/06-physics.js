@@ -75,7 +75,7 @@ function solveShot(tx,ty,T,w,minNet=2.5){
   return{vx:(tx-b.x)/T,vy:(ty-b.y)/T,vz:(.5*G*T*T-b.z)/T};
 }
 function launch(tx,ty,T,w=0,e=0,minNet){
-  const v=solveShot(tx,ty,T,w,minNet);b.sv=0;
+  const v=solveShot(tx,ty,T,w,minNet);b.sv=0;b.offWall=false;
   if(e>0){const a=rnd(-1,1)*e*.009,c=Math.cos(a),s=Math.sin(a),f=1+rnd(-1,1)*e*.0075;
     const vx=v.vx*c-v.vy*s,vy=v.vx*s+v.vy*c;v.vx=vx*f;v.vy=vy*f;v.vz+=rnd(-1,1)*e*.006}
   b.vx=v.vx;b.vy=v.vy;b.vz=v.vz;b.w=w;
