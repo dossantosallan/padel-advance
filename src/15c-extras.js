@@ -107,3 +107,23 @@ function drawChangeEnds(){
   txt('TROCA DE LADO',80,y+8,ACC,'center');
   [0,1].forEach(t=>{const yy=y+28+t*18;txt(teamName(t).slice(0,10),20,yy,t===0?P[0].shirt:P[2].shirt);if(bo3)txt(String(sets[t]),112,yy,MUT);R(124,yy-2,14,11,'#1b2350');txt(String(games[t]),128,yy,WHITE)});
 }
+
+/* ---------- primeira vez: escolher câmera e tela antes do menu ---------- */
+function stepSetup(){
+  nav(3);const dv=prs(menu,'right')-prs(menu,'left')||(cur<2&&prs(menu,'a')?1:0);
+  if(dv&&cur===0){setCam(1-save.opts.cam);sfx.ui()}
+  else if(dv&&cur===1){save.opts.full=!save.opts.full;applyScreen();store();sfx.ui()}
+  if(cur===2&&(prs(menu,'a')||prs(menu,'start'))){save.setupDone=true;store();sfx.game();enterDemo();if(!save.me.name){mode='create';cur=0}return}
+  quiet=true;stepGame();quiet=false;
+}
+function drawSetup(){
+  cx.fillStyle='rgba(8,10,30,.55)';cx.fillRect(0,0,CW,CH);
+  cx.fillStyle='rgba(13,19,51,.94)';cx.fillRect(8,34,144,76);R(8,34,144,1,ACC);R(8,109,144,1,ACC);
+  txt('COMO PREFERE JOGAR?',80,40,ACC,'center');
+  const rows=[['CAMERA',CAMS[save.opts.cam].n],['TELA',save.opts.full?'CHEIA':'GBA']];
+  rows.forEach(([l,v],i)=>{const y=58+i*16,on=cur===i;txt(l,16,y,on?ACC:WHITE);txt((on?'< ':'')+v+(on?' >':''),146,y,on?ACC:MUT,'right')});
+  const on=cur===2;txt((on?'> ':'  ')+'COMECAR',40,92,on?ACC:WHITE);
+  cx.fillStyle='rgba(13,19,51,.9)';cx.fillRect(8,224,144,40);
+  txt(cur===0?(save.opts.cam?'ATRAS DA QUADRA':'VISTA DE CIMA'):cur===1?(save.opts.full?'SEM A CARCACA':'PORTATIL ROXO'):'A CONFIRMA',80,230,BLU,'center');
+  txt('MUDE DEPOIS EM OPCOES',80,246,MUT,'center');
+}

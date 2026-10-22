@@ -26,7 +26,7 @@ function stepIntro(){
   if(tapAny||prs(menu,'a')||prs(menu,'start')||prs(menu,'b')){tapAny=false;if(t<PRESS_T)introT=PRESS_T;else finishIntro()}
   if(t>PRESS_T+420)finishIntro();
 }
-function finishIntro(){sfx.ui();buildCrowd();enterDemo();if(!save.me.name){mode='create';cur=0}}
+function finishIntro(){sfx.ui();buildCrowd();enterDemo();if(firstRun&&!save.setupDone){mode='setup';cur=0;return}if(!save.me.name){mode='create';cur=0}}
 function drawBoot(){
   R(0,0,CW,CH,NAVY);
   for(let y=0;y<CH;y+=4)for(let x=2;x<CW;x+=6)R(x+((y>>2)%2)*3,y,1,1,'#141b44');

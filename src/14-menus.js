@@ -274,6 +274,7 @@ function update(){
       if(prs(menu,'a')){car.focus=['vel','for','pre','top'][cur];sfx.ui();store()}
       else if(back()){mode='career';cur=6}
       break;
+    case 'setup':stepSetup();break;
     case 'chal':
       nav(3);
       if(prs(menu,'a')||prs(menu,'start')){sfx.ui();if(cur===0)startChallenge('daily');else if(cur===1)startChallenge('quick');else enterDemo()}

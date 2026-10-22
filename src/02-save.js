@@ -1,6 +1,7 @@
 /* ---------- salvamento ---------- */
 const SAVE_KEY='padelAdvance.v1';
 const save={attr:{vel:40,for:40,pre:40,top:40},xp:2,season:1,titles:0,wins:0,opts:{court:0,cam:0,btn:1,full:false,music:true,tips:true,shirt:0,hair:0,golden:true,marker:false,sound:true},me:{name:'',hs:0,hair:0,skin:0,shirt:0,side:0,lefty:0,style:0,acc:0,accC:0,shoe:0,rkt:0,c2:0,pat:0,team:''},car:null,school:[],tipsSeen:{},stats:null,tour:null};
+let firstRun=true;try{firstRun=!localStorage.getItem(SAVE_KEY)}catch(_){}
 try{const s=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');if(s){Object.assign(save,s,{attr:{...save.attr,...s.attr},opts:{...save.opts,...s.opts},me:{...save.me,shirt:(s.opts&&s.opts.shirt)||0,hair:(s.opts&&s.opts.hair)||0,...s.me}})}}catch(_){}
 CAM=CAMS[save.opts.cam]||CAMS[0];
 /* escala de atributos 40-99 (versões antigas usavam 1-8) */

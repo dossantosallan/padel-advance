@@ -257,6 +257,7 @@ function renderInner(){
   cx.drawImage(getBg(),0,0);
   drawCrowd();
   cx.drawImage(getCourt(),0,0);
+  if(mode==='setup'){drawWorld();drawSetup();return}
   if(mode==='title'){
     drawWorld();dim(.62);
     cx.font=F16;cx.textAlign='center';cx.textBaseline='top';
