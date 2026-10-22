@@ -10,6 +10,7 @@ Abra o `index.html` no navegador, ou ative o GitHub Pages neste repositório.
 **1 jogador:** setas/WASD movem · J/Z = A · K/X = B · Shift = parceiro · Enter = start/pausa
 
 - Segure A ou B para carregar a força e solte (ou deixe a bola chegar).
+- Saque: A = liftado (rápido, quica alto e corre pro vidro), B = cortado (quica baixo e escorrega pra lateral). Na hora do golpe, ←/→ escolhem T ou aberto, ↑ saque curto, ↓ saque fundo.
 - Bola baixa: A drive, B lob, ↑+A dejada.
 - Bola alta: A remate, B bandeja, ↑+A víbora.
 - Bola passou e vai pro vidro: ↓+B = contrapared. Bola longe: A/B = peixinho.

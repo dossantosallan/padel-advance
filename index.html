@@ -149,7 +149,7 @@ body{position:fixed;inset:0;-webkit-touch-callout:none;-webkit-user-select:none;
     <button class="pill" id="bStart"><i></i>START</button>
   </div>
 </main>
-<p class="hint">1 jogador: setas/WASD movem · J/Z = A · K/X = B · Shift = parceiro · Enter = start/pausa<br>Segure A/B para carregar a força · Bola baixa: A drive, B lob, ↑+A dejada · Bola alta: A remate, B bandeja, ↑+A víbora<br>Bola passou e vai pro vidro: ↓+B = contrapared · Bola longe: A/B = peixinho · Por 3/por 4 na lateral: corra pela porta e aperte A<br>2 jogadores: J1 WASD + F/G/Q · J2 setas + L/K/P</p>
+<p class="hint">1 jogador: setas/WASD movem · J/Z = A · K/X = B · Shift = parceiro · Enter = start/pausa<br>Saque: A liftado, B cortado; ←/→ T ou aberto, ↑ curto, ↓ fundo · Segure A/B para carregar a força · Bola baixa: A drive, B lob, ↑+A dejada · Bola alta: A remate, B bandeja, ↑+A víbora<br>Bola passou e vai pro vidro: ↓+B = contrapared · Bola longe: A/B = peixinho · Por 3/por 4 na lateral: corra pela porta e aperte A<br>2 jogadores: J1 WASD + F/G/Q · J2 setas + L/K/P</p>
 
 <script>
 /* iOS Safari: bloqueia zoom por duplo toque e pinça, e o arraste da página */
@@ -407,6 +407,7 @@ function flight(o){
   const hs=Math.hypot(o.vx,o.vy),d=1-DRAG*hs;
   o.vx*=d;o.vy*=d;
   o.vz-=G*(1+MAG*(o.w||0)*Math.min(1,hs/2.2));
+  if(o.sv)o.vx+=o.sv*.006;   /* efeito lateral (saque cortado) */
 }
 function physics(o,ev){
   flight(o);
@@ -422,6 +423,7 @@ function physics(o,ev){
   if(o.z<=0){o.z=0;if(o.vz<0){const v=-o.vz,c=CT(),w=o.w||0;
     if(o.spin==='kick'){o.vz=o.kickV;o.vx*=.92;o.vy*=.92;o.spin='none'}
     else{o.vz=v>.3?v*clamp(c.bounce+.2*w,.3,.85):0;const f=clamp(c.fric+.07*w,.7,.98);o.vx*=f;o.vy*=f}
+    if(o.sv){o.vx+=o.sv*.35;o.sv*=.3}
     o.w=w*.5;ev('floor',v)}}
   if(o.out)return;
   let hit=false;
@@ -462,18 +464,18 @@ function simLand(x,y,z,vx,vy,vz,w){
   }
   return{x:o.x,y:o.y,t:400,netZ};
 }
-function solveShot(tx,ty,T,w){
+function solveShot(tx,ty,T,w,minNet=2.5){
   for(let k=0;k<20;k++){
     let vx=(tx-b.x)/T,vy=(ty-b.y)/T,vz=(.5*G*T*T-b.z)/T,r;
     for(let i=0;i<6;i++){r=simLand(b.x,b.y,b.z,vx,vy,vz,w);vx+=(tx-r.x)/T*.9;vy+=(ty-r.y)/T*.9;vz+=(T-r.t)*G*.5}
     r=simLand(b.x,b.y,b.z,vx,vy,vz,w);
-    if((b.y-NET)*(ty-NET)<0&&r.netZ<NETH+2.5){T+=3;continue}
+    if((b.y-NET)*(ty-NET)<0&&r.netZ<NETH+minNet){T+=2;continue}
     return{vx,vy,vz};
   }
   return{vx:(tx-b.x)/T,vy:(ty-b.y)/T,vz:(.5*G*T*T-b.z)/T};
 }
-function launch(tx,ty,T,w=0,e=0){
-  const v=solveShot(tx,ty,T,w);
+function launch(tx,ty,T,w=0,e=0,minNet){
+  const v=solveShot(tx,ty,T,w,minNet);b.sv=0;
   if(e>0){const a=rnd(-1,1)*e*.009,c=Math.cos(a),s=Math.sin(a),f=1+rnd(-1,1)*e*.0075;
     const vx=v.vx*c-v.vy*s,vy=v.vx*s+v.vy*c;v.vx=vx*f;v.vy=vy*f;v.vz+=rnd(-1,1)*e*.006}
   b.vx=v.vx;b.vy=v.vy;b.vz=v.vz;b.w=w;
@@ -574,21 +576,32 @@ function startToss(s,pow,ctype){
   toss={pow,ctype,t:0,bounced:false};s.charging=false;s.tossing=true;
   b.x=s.x+3;b.y=s.y+(s.team===0?-2:2);b.z=11;b.vz=0;
 }
+/* Saque: por baixo, rasante sobre a rede, na diagonal.
+   A = liftado (rápido, quica alto e corre para o vidro), B = cortado (mais lento, quica baixo e escorrega para a lateral).
+   Setas no momento do golpe: ←/→ escolhem T ou aberto, ↑ saque curto, ↓ saque fundo. Mais força = menos controle e mais risco de rede. */
 function doServe(s,pow,ctype){
-  const toTop=s.team===0,[x0,x1]=b.box;
-  if(pow==null)pow=rnd(.4,.8);
-  if(!ctype)ctype=Math.random()<.5?'a':'b';
+  const toTop=s.team===0,[x0,x1]=b.box,human=isHuman(s);
+  if(pow==null){const k=isPartner(s)?1.6:sk(s);pow=clamp(rnd(.4,.8)+k*.05-(faults?.2:0),.3,.95)}
+  if(!ctype)ctype=Math.random()<.55?'a':'b';
   lastHitter=s;if(mst&&!demo&&s===P[0]&&faults===0)mst.sv++;
   pow*=.75+.25*s.stam;
-  let tx=rnd(x0+10,x1-10),ty=toTop?rnd(SV1+8,SV1+22):rnd(SV2-22,SV2-8);
-  if(isHuman(s)){const C=s.ctrl.cur;if(C.left)tx=x0+7;else if(C.right)tx=x1-7;const e=pow*pow*8*(1.3-.1*attrOf(s).pre);tx+=rnd(-e,e);ty+=rnd(-e,e)*(toTop?-1:1)}
-  else if(!isPartner(s)){const e=Math.max(2.5,13-3*sk(s))*.45;tx+=rnd(-e,e);ty+=rnd(-e,e)}
+  const cut=ctype==='b',left=x0<50,mid=(x0+x1)/2;
+  let place,depth;
+  if(human){const C=s.ctrl.cur;place=C.left?(left?'wide':'t'):C.right?(left?'t':'wide'):'body';depth=C.up?'short':C.down?'deep':'mid'}
+  else{const r=Math.random();place=r<.4?'t':r<.75?'wide':'body';const d=Math.random();depth=d<.12?'short':d<.5?'deep':'mid'}
+  let tx=place==='t'?(left?x1-6:x0+6):place==='wide'?(left?x0+7:x1-7):mid+rnd(-5,5);
+  const dd=depth==='short'?rnd(14,24):depth==='deep'?rnd(60,66):rnd(38,54);
+  let ty=toTop?NET-dd:NET+dd;
+  const ctrl=human?(1.3-.1*attrOf(s).pre):isPartner(s)?1:Math.max(.5,1.4-.25*sk(s));
+  const e=(2+pow*pow*8)*ctrl*(faults?.7:1);tx+=rnd(-e,e);ty+=rnd(-e,e)*.8;
   b.y=s.y+(toTop?-3:3);b.z=Math.max(2,b.z);
-  const cut=ctype==='b';
-  launch(tx,ty,Math.hypot(tx-b.x,ty-b.y)/((cut?1.8:1.6)+.8*pow),cut?-.7:.6,0);
+  const sp=(cut?3+1.2*pow:3.4+1.6*pow)*(faults?.9:1),T=Math.hypot(tx-b.x,ty-b.y)/sp,sv=cut?(left?-1:1):0;
+  tx-=.003*sv*T*T;
+  const margin=(human?2:2.4)-1.7*pow+rnd(-.6,.6)+(faults?.9:0);
+  launch(tx,ty,T,cut?-.8:.7,0,margin);b.sv=sv;
   b.lastTeam=s.team;b.bounces=0;b.serving=true;b.mustBounce=true;b.netTouched=false;b.cord=false;b.out=null;b.spin='none';b.contra=false;
   s.charging=false;s.tossing=false;s.swing=Math.round(SW*.7);s.stype='serve';st='play';sfx.hit(pow,.8,'serve');
-  if(isHuman(s)){s.lbl=cut?'CORTADO':'LIFTADO';s.lblT=36}
+  if(human){s.lbl=(cut?'CORTADO ':'LIFTADO ')+{t:'NO T',wide:'ABERTO',body:'CORPO'}[place];s.lblT=40}
   flash={x:b.x,y:b.y,z:b.z,t:6};rec.length=0;
   afterHit(s);
 }
@@ -771,7 +784,7 @@ function chaseReturn(){
 const aiSpeed=p=>(isPartner(p)?1.05:(.82+.11*sk(p))*1.05)*stamF(p);
 const humanSpeed=p=>(twoP?1.25:1.12+.045*attrOf(p).vel)*stamF(p);
 function predictFor(team){
-  const s={x:b.x,y:b.y,z:b.z,vx:b.vx,vy:b.vy,vz:b.vz,w:b.w,bounces:b.bounces,mustBounce:b.mustBounce,spin:b.spin,kickV:b.kickV,out:b.out,corner:b.corner||0};
+  const s={x:b.x,y:b.y,z:b.z,vx:b.vx,vy:b.vy,vz:b.vz,w:b.w,sv:b.sv,bounces:b.bounces,mustBounce:b.mustBounce,spin:b.spin,kickV:b.kickV,out:b.out,corner:b.corner||0};
   const out=[];
   for(let t=1;t<180;t++){
     let stop=false;
@@ -785,7 +798,7 @@ function predictFor(team){
   return out;
 }
 function predictBounce(){
-  const s={x:b.x,y:b.y,z:b.z,vx:b.vx,vy:b.vy,vz:b.vz,w:b.w,spin:b.spin,kickV:b.kickV,out:b.out,corner:b.corner||0};
+  const s={x:b.x,y:b.y,z:b.z,vx:b.vx,vy:b.vy,vz:b.vz,w:b.w,sv:b.sv,spin:b.spin,kickV:b.kickV,out:b.out,corner:b.corner||0};
   for(let t=0;t<220;t++){let hit=null;physics(s,e=>{if(e==='floor'&&!hit)hit={x:s.x,y:s.y};if(e==='out'&&!hit)hit={out:1}});if(hit)return hit.out?null:hit}
   return null;
 }
@@ -1201,7 +1214,7 @@ function drawSchool(){
   txt('A COMECA  B VOLTA',80,262,MUT,'center');
 }
 /* ---------- dicas na primeira vez ---------- */
-const TIPS_CTX={charge:['SEGURE A: CARREGA','SOLTE PARA BATER'],serve:['SOLTE O BOTAO','PARA SACAR'],high:['ALTA: B = BANDEJA','CIMA + A = VIBORA'],
+const TIPS_CTX={charge:['SEGURE A: CARREGA','SOLTE PARA BATER'],serve:['A LIFTADO B CORTADO','SETAS MIRAM O SAQUE'],high:['ALTA: B = BANDEJA','CIMA + A = VIBORA'],
   wall:['BOLA VAI PRO VIDRO','BAIXO+B: CONTRA'],wide:['BOLA LONGE?','APERTE A: PEIXINHO'],chase:['CORRA ATE A PORTA','E APERTE A'],partner:['SELECT: PARCEIRO','REDE/FUNDO/AUTO']};
 let tipNow=null;
 function tipShow(k){if(!save.opts.tips||save.tipsSeen[k]||kind==='train'||demo||tipNow)return;save.tipsSeen[k]=1;store();tipNow={k,t:200}}

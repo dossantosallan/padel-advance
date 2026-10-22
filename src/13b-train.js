@@ -83,7 +83,7 @@ function drawSchool(){
   txt('A COMECA  B VOLTA',80,262,MUT,'center');
 }
 /* ---------- dicas na primeira vez ---------- */
-const TIPS_CTX={charge:['SEGURE A: CARREGA','SOLTE PARA BATER'],serve:['SOLTE O BOTAO','PARA SACAR'],high:['ALTA: B = BANDEJA','CIMA + A = VIBORA'],
+const TIPS_CTX={charge:['SEGURE A: CARREGA','SOLTE PARA BATER'],serve:['A LIFTADO B CORTADO','SETAS MIRAM O SAQUE'],high:['ALTA: B = BANDEJA','CIMA + A = VIBORA'],
   wall:['BOLA VAI PRO VIDRO','BAIXO+B: CONTRA'],wide:['BOLA LONGE?','APERTE A: PEIXINHO'],chase:['CORRA ATE A PORTA','E APERTE A'],partner:['SELECT: PARCEIRO','REDE/FUNDO/AUTO']};
 let tipNow=null;
 function tipShow(k){if(!save.opts.tips||save.tipsSeen[k]||kind==='train'||demo||tipNow)return;save.tipsSeen[k]=1;store();tipNow={k,t:200}}

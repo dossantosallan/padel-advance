@@ -7,6 +7,7 @@ function flight(o){
   const hs=Math.hypot(o.vx,o.vy),d=1-DRAG*hs;
   o.vx*=d;o.vy*=d;
   o.vz-=G*(1+MAG*(o.w||0)*Math.min(1,hs/2.2));
+  if(o.sv)o.vx+=o.sv*.006;   /* efeito lateral (saque cortado) */
 }
 function physics(o,ev){
   flight(o);
@@ -22,6 +23,7 @@ function physics(o,ev){
   if(o.z<=0){o.z=0;if(o.vz<0){const v=-o.vz,c=CT(),w=o.w||0;
     if(o.spin==='kick'){o.vz=o.kickV;o.vx*=.92;o.vy*=.92;o.spin='none'}
     else{o.vz=v>.3?v*clamp(c.bounce+.2*w,.3,.85):0;const f=clamp(c.fric+.07*w,.7,.98);o.vx*=f;o.vy*=f}
+    if(o.sv){o.vx+=o.sv*.35;o.sv*=.3}
     o.w=w*.5;ev('floor',v)}}
   if(o.out)return;
   let hit=false;
@@ -62,18 +64,18 @@ function simLand(x,y,z,vx,vy,vz,w){
   }
   return{x:o.x,y:o.y,t:400,netZ};
 }
-function solveShot(tx,ty,T,w){
+function solveShot(tx,ty,T,w,minNet=2.5){
   for(let k=0;k<20;k++){
     let vx=(tx-b.x)/T,vy=(ty-b.y)/T,vz=(.5*G*T*T-b.z)/T,r;
     for(let i=0;i<6;i++){r=simLand(b.x,b.y,b.z,vx,vy,vz,w);vx+=(tx-r.x)/T*.9;vy+=(ty-r.y)/T*.9;vz+=(T-r.t)*G*.5}
     r=simLand(b.x,b.y,b.z,vx,vy,vz,w);
-    if((b.y-NET)*(ty-NET)<0&&r.netZ<NETH+2.5){T+=3;continue}
+    if((b.y-NET)*(ty-NET)<0&&r.netZ<NETH+minNet){T+=2;continue}
     return{vx,vy,vz};
   }
   return{vx:(tx-b.x)/T,vy:(ty-b.y)/T,vz:(.5*G*T*T-b.z)/T};
 }
-function launch(tx,ty,T,w=0,e=0){
-  const v=solveShot(tx,ty,T,w);
+function launch(tx,ty,T,w=0,e=0,minNet){
+  const v=solveShot(tx,ty,T,w,minNet);b.sv=0;
   if(e>0){const a=rnd(-1,1)*e*.009,c=Math.cos(a),s=Math.sin(a),f=1+rnd(-1,1)*e*.0075;
     const vx=v.vx*c-v.vy*s,vy=v.vx*s+v.vy*c;v.vx=vx*f;v.vy=vy*f;v.vz+=rnd(-1,1)*e*.006}
   b.vx=v.vx;b.vy=v.vy;b.vz=v.vz;b.w=w;

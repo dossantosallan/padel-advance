@@ -2,7 +2,7 @@
 const aiSpeed=p=>(isPartner(p)?1.05:(.82+.11*sk(p))*1.05)*stamF(p);
 const humanSpeed=p=>(twoP?1.25:1.12+.045*attrOf(p).vel)*stamF(p);
 function predictFor(team){
-  const s={x:b.x,y:b.y,z:b.z,vx:b.vx,vy:b.vy,vz:b.vz,w:b.w,bounces:b.bounces,mustBounce:b.mustBounce,spin:b.spin,kickV:b.kickV,out:b.out,corner:b.corner||0};
+  const s={x:b.x,y:b.y,z:b.z,vx:b.vx,vy:b.vy,vz:b.vz,w:b.w,sv:b.sv,bounces:b.bounces,mustBounce:b.mustBounce,spin:b.spin,kickV:b.kickV,out:b.out,corner:b.corner||0};
   const out=[];
   for(let t=1;t<180;t++){
     let stop=false;
@@ -16,7 +16,7 @@ function predictFor(team){
   return out;
 }
 function predictBounce(){
-  const s={x:b.x,y:b.y,z:b.z,vx:b.vx,vy:b.vy,vz:b.vz,w:b.w,spin:b.spin,kickV:b.kickV,out:b.out,corner:b.corner||0};
+  const s={x:b.x,y:b.y,z:b.z,vx:b.vx,vy:b.vy,vz:b.vz,w:b.w,sv:b.sv,spin:b.spin,kickV:b.kickV,out:b.out,corner:b.corner||0};
   for(let t=0;t<220;t++){let hit=null;physics(s,e=>{if(e==='floor'&&!hit)hit={x:s.x,y:s.y};if(e==='out'&&!hit)hit={out:1}});if(hit)return hit.out?null:hit}
   return null;
 }
