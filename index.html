@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Padel Advance</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap">
@@ -78,6 +78,10 @@ canvas{
 .pill.on i{background:var(--btn-press)}
 .hint{font-size:8px;line-height:1.8;color:var(--muted);text-align:center;max-width:400px;margin:0}
 @media (pointer:coarse){.hint{display:none}}
+/* iOS: sem zoom por duplo toque, sem rolagem/elástico, sem menu de toque longo */
+html,body{overflow:hidden;overscroll-behavior:none;touch-action:manipulation;-webkit-text-size-adjust:100%}
+body{position:fixed;inset:0;-webkit-touch-callout:none;-webkit-user-select:none;padding-top:calc(10px + env(safe-area-inset-top,0px));padding-bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+.gba,.gba *,canvas{touch-action:none;-webkit-touch-callout:none}
 </style>
 </head>
 <body>
@@ -101,6 +105,15 @@ canvas{
 </main>
 <p class="hint">1 jogador: setas/WASD movem · J/Z = A · K/X = B · Shift = parceiro · Enter = start/pausa<br>Segure A/B para carregar a força · Bola baixa: A drive, B lob, ↑+A dejada · Bola alta: A remate, B bandeja, ↑+A víbora<br>2 jogadores: J1 WASD + F/G/Q · J2 setas + L/K/P</p>
 
+<script>
+/* iOS Safari: bloqueia zoom por duplo toque e pinça, e o arraste da página */
+(()=>{let last=0;
+document.addEventListener('touchend',e=>{const n=Date.now();if(n-last<350)e.preventDefault();last=n},{passive:false});
+document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
+['gesturestart','gesturechange','gestureend'].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
+document.addEventListener('touchmove',e=>{if(e.touches.length>1||!e.target.closest('.hint'))e.preventDefault()},{passive:false});
+})();
+</script>
 <script>
 (()=>{
 const cv=document.getElementById('c');
