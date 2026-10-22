@@ -288,7 +288,7 @@ function attrBonus(k){
   return v;
 }
 const myName=()=>save.me.name||'VOCE';
-let oppPair=null,bo3=false,sets=[0,0],cpage=0,nameTarget='me',rkOff=0;
+let rkBpt=false,oppPair=null,bo3=false,sets=[0,0],cpage=0,nameTarget='me',rkOff=0;
 const teamName=t=>twoP?(t?'J2':'J1'):(t?(oppPair||PAIRS[0]).n:(kind==='car'&&car?teamKeyName(-1):(save.me.team||myName())));
 let nameBuf='',nameCur=0;const typeQ=[];
 const golden=()=>forceGold||save.opts.golden;
@@ -547,7 +547,7 @@ function point(w,why){
     games[w]++;pts=[0,0];serveTeam=1-serveTeam;
     sub='GAME '+teamName(w);
     sfx.game();ptimer=Math.max(ptimer,140);
-    const won=matchTo?games[w]>=matchTo:(games[w]>=4&&games[w]-games[l]>=2)||games[w]>=5;
+    const won=matchTo?games[w]>=matchTo:setTo?(games[w]>=setTo&&games[w]-games[l]>=2)||games[w]>setTo:(games[w]>=4&&games[w]-games[l]>=2)||games[w]>=5;
     if(won&&bo3&&!demo){sets[w]++;if(sets[w]<2){sub='SET '+teamName(w)+' '+sets[0]+'-'+sets[1];games=[0,0];after=()=>setupServe();return}}
     if(won){
       if(demo)after=()=>{games=[0,0];setupServe()};
@@ -1030,8 +1030,6 @@ const CATS={
   MA:{n:'MAJOR',s:'MAJOR',size:32,pts:[2000,1200,600,300,150,75],prize:60000,cost:5000,col:'#ff7ad9',req:16,range:[1,48],xp:5,bo3:true},
   FI:{n:'FINALS',s:'FINALS',size:8,pts:[1500,900,450,225],prize:50000,cost:0,col:'#ffffff',req:8,range:[1,8],xp:5,bo3:true},
 };
-const CAL=['BR','SI','BR','GO','P2','SI','P1','BR','GO','P2','MA','SI','GO','P1','P2','BR','MA','P1','GO','FI'];
-const CITIES=['CHAPECO','FLORIPA','CURITIBA','ASSUNCAO','SAO PAULO','LISBOA','MADRI','MALAGA','MILAO','BRUXELAS','ROMA','SANTIAGO','PORTO ALEGRE','BUENOS AIRES','MEXICO','RIO','DOHA','PARIS','DUBAI','BARCELONA'];
 const FN=['LUCAS','PEDRO','MATEUS','RAFAEL','BRUNO','DIEGO','HUGO','IVAN','TIAGO','NICO','JORGE','PABLO','MARCO','SERGIO','ADRIAN','ENZO','MIGUEL','ANDRE','VICTOR','RAUL','CARLA','ANA','JULIA','LAURA','MARTA','PAULA','SOFIA','ELENA','LUISA','NORA','DAVI','OTTO','LEO','RUI','TOM','BIA','LIA','EVA'];
 const LN=['ALVES','BRITO','CORREA','DUARTE','ESTEVES','FARIAS','GODOY','HORTA','IBANEZ','JARDIM','KLEIN','LOBATO','MACEDO','NOVAIS','OSORIO','PRADO','QUIROGA','RIBAS','SALAZAR','TEIXEIRA','URIBE','VARELA','WEBER','XAVIER','ZANETTI','AMARAL','BENTO','CASTRO','DORNELES','FONTANA','GUERRA','HOLANDA','LEMOS','MOURA','PAIVA','ROCHA','SIQUEIRA','TORRES','VIANA','MEIRA'];
 const TEAMCOL=['#9b7bff','#ff8a3d','#3fb8c8','#c9a26b','#ff9ed8','#40e0a0','#6b8cff','#fff36b','#ff4fa0','#a0a0a0','#7fe0ff','#e8f0ff'];
@@ -1043,15 +1041,15 @@ const money$=v=>'$'+Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.'
 function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
 let car=save.car||null;
 function newCareer(){
-  const r=rng((Date.now()^0x5f3a)&0xffffff),used=new Set(),players=[],N=102;
+  const r=rng((Date.now()^0x5f3a)&0xffffff),used=new Set(),players=[],N=166;
   for(let i=0;i<N;i++){
     let n;do{n=FN[(r()*FN.length)|0]+' '+LN[(r()*LN.length)|0]}while(used.has(n)||n.length>13);used.add(n);
     const sk=clamp(3.6-3.3*Math.pow(i/(N-1),.8)+(r()-.5)*.2,.25,3.7);
     players.push({n,age:19+((r()*16)|0),hs:HS[(r()*3)|0],hair:HAIRS[(r()*5)|0],skin:(r()*5)|0,sk:+sk.toFixed(2),st:['equil','parede','rede','globo','canhoto'][(r()*5)|0],pts:Math.round(30+Math.pow(sk,2.6)*140+r()*60)});
   }
-  const free=[20,38,52,64,74,84,92,99],rest=players.map((_,i)=>i).filter(i=>!free.includes(i)),teams=[];
+  const free=[20,40,60,80,100,120,140,163],rest=players.map((_,i)=>i).filter(i=>!free.includes(i)),teams=[];
   for(let i=0;i<rest.length;i+=2)teams.push([rest[i],rest[i+1]]);
-  car=save.car={v:1,season:1,week:0,money:3000,cond:100,inj:0,myPts:0,players,teams,free:free.filter(i=>i!==99),partner:99,chem:0,coach:false,rk:[0],rkEq:0,wc:-1,physio:-1,tour:null,hist:[],titles:0,seasonTitles:0,msg:'BEM-VINDO!',last:null,pick:0,pmor:.7,age:19,diff:newDiff,contract:null,needOffer:true};
+  car=save.car={v:1,season:1,week:0,money:3000,cond:100,inj:0,myPts:0,players,teams,free:free.filter(i=>i!==163),partner:163,chem:0,coach:false,rk:[0],rkEq:0,wc:-1,physio:-1,tour:null,hist:[],titles:0,seasonTitles:0,msg:'BEM-VINDO!',last:null,pick:0,pmor:.7,age:19,diff:newDiff,contract:null,needOffer:true,circ:'BR',bpt:{}};
   carEnsure();pushNews('SUA CARREIRA COMECA!');newGoal();
   store();
 }
@@ -1073,7 +1071,7 @@ function weekInfo(){const o=weekOpts();return o[Math.min(car.pick||0,o.length-1)
 function eligible(){return canEnter(weekInfo(),car.pick||0)}
 function seedOrder(n){let s=[1,2];while(s.length<n){const m=s.length*2+1;s=s.flatMap(x=>[x,m-x])}return s}
 function buildDraw(code,withMe,ex){
-  const cat=CATS[code],list=teamList().filter(t=>!(ex&&ex.has(t.k)));
+  const cat=CATS[code],list=(cat.nat?bptList():teamList()).filter(t=>!(ex&&ex.has(t.k)));
   let field=list.slice(cat.range[0]-1,cat.range[1]).filter(t=>t.k!==-1).slice(0,cat.size);
   if(withMe){if(field.length>=cat.size)field=field.slice(0,cat.size-1);field.push(list.find(t=>t.k===-1))}
   field.sort((x,y)=>y.pts-x.pts);
@@ -1086,10 +1084,11 @@ function finishTour(t){
   while(t.cur.length>1){t.mine=null;if(t.cur.includes(-1)){/* nunca: você já saiu */}playRound(t)}
   t.res[t.cur[0]]=t.R;t.champ=t.cur[0];
   const cat=CATS[t.code];
-  if(t.champ!==undefined)pushNews(t.city+' '+CATS[t.code].s+': '+(t.champ===-1?'VOCES':teamKeyName(t.champ))+' CAMPEOES');
-  for(const k in t.res){const key=+k;if(key===-2)continue;const idx=t.R-t.res[k],p=cat.pts[Math.min(idx,cat.pts.length-1)]||0;
-    if(key===-1){car.myPts+=p;PL_(car.partner).pts+=p;t.myPts=p;t.prize=Math.round(cat.prize/Math.pow(2,idx))}
-    else{PL_(car.teams[key][0]).pts+=p;PL_(car.teams[key][1]).pts+=p}}
+  if(t.champ!==undefined&&t.champ!==-2&&!t.quiet)pushNews(t.city+' '+CATS[t.code].s+': '+(t.champ===-1?'VOCES':teamKeyName(t.champ))+' CAMPEOES');
+  for(const k in t.res){const key=+k;if(key===-2)continue;const idx=t.R-t.res[k],p=cat.pts[Math.min(idx,cat.pts.length-1)]||0,wp=cat.nat?Math.round(p*WFAC):p;
+    if(cat.nat)bptAdd(key,p);
+    if(key===-1){car.myPts+=wp;PL_(car.partner).pts+=wp;t.myPts=p;t.prize=Math.round(cat.prize/Math.pow(2,idx))}
+    else{PL_(car.teams[key][0]).pts+=wp;PL_(car.teams[key][1]).pts+=wp}}
 }
 function simWeekAI(){const{code,city}=weekInfo();const t={code,city,cur:buildDraw(code,false),res:{},r:0,R:Math.log2(CATS[code].size)};finishTour(t);car.last={city:weekInfo().city,code,champ:teamKeyName(t.champ)}}
 function enterTour(){
@@ -1104,7 +1103,7 @@ const tourIsFinal=()=>car.tour.cur.length===2;
 function tourMatchDone(win,sim){
   const t=car.tour,cat=CATS[t.code],oppK=tourOpp();
   h2hNote(oppK,win);if(win)goalOnWin();
-  car.cond=clamp(car.cond-(sim?6:(cat.bo3&&tourIsFinal()?12:8)),0,100);
+  car.cond=clamp(car.cond-(sim?(cat.nat?4:7):(cat.nat?5:9)),0,100);
   car.chem=Math.min(1,car.chem+.04);
   if(win){t.won++;save.wins++;partnerAfterWin();contractWin()}
   t.mine=win?-1:tourOpp();
@@ -1138,10 +1137,11 @@ function nextWeek(action){
   if(r0-r1>=5)pushNews('VOCE SOBE PARA #'+r1+' NO RANKING');else if(r1-r0>=5)pushNews('VOCE CAI PARA #'+r1);
   if(Math.random()<.14)pushNews(PL_(car.partner).n.split(' ')[0]+' '+PARTNER_TALK[(Math.random()*PARTNER_TALK.length)|0]);
   partnerWeekCheck();
-  if(car.week>=CAL.length){store();mode='cseason';return}
+  if(car.week>=SEASON_W){decideCircuit();store();mode='cseason';return}
   goalOnWeek();if(car.week===10)car.needOffer=true;
   car.wc=-1;
-  if(!canEnter(weekOpts()[0],0)&&CAL[car.week]!=='FI'&&myTeamPos()<=CATS[CAL[car.week]].req+10&&Math.random()<.3){car.wc=car.week;car.msg='CONVITE PARA '+CATS[CAL[car.week]].n+'!'}
+  const m0=weekOpts()[0];
+  if(car.circ==='EU'&&!canEnter(m0,0)&&m0.code!=='FI'&&myTeamPos()<=m0.cat.req+10&&Math.random()<.3){car.wc=car.week;car.msg='CONVITE PARA '+m0.cat.n+'!'}
   defaultPick();
   store();
 }
@@ -1151,8 +1151,9 @@ function newSeason(){
   car.season++;save.season=car.season;car.week=0;car.cond=100;car.inj=0;car.seasonTitles=0;car.hist=[];car.tour=null;
   car.myPts=Math.round(car.myPts*.35);
   for(const p of car.players)p.pts=Math.round(p.pts*.35);
+  if(car.nextCirc)car.circ=car.nextCirc;car.nextCirc=null;car.bpt={};
   ageSeason();car.pmor=Math.max(car.pmor,.5);car.needOffer=true;car.pick=0;defaultPick();
-  car.msg='TEMPORADA '+car.season+' COMECOU';pushNews('TEMPORADA '+car.season+' COMECOU');car.goal=null;newGoal();store();
+  car.msg=car.circ==='EU'?'GIRA EUROPEIA!':'TEMPORADA '+car.season+' COMECOU';pushNews('TEMPORADA '+car.season+' COMECOU');car.goal=null;newGoal();store();
 }
 const reqRankFor=sk=>sk>=3?15:sk>=2.3?35:sk>=1.5?60:999;
 const freeSorted=()=>car.free.slice().sort((a,c)=>PL_(c).sk-PL_(a).sk);
@@ -1264,7 +1265,7 @@ function drawTip(){
   txt(L[0],80,41,WHITE,'center');txt(L[1],80,53,ACC,'center');
 }
 /* ---------- vida da carreira: notícias, rivais, troféus, estatísticas e metas ---------- */
-const CAT_ORD=['BR','SI','GO','P2','P1','MA','FI'];
+const CAT_ORD=['CH','OP','MS','MF','BR','SI','GO','P2','P1','MA','FI'];
 const PARTNER_TALK=['QUER JOGAR MAIS NA REDE','ELOGIOU SUA BANDEJA','PEDIU MAIS TREINO','ESTA CONFIANTE','SONHA COM UM MAJOR','GOSTOU DA SEMANA'];
 function carEnsure(){if(!car)return;car.news=car.news||[];car.h2h=car.h2h||{};car.trophies=car.trophies||[];car.best=car.best||999;if(car.goal===undefined)car.goal=null}
 function pushNews(s){carEnsure();car.news.unshift({w:car.week+1,s:car.season,t:s});if(car.news.length>24)car.news.pop()}
@@ -1278,10 +1279,12 @@ function h2hNote(k,win){
 }
 function newGoal(){
   const pos=myTeamPos(),r=Math.random();let g;
-  const tier=pos>40?'BR':pos>32?'SI':pos>24?'GO':pos>16?'P2':pos>8?'P1':'MA';
-  if(r<.4){const st=tier==='BR'||tier==='SI'?2:3;g={k:'reach',c:tier,st,d:(st===2?'SEMI':'QUARTAS')+' NUM '+CATS[tier].s+' OU MAIOR'}}
+  const br=car.circ==='BR',bp=br?bptPos():0;
+  const tier=br?(bp>12?'CH':bp>5?'OP':'MS'):pos>40?'BR':pos>32?'SI':pos>24?'GO':pos>16?'P2':pos>8?'P1':'MA';
+  if(r<.4){const st=['BR','SI','CH','OP'].includes(tier)?2:3;g={k:'reach',c:tier,st,d:(st===2?'SEMI':'QUARTAS')+' NUM '+CATS[tier].s+' OU MAIOR'}}
   else if(r<.7){const n=3+((Math.random()*3)|0);g={k:'wins',n,prog:0,d:'VENCER '+n+' PARTIDAS'}}
-  else if(r<.85){const n=Math.max(1,myRank()-8);g={k:'rank',n,d:'CHEGAR AO TOP '+n}}
+  else if(r<.85&&!br){const n=Math.max(1,myRank()-8);g={k:'rank',n,d:'CHEGAR AO TOP '+n}}
+  else if(r<.85){const n=Math.max(1,bp-4);g={k:'bpt',n,d:'TOP '+n+' NO BPT'}}
   else g={k:'title',d:'GANHAR UM TITULO'};
   g.until=car.week+4;g.rew=Math.max(600,Math.round((600+Math.max(0,60-pos)*90)/100)*100);car.goal=g;
   pushNews('PATROCINADOR: '+g.d);
@@ -1296,6 +1299,7 @@ function goalOnWin(){const g=car.goal;if(g&&g.k==='wins'&&++g.prog>=g.n)goalDone
 function goalOnWeek(){
   const g=car.goal;
   if(g&&g.k==='rank'&&myRank()<=g.n)goalDone();
+  else if(g&&g.k==='bpt'&&car.circ==='BR'&&bptPos()<=g.n)goalDone();
   else if(g&&car.week>=g.until){pushNews('META NAO CUMPRIDA');car.goal=null}
   if(!car.goal&&car.week%4===0)newGoal();
 }
@@ -1334,12 +1338,12 @@ function drawCNews(){
 }
 function drawCTroph(){
   carEnsure();txt('TROFEUS',80,32,ACC,'center',F16);
-  CAT_ORD.forEach((c,i)=>{const n=car.trophies.filter(t=>t.c===c).length,x=i%4,y=i>>2,X=24+x*38,Y=58+y*60;
-    drawTrophyC(X,Y,1,n?CATS[c].col:'#2b3470');txt(CATS[c].s.slice(0,6),X,Y+20,n?CATS[c].col:'#55507a','center');txt('x'+n,X,Y+31,n?WHITE:'#55507a','center')});
-  txt('TITULOS '+car.trophies.length,80,186,WHITE,'center');
-  txt('MELHOR RANKING #'+(car.best<999?car.best:'-'),80,200,MUT,'center');
+  CAT_ORD.forEach((c,i)=>{const n=car.trophies.filter(t=>t.c===c).length,x=i%4,y=i>>2,X=24+x*38,Y=54+y*44;
+    drawTrophyC(X,Y,1,n?CATS[c].col:'#2b3470');txt(CATS[c].s.slice(0,5),X,Y+18,n?CATS[c].col:'#55507a','center');txt('x'+n,X,Y+28,n?WHITE:'#55507a','center')});
+  txt('TITULOS '+car.trophies.length,80,190,WHITE,'center');
+  txt('MELHOR RANKING #'+(car.best<999?car.best:'-'),80,203,MUT,'center');
   const last=car.trophies[car.trophies.length-1];
-  if(last)txt('ULTIMO: '+last.city,80,214,ACC,'center');
+  if(last)txt('ULTIMO: '+last.city,80,216,ACC,'center');
   txt('TEMPORADA '+car.season,80,228,MUT,'center');
   txt('A COMPARTILHA  B VOLTA',80,262,MUT,'center');
 }
@@ -1446,8 +1450,6 @@ function drawCEvo(){
 /* ---------- carreira estratégica: duas opções por semana, parceiro com vida própria,
    contratos de patrocínio, idade e aposentadoria, dificuldade ---------- */
 const ALT={BR:'BR',SI:'BR',GO:'BR',P2:'SI',P1:'GO',MA:'P2',FI:null};
-const ALTC=['JOINVILLE','BLUMENAU','LONDRINA','MARINGA','CASCAVEL','PASSO FUNDO','CRICIUMA','LAGES','JOACABA','ERECHIM','PELOTAS','CAXIAS','PONTA GROSSA','TOLEDO','ITAJAI','CAMBORIU','CANOAS','SANTA MARIA','XANXERE','CONCORDIA'];
-const BRCITY=new Set(['CHAPECO','FLORIPA','CURITIBA','SAO PAULO','PORTO ALEGRE','RIO']);
 const DIFF_N=['FACIL','NORMAL','DIFICIL'],DIFF_ADJ=[-.5,0,.45];
 const SPONS2=['RAIZ','VOLTA','IMPULSO','MARE','FAROL'];
 const RETIRE_AGE=34,FORCE_RETIRE=40;
@@ -1455,24 +1457,26 @@ let newDiff=1;
 function depthEnsure(){
   if(!car)return;
   if(car.pick===undefined)car.pick=0;if(car.pmor===undefined)car.pmor=.7;if(car.age===undefined)car.age=22;if(car.diff===undefined)car.diff=1;
-  if(car.contract===undefined)car.contract=null;
+  if(car.contract===undefined)car.contract=null;circEnsure();
   for(const p of car.players)if(p.age===undefined)p.age=19+((p.n.length*7+p.sk*13)|0)%16;
 }
-function weekOpts(){
-  const w=car.week,m={code:CAL[w],city:CITIES[w]};m.far=!BRCITY.has(m.city);
-  const o=[m],a=ALT[m.code];if(a)o.push({code:a,city:ALTC[w%ALTC.length],far:false});
-  return o.map(x=>({...x,cat:CATS[x.code],cost:Math.round(CATS[x.code].cost*(x.far?1.2:.6)),tired:x.far?6:2}));
-}
-function canEnter(o,i){const pos=myTeamPos();if(o.code==='FI')return pos<=8;return pos<=o.cat.req||(i===0&&car.wc===car.week)}
+function weekOpts(){circEnsure();return optsFor(car.circ,Math.min(car.week,SEASON_W-1))}
+function canEnter(o,i){
+  if(o.cat.nat)return o.code==='MF'?bptPos()<=8:true;
+  const pos=myTeamPos();if(o.code==='FI')return pos<=8;return pos<=o.cat.req||(i===0&&car.wc===car.week)}
 function defaultPick(){const o=weekOpts();car.pick=canEnter(o[0],0)||!o[1]?0:1}
 /* simula os torneios da semana que você não jogou; uma dupla não joga dois torneios na mesma semana */
 function simWeekAll(playedIdx,used){
-  const o=weekOpts(),ex=new Set(used||[]);
-  o.forEach((x,i)=>{
-    if(i===playedIdx)return;
-    const cur=buildDraw(x.code,false,ex);cur.forEach(k=>ex.add(k));
-    const t={code:x.code,city:x.city,cur,res:{},r:0,R:Math.log2(x.cat.size)};finishTour(t);
-  });
+  circEnsure();const ex=new Set(used||[]);
+  for(const circ of['EU','BR']){
+    if(circ==='BR'&&natPool().length<8)continue;
+    optsFor(circ,Math.min(car.week,SEASON_W-1)).forEach((x,i)=>{
+      if(circ===car.circ&&i===playedIdx)return;
+      const cur=buildDraw(x.code,false,ex);cur.forEach(k=>ex.add(k));
+      if(cur.filter(k=>k!==-2).length<2)return;
+      const t={code:x.code,city:x.city,cur,res:{},r:0,R:Math.log2(x.cat.size),quiet:circ!==car.circ&&!['MA','FI'].includes(x.code)};finishTour(t);
+    });
+  }
 }
 /* parceiro: confiança sobe com vitórias e títulos, cai com derrotas cedo; pode sair */
 function partnerAfterTour(t){
@@ -1546,6 +1550,229 @@ function drawCRetire(){
   rows.forEach(([l,v],i)=>{const y=120+i*16;txt(l,14,y,MUT);txt(String(v),146,y,WHITE,'right')});
   const majors=(car.trophies||[]).filter(t=>t.c==='MA').length;if(majors)txt(majors+' MAJOR(S)!',80,206,CATS.MA.col,'center');
   txt('B COMPARTILHA',80,240,BLU,'center');txt('A VOLTA AO MENU',80,256,ACC,'center');
+}
+/* ---------- circuitos: nacional (inspirado no BPT) e gira europeia ----------
+   A carreira começa no circuito nacional. Ranking BPT próprio, zerado a cada temporada.
+   Fim da temporada: top 5 do BPT tem pequena chance de convite para a gira europeia,
+   top 3 mais, campeão do ranking (ou do Master Finals) mais ainda.
+   Na gira: só torneios europeus, Majors e Finals. Quem cai para fora do top 48 de duplas volta ao BPT. */
+Object.assign(CATS,{
+  CH:{n:'BPT CHALLENGER',s:'CHALLENGER',size:8,pts:[150,90,45,20],prize:1500,cost:150,col:'#7ec850',req:99,range:[17,40],xp:2,nat:true},
+  OP:{n:'BPT OPEN',s:'OPEN',size:16,pts:[300,180,90,45,20],prize:3000,cost:250,col:'#3fc8c8',req:99,range:[9,40],xp:2,nat:true},
+  MS:{n:'BPT MASTER',s:'MASTER',size:16,pts:[600,360,180,90,45],prize:6000,cost:400,col:'#ffb040',req:99,range:[1,40],xp:3,nat:true},
+  MF:{n:'BPT MASTER FINALS',s:'M.FINALS',size:8,pts:[900,540,270,135],prize:12000,cost:0,col:'#ffe9a0',req:8,range:[1,8],xp:4,nat:true},
+});
+const WFAC=.25,EU_SLOTS=48;
+/* [cidade, categoria, alternativa (Challenger na mesma semana) ou null] — base: calendário BPT 2026 */
+const NATC=[['JOINVILLE','CH',null],['LIVRAMENTO','CH',null],['ERECHIM','MS','PASSO FUNDO'],['CURITIBA','CH',null],['QUARAI','CH',null],
+  ['CAMAQUA','OP','PELOTAS'],['PORTO ALEGRE','CH',null],['SORRISO','MS','CHAPECO'],['SAO PAULO','OP','CURITIBA'],['FLORIPA','MS','JOINVILLE'],
+  ['SANTA MARIA','OP','LIVRAMENTO'],['CAMBORIU','CH',null],['CHAPECO','OP','ERECHIM'],['CAMAQUA','MS','QUARAI'],['PASSO FUNDO','CH',null],
+  ['ITAJAI','OP','CAMBORIU'],['RIO','OP','PORTO ALEGRE'],['CARAZINHO','MS','SANTA MARIA'],['PELOTAS','CH',null],['ITAJAI','MF',null]];
+const NAT_FAR=new Set(['SAO PAULO','RIO','SORRISO']);
+const EUC=[['MALAGA','GO','GRANADA'],['BRUXELAS','P2','GANTE'],['GENOVA','P2','TURIM'],['MADRI','P1','TOLEDO'],['ROMA','MA','NAPOLES'],
+  ['VALENCIA','GO','ALICANTE'],['BORDEUS','P2','TOULOUSE'],['MALMO','GO','COPENHAGUE'],['VENEZA','P2','VERONA'],['MILAO','P1','BERGAMO'],
+  ['PARIS','MA','LILLE'],['AMSTERDA','GO','UTRECHT'],['ROTTERDAM','P2','HAIA'],['SEVILHA','P1','CORDOBA'],['MUNIQUE','GO','SALZBURGO'],
+  ['ESTOCOLMO','P2','UPPSALA'],['LONDRES','P1','BRISTOL'],['MARBELLA','GO','CADIZ'],['MONACO','P2','NICE'],['BARCELONA','FI',null]];
+const SEASON_W=20;
+const calOf=c=>c==='BR'?NATC:EUC;
+function optsFor(circ,w){
+  const e=calOf(circ)[w],o=[{code:e[1],city:e[0]}];
+  if(circ==='BR'){if(e[2])o.push({code:'CH',city:e[2]})}
+  else{const a=ALT[e[1]];if(a)o.push({code:a,city:e[2]})}
+  return o.map(x=>{const cat=CATS[x.code];let mul,tired,far;
+    if(circ==='BR'){far=NAT_FAR.has(x.city);mul=far?1.2:.6;tired=far?6:2}else{far=true;mul=1;tired=4}
+    return{...x,circ,far,cat,cost:Math.round(cat.cost*mul),tired}});
+}
+/* ranking BPT: duplas do mundo abaixo do top 48 + você (quando está no nacional) */
+function natPool(){return teamList().filter(t=>t.k!==-1).slice(EU_SLOTS).map(t=>t.k)}
+const bptOf=k=>(car.bpt&&car.bpt[k])||0;
+function bptList(){
+  const L=natPool().map(k=>({k,pts:bptOf(k),w:k<0?0:PL_(car.teams[k][0]).pts+PL_(car.teams[k][1]).pts}));
+  if(car.circ==='BR')L.push({k:-1,pts:bptOf(-1),w:car.myPts+PL_(car.partner).pts});
+  return L.sort((a,c)=>c.pts-a.pts||c.w-a.w);
+}
+const bptPos=()=>bptList().findIndex(t=>t.k===-1)+1;
+function bptAdd(k,p){car.bpt=car.bpt||{};car.bpt[k]=(car.bpt[k]||0)+p}
+function circEnsure(){
+  if(car.circ===undefined)car.circ='EU';
+  if(!car.bpt)car.bpt={};
+}
+/* decisão de fim de temporada */
+function decideCircuit(){
+  car.giraMsg=null;car.nextCirc=car.circ;car.bptFinal=0;
+  if(car.circ==='BR'){
+    const p=bptPos();car.bptFinal=p;
+    const mf=(car.trophies||[]).some(t=>t.c==='MF'&&t.s===car.season);
+    let ch=p===1?.6:p<=3?.35:p<=5?.15:0;if(mf)ch=Math.min(.8,ch+.15);
+    if(ch>0&&Math.random()<ch){car.nextCirc='EU';car.giraMsg='CONVITE: GIRA EUROPEIA!';pushNews('CONVIDADOS PARA A GIRA EUROPEIA!')}
+    else car.giraMsg=ch>0?'SEM CONVITE DA GIRA':'SEGUE NO BPT';
+  }else{
+    if(myTeamPos()>EU_SLOTS){car.nextCirc='BR';car.giraMsg='PERDEU A VAGA: BPT';pushNews('FORA DO TOP '+EU_SLOTS+': DE VOLTA AO BPT')}
+    else car.giraMsg='VAGA MANTIDA NA GIRA';
+  }
+}
+
+/* ---------- cenas das cidades (144x64) ---------- */
+function cityScene(city,X,Y){
+  const r=(x,y,w,h,c)=>R(X+x,Y+y,w,h,c);
+  const sky=(a,b,c)=>{r(0,0,144,22,a);r(0,22,144,16,b);r(0,38,144,26,c||b)};
+  const ground=(y,c,d)=>{r(0,y,144,64-y,c);if(d)for(let i=0;i<144;i+=6)r(i+((i/6)%2)*2,y+2,2,1,d)};
+  const sun=(x,y,c)=>{r(x-3,y-4,6,8,c);r(x-4,y-3,8,6,c)};
+  const cloud=(x,y)=>{r(x,y,14,3,'#ffffff');r(x+3,y-2,7,2,'#ffffff')};
+  const water=(y,c,h)=>{r(0,y,144,h||64-y,c);for(let i=0;i<5;i++)r(((frame>>2)+i*31)%140,y+2+i%3*3,4,1,'#ffffff')};
+  const tree=(x,y)=>{r(x+2,y+6,2,4,'#6b4423');r(x,y,6,6,'#2e8b3e');r(x+1,y-1,4,1,'#2e8b3e')};
+  const bldg=(x,y,w,h,c,win)=>{r(x,y,w,h,c);for(let j=y+2;j<y+h-2;j+=4)for(let i=x+1;i<x+w-1;i+=3)r(i,j,1,2,win||'#ffe9a0')};
+  const D={
+    JOINVILLE(){ /* casas enxaimel e flores */
+      sky('#7fc8ff','#b8e4ff');cloud(96,6);ground(48,'#3f9a40');
+      for(const hx of[18,74]){r(hx,26,40,22,'#f4ecd8');for(let i=0;i<5;i++)r(hx+i*9,26,2,22,'#5a3418');r(hx,36,40,2,'#5a3418');
+        for(let i=0;i<4;i++){r(hx+2+i*9,28,1,8,'#5a3418')}
+        for(let j=0;j<12;j++)r(hx+20-j*2-2,14+j,4+j*4,1,'#c0392b');r(hx+12,40,6,8,'#5a3418')}
+      const fc=['#ff6fa8','#ffd23f','#ff4f4f','#c86bff','#ffffff'];for(let i=0;i<30;i++){r(4+i*4.7,52+(i*7)%9,2,2,fc[i%5]);r(5+i*4.7,54+(i*7)%9,1,2,'#1f6b2a')}},
+    LIVRAMENTO(){ /* Parque Internacional: obelisco e as duas bandeiras */
+      sky('#8fd0ff','#c8ecff');cloud(14,8);ground(50,'#4caf50','#3d8f40');
+      r(68,10,8,40,'#e8e8e8');r(70,6,4,4,'#e8e8e8');r(71,4,2,2,'#e8e8e8');r(64,48,16,3,'#c8c8c8');r(76,10,1,40,'#b8b8b8');
+      r(30,16,1,34,'#888');r(31,16,16,11,'#1f9a3e');r(35,18,8,7,'#ffd23f');r(37,20,4,3,'#1f4fa8');
+      r(112,16,1,34,'#888');for(let i=0;i<5;i++)r(113,16+i*2,16,1,i%2?'#ffffff':'#3a6ed8');r(113,16,6,5,'#ffffff');r(115,17,2,2,'#ffd23f')},
+    ERECHIM(){ /* castelinho de madeira com torre */
+      sky('#9fd8ff','#d8f0ff');cloud(110,6);ground(50,'#5aa64a');tree(14,38);tree(124,38);
+      r(44,26,46,24,'#9a5a2a');for(let j=28;j<50;j+=3)r(44,j,46,1,'#7a4420');
+      for(let i=0;i<4;i++)r(50+i*10,32,5,6,'#ffe9a0');r(64,40,7,10,'#4a2410');
+      for(let j=0;j<10;j++)r(66-j*2.4,16+j,1+j*4.8,1,'#5a2a14');
+      r(88,14,14,36,'#a8682e');r(92,20,5,6,'#ffe9a0');for(let j=0;j<12;j++)r(95-j*.7,2+j,1+j*1.4,1,'#5a2a14')},
+    CURITIBA(){ /* estufa do Jardim Botânico */
+      sky('#a8c8e8','#d8e8f4');ground(50,'#3e9e4a');
+      const g='#bfe8ff',f='#ffffff';
+      r(34,30,76,20,g);for(let i=34;i<110;i+=6)r(i,30,1,20,f);r(34,30,76,1,f);
+      for(let j=0;j<14;j++){const w=Math.round(Math.sqrt(1-Math.pow(j/14,2))*18);r(72-w,30-j,w*2,1,j%3?g:f)}
+      r(71,10,2,6,f);for(let j=0;j<6;j++){const w=Math.round(Math.sqrt(1-Math.pow(j/6,2))*7);r(72-w,24-j,w*2,1,g)}
+      for(let i=0;i<12;i++)r(8+i*11,54,6,3,i%2?'#ff6f8a':'#ffd23f');r(0,58,144,2,'#d8c8a0')},
+    QUARAI(){ /* Cerro do Jarau, pampa e a ponte internacional */
+      sky('#ffc890','#ffe4b8');sun(116,14,'#fff4c0');
+      for(let i=0;i<70;i++){const h=Math.max(0,16-Math.abs(i-35)*.25-(Math.abs(i-35)>24?(Math.abs(i-35)-24)*1.2:0));r(10+i,40-h,1,h,'#7a6a48')}r(30,24,40,2,'#7a6a48');
+      ground(40,'#9ab050','#7e9640');water(50,'#4a88c8',6);
+      r(76,44,68,2,'#d8d0c0');for(let i=0;i<4;i++){r(80+i*16,46,2,10,'#d8d0c0');for(let j=0;j<6;j++)r(82+i*16+j*2,46+Math.round(Math.abs(j-3)*1.2),2,1,'#d8d0c0')}},
+    CAMAQUA(){ /* arrozais e Lagoa dos Patos */
+      sky('#9fd0ff','#d0ecff');cloud(30,6);cloud(100,10);water(30,'#5aa0d0',10);
+      ground(40,'#6abf3a');for(let j=42;j<64;j+=4)for(let i=0;i<144;i+=4)r(i+(j%8?2:0),j,1,3,'#3f8f22');
+      r(96,34,6,6,'#ffffff');r(100,30,2,4,'#ffffff');r(102,30,3,1,'#ffb040');r(98,40,1,6,'#333');r(100,40,1,6,'#333')},
+    'PORTO ALEGRE'(){ /* chaminé da Usina do Gasômetro e o pôr do sol no Guaíba */
+      sky('#ff9a4a','#ffc070','#ffd890');sun(30,30,'#fff0a0');water(40,'#c8703a');for(let i=0;i<6;i++)r(24+((i*7)%14),42+i*3,10,1,'#ffe080');
+      r(70,22,52,18,'#a84a2a');for(let i=0;i<8;i++)r(74+i*6,26,3,8,'#ffd890');r(70,22,52,2,'#7a2a14');
+      r(100,0,9,22,'#b8562e');for(let j=2;j<22;j+=4)r(100,j,9,1,'#8a3a1e');r(99,0,11,2,'#7a2a14')},
+    SORRISO(){ /* soja até o horizonte e silos */
+      sky('#6fc0ff','#b0e0ff');cloud(10,6);cloud(60,12);sun(130,10,'#fff6b0');ground(40,'#8ac840');
+      for(let j=42;j<64;j+=3)r(0,j,144,1,'#6ea830');
+      for(let k=0;k<3;k++){const x=84+k*16;r(x,16,13,26,'#c8ccd4');r(x+3,16,2,26,'#e8ecf4');for(let j=0;j<5;j++)r(x+6-j*1.3,11+j,1+j*2.6,1,'#a8acb4')}
+      r(132,10,3,32,'#a8acb4');r(80,22,52,2,'#a8acb4');
+      r(20,46,14,6,'#2f9a3a');r(18,44,6,4,'#2f9a3a');r(22,52,4,4,'#222');r(30,52,3,3,'#222')},
+    'SAO PAULO'(){ /* MASP e prédios */
+      sky('#a8b8c8','#c8d4e0');
+      [[2,8,14,40],[18,16,10,32],[30,4,12,44],[116,10,12,38],[130,2,12,46],[104,18,10,30]].forEach(([x,y,w,h])=>bldg(x,y,w,h,'#7a8494'));
+      ground(48,'#8a8a8a');r(0,47,144,1,'#5a5a5a');
+      r(46,26,54,14,'#8c9098');for(let i=0;i<9;i++)r(48+i*6,30,4,6,'#30343c');
+      r(44,22,3,26,'#e02a24');r(99,22,3,26,'#e02a24');r(44,22,58,3,'#e02a24');r(44,38,58,2,'#e02a24')},
+    FLORIPA(){ /* ponte Hercílio Luz */
+      sky('#78c4ff','#b8e2ff');cloud(18,6);
+      for(let i=0;i<40;i++)r(104+i,30-Math.min(12,i*.6),1,20,'#3d8a4a');
+      water(42,'#2f7fc0');
+      r(0,36,144,2,'#c8c8d0');r(40,6,4,32,'#c8c8d0');r(100,6,4,32,'#c8c8d0');
+      for(let i=0;i<=60;i++){const t=(i-30)/30,y=Math.round(6+(1-t*t)*24);r(42+i,y,1,1,'#e8e8f0');if(i%4===0)r(42+i,y,1,36-y,'#9a9aa8')}
+      for(let i=0;i<40;i++){r(i,6+Math.round(i*.75),1,1,'#e8e8f0');r(104+i,36-Math.round((40-i)*.75),1,1,'#e8e8f0')}},
+    'SANTA MARIA'(){ /* gare da estação e locomotiva */
+      sky('#8fcaff','#c8e6ff');cloud(100,6);ground(46,'#7a7a6a');r(0,52,144,2,'#5a4a3a');for(let i=0;i<144;i+=6)r(i,51,3,4,'#6b4423');
+      r(14,18,70,28,'#e8d8b0');r(14,18,70,3,'#a85a3a');r(40,8,18,12,'#e8d8b0');r(40,8,18,2,'#a85a3a');r(45,11,8,7,'#ffffff');r(48,13,2,3,'#222');r(49,14,3,1,'#222');
+      for(let i=0;i<6;i++)r(18+i*11,26,6,12,'#6b8ab0');
+      r(96,34,34,12,'#2a2a2a');r(118,26,12,8,'#2a2a2a');r(100,28,5,6,'#2a2a2a');r(96,42,34,2,'#c0392b');
+      for(const wx of[100,110,122])r(wx,46,6,5,'#555');for(let i=0;i<3;i++)r(98-i*3,22-i*4,4+i*2,3,'#d8d8d8')},
+    CAMBORIU(){ /* arranha-céus, roda-gigante e praia */
+      sky('#6fc4ff','#b4e4ff');
+      [[8,4,9,40],[19,10,8,34],[29,0,10,44],[41,8,8,36],[51,2,9,42],[62,12,8,32],[72,6,9,38]].forEach(([x,y,w,h],i)=>bldg(x,y,w,h,i%2?'#d8dce8':'#b8c4d8','#7fb0e0'));
+      const cxw=112,cyw=22;for(let a=0;a<32;a++){const t=a/32*Math.PI*2;r(cxw+Math.cos(t)*16,cyw+Math.sin(t)*16,1,1,'#ffffff');if(a%4===0){r(cxw+Math.cos(t+frame*.01)*16-1,cyw+Math.sin(t+frame*.01)*16,3,2,'#ff6f6f')}}
+      r(cxw-1,cyw,2,22,'#e8e8e8');r(cxw-6,cyw+20,12,2,'#e8e8e8');
+      r(0,44,144,6,'#f0dca0');water(50,'#2f8ad0')},
+    CHAPECO(){ /* Arena Condá */
+      sky('#8fd0ff','#c8ecff');cloud(16,6);cloud(96,4);ground(52,'#3f9a40');
+      r(14,22,116,30,'#1f8a3a');r(14,22,116,3,'#ffffff');for(let j=27;j<50;j+=4)r(16,j,112,1,'#2fae4a');
+      for(let i=0;i<20;i++)r(20+i*5.5,30+(i%3)*6,2,2,i%2?'#ffffff':'#2fae4a');
+      r(60,40,24,12,'#ffffff');r(62,42,20,10,'#1f6a30');
+      for(const lx of[8,132]){r(lx,4,2,48,'#c8c8c8');r(lx-3,2,8,4,'#fff6c0')}},
+    'PASSO FUNDO'(){ /* cuia de chimarrão no pampa */
+      sky('#9fd4ff','#d4eeff');sun(24,12,'#fff4b0');ground(48,'#5aa64a','#4a9040');
+      r(58,24,30,24,'#8a5a2a');r(54,28,38,16,'#8a5a2a');r(60,46,26,4,'#6b4423');r(56,24,34,3,'#c8a060');
+      r(60,22,26,3,'#3fa83a');r(64,20,18,3,'#58c84a');r(80,4,3,22,'#d8d8e0');r(78,4,7,2,'#d8d8e0');
+      tree(14,36);tree(118,38);tree(130,40)},
+    ITAJAI(){ /* porto: guindastes e contêineres */
+      sky('#88c8f0','#c0e0f8');cloud(60,5);water(48,'#2a6aa8');
+      r(0,40,144,8,'#8a8a8a');
+      for(const gx of[20,70]){r(gx,6,3,34,'#ff8a2a');r(gx+16,6,3,34,'#ff8a2a');r(gx-8,6,40,3,'#ff8a2a');r(gx+28,9,2,12,'#444')}
+      const cc=['#c0392b','#2e86de','#27ae60','#f39c12','#8e44ad'];for(let i=0;i<8;i++)for(let j=0;j<2;j++)r(96+(i%4)*12,32-j*6-((i>>2)*0),11,5,cc[(i+j)%5]);
+      r(10,46,70,6,'#1b2350');r(14,42,10,4,'#ffffff');for(let i=0;i<4;i++)r(30+i*11,42,10,4,cc[i])},
+    RIO(){ /* Cristo Redentor e Pão de Açúcar */
+      sky('#5fc0ff','#a8e0ff');cloud(70,8);
+      for(let i=0;i<60;i++){const h=Math.max(0,36-Math.abs(i-24)*1.1);r(2+i,50-h,1,h,'#2f7a3a')}
+      r(25,6,2,9,'#f4f4f4');r(20,8,12,2,'#f4f4f4');r(25,4,2,2,'#f4f4f4');
+      for(let i=0;i<34;i++){const h=Math.max(0,24-Math.pow(Math.abs(i-17)/17,1.6)*24);r(96+i,50-h,1,h,'#3a7a3a')}
+      for(let i=0;i<20;i++){const h=Math.max(0,12-Math.abs(i-10)*1.1);r(76+i,50-h,1,h,'#3a7a3a')}
+      for(let i=0;i<26;i++)r(86+i,38-Math.round(i*.5),1,1,'#555');r(98,32,3,2,'#ff4f4f');
+      water(50,'#2a8ad0')},
+    CARAZINHO(){ /* igreja matriz e trigais */
+      sky('#9fd8ff','#d8f0ff');cloud(18,8);ground(46,'#d8b84a');for(let j=48;j<64;j+=3)for(let i=0;i<144;i+=5)r(i+(j%6?2:0),j,1,2,'#b8982a');
+      r(52,20,40,26,'#f0ece0');r(54,30,8,10,'#8ab0d0');r(82,30,8,10,'#8ab0d0');r(68,34,8,12,'#6b4423');
+      for(const tx of[50,86]){r(tx,8,8,38,'#f0ece0');for(let j=0;j<7;j++)r(tx+4-j*.6,1+j,1+j*1.2,1,'#8a8aa0');r(tx+3,12,2,4,'#6b4423')}
+      for(let j=0;j<8;j++)r(72-j*2.5,12+j,1+j*5,1,'#b84a3a')},
+    PELOTAS(){ /* Mercado Público e os doces */
+      sky('#a0d4ff','#d0ecff');ground(48,'#c8b890');
+      r(20,22,104,26,'#f0d8a8');r(20,22,104,3,'#c87a4a');for(let i=0;i<10;i++)r(24+i*10,28,5,10,'#5a7aa8');r(66,36,12,12,'#6b4423');
+      r(64,6,16,16,'#c8ccd4');r(66,8,12,12,'#9aa0aa');r(69,11,6,6,'#ffffff');r(71,12,1,3,'#222');r(71,14,3,1,'#222');for(let j=0;j<5;j++)r(72-j*1.5,1+j,1+j*3,1,'#9aa0aa');
+      const dc=['#5a3018','#ff9ecf','#fff0c0','#ffd23f'];for(let i=0;i<9;i++){r(8+i*15,54,7,5,'#ffffff');r(9+i*15,52,5,4,dc[i%4])}},
+    ROMA(){sky('#ffcf8a','#ffe8c0');sun(124,12,'#fff4c0');ground(52,'#c8b48a');
+      for(let j=0;j<3;j++)r(24-j*0,18+j*11,96,10,j===2?'#c89a6a':'#d8aa78');for(let j=0;j<3;j++)for(let i=0;i<12;i++)r(28+i*8,20+j*11,4,7,'#7a4a2a');r(104,14,18,4,'#d8aa78')},
+    PARIS(){sky('#8fb8e8','#c0d8f0');cloud(20,10);ground(54,'#5aa64a');
+      for(let j=0;j<48;j++){const w=Math.max(1,Math.round(Math.pow(j/48,2.2)*34));r(72-w/2,6+j,w,1,'#8a6a4a');if(j>30)r(72-w/2+w*.3,6+j,w*.4,1,'#c0d8f0')}r(71,2,2,4,'#8a6a4a');r(60,26,24,2,'#6a4a2a');r(54,40,36,2,'#6a4a2a')},
+    BARCELONA(){sky('#7fc8ff','#c0e6ff');ground(54,'#d8c8a0');
+      for(const[x,h]of[[44,40],[56,48],[68,52],[80,48],[92,40]]){for(let j=0;j<h;j++){const w=Math.max(2,Math.round(8-j/h*6));r(x+4-w/2,54-j,w,1,'#c8a878')}r(x+3,54-h-3,2,3,'#ffd23f')}
+      water(58,'#2f8ad0',6)},
+    MADRI(){sky('#88c4ff','#c8e4ff');ground(52,'#c8b890');r(36,20,72,32,'#e0d0b0');r(36,18,72,3,'#b8a888');for(let i=0;i<5;i++)r(42+i*14,30,8,22,i===2?'#7aa0c8':'#5a4a3a');r(66,10,12,10,'#e0d0b0')},
+  };
+  const f=D[city];
+  if(f){f();return}
+  /* cidade europeia genérica: telhados, torre de igreja e rio */
+  sky('#88bce8','#c4dcf0');cloud(20,8);
+  let s=0;for(const ch of city)s=(s*31+ch.charCodeAt(0))%997;
+  for(let i=0;i<9;i++){const w=12+(s*(i+3))%6,h=14+(s*(i+7))%16,x=i*16;r(x,48-h,w,h,['#e8d8c0','#d8c0a0','#f0e4d0'][i%3]);for(let j=0;j<w/2;j++)r(x+j,48-h-j*.7,w-j*2,1,'#b85a3a');r(x+3,52-h,3,4,'#5a7aa8')}
+  r(64+(s%40)-20,4,8,44,'#c8b898');for(let j=0;j<10;j++)r(68+(s%40)-20-j*.5,j-6+4,1+j,1,'#6a6a7a');
+  water(48,'#4a7ab0');
+}
+const FLY_T=230;let fly=null;
+function startFly(){const t=car.tour;fly={t:0,city:t.city,code:t.code,eu:car.circ==='EU'};mode='cfly';sfx.ui()}
+function stepFly(){
+  fly.t++;
+  if(fly.t===4)beep(220,.25,'triangle',.04,1.6);
+  if(fly.t===120){sfx.game()}
+  if((fly.t>20&&(prs(menu,'a')||prs(menu,'start')||prs(menu,'b')))||fly.t>=FLY_T){fly=null;mode='ctour';cur=0;sfx.ui()}
+}
+function drawPlane(x,y,tilt){
+  const k=2,r=(a,b,w,h,c)=>R(x+a*k,y+(b+Math.round(tilt*a/18))*k,w*k,h*k,c);
+  r(0,2,18,4,'#f4f6ff');r(18,3,3,2,'#f4f6ff');r(0,0,4,2,'#f4f6ff');r(1,-2,3,2,'#ef3e36');
+  for(let i=0;i<5;i++)r(6+i*2,3,1,1,'#2e86ff');r(18,3,2,1,'#2e86ff');r(7,5,8,2,'#c8ccd8');r(9,7,4,1,'#a8acb8');r(0,5,18,1,'#c8ccd8');
+}
+function drawFly(){
+  const t=fly.t,top=44,gy=top+84;
+  const sk=fly.eu?['#2a4a9a','#4a74c8','#7fa8e8']:['#3a7ad8','#6ca8f0','#a8d4ff'];
+  R(0,top,CW,28,sk[0]);R(0,top+28,CW,28,sk[1]);R(0,top+56,CW,gy-top-56,sk[2]);
+  for(let i=0;i<7;i++){const x=((i*53-t*(1+(i%3)*.6))%220+220)%220-40,y=top+8+((i*37)%68);R(x,y,22,4,'#ffffff');R(x+5,y-3,12,3,'#ffffff');R(x+2,y+4,18,1,'#d8e8ff')}
+  R(0,gy,CW,10,fly.eu?'#2a6aa8':'#3f9a40');for(let i=0;i<12;i++)R(((i*29-t*2)%180+180)%180-10,gy+3+(i%3)*2,6,1,fly.eu?'#ffffff':'#2f7a30');
+  /* avião decola, cruza e desce */
+  const p=Math.min(1,t/120),x=-44+p*210,alt=Math.sin(p*Math.PI)*48,y=gy-16-alt,tilt=p<.35?-3:p>.7?3:0;
+  if(t<126){for(let i=2;i<16;i+=2){const q=p-i*.016;if(q<0)break;R(-44+q*210+2,gy-16-Math.sin(q*Math.PI)*48+7,2,1,'#ffffff')}drawPlane(Math.round(x),Math.round(y),tilt)}
+  txt(t<120?'VIAJANDO PARA':'BEM-VINDOS A',80,30,WHITE,'center');
+  const sy=gy+16,col=CATS[fly.code].col;
+  R(6,sy-2,148,68,'#05071a');R(6,sy-2,148,1,col);R(6,sy+65,148,1,col);
+  if(t>=110){cx.save();cx.beginPath();const k=Math.min(1,(t-110)/30);cx.rect(8,sy,144*k,64);cx.clip();cityScene(fly.city,8,sy);cx.restore()}
+  else for(let i=0;i<6;i++)R(14+i*22,sy+28+((t>>3)+i)%3,6,6,'#141a3c');
+  txt(fly.city,80,sy+72,WHITE,'center',F16);catBadge(fly.code,80,sy+92);
+  if(t>20&&Math.floor(frame/24)%2)txt('A CONTINUA',80,264,MUT,'center');
 }
 /* ---------- partidas, torneio e menus ---------- */
 function setupTeams(oppId,skill){
@@ -1624,10 +1851,9 @@ function careerResultLines(win,rn,inj){
 }
 function simCareerMatch(){
   lvlUps=[];mst=null;const t=car.tour,o=tourOpp(),win=Math.random()<winP(-1,o),rn=ROUNDN(t.cur.length);gainSpread(win?.22:.14);
-  const best3=CATS[t.code].bo3&&t.cur.length===2;
   kind='car';demo=false;twoP=false;bo3=false;sets=[0,0];oppPair=pairObj(o);
-  const lo=(Math.random()*3)|0;games=win?[4,lo]:[lo,4];pts=[0,0];
-  if(best3){bo3=true;sets=win?[2,(Math.random()*2)|0]:[(Math.random()*2)|0,2]}
+  let hi,lo;if(CATS[t.code].nat){hi=2;lo=(Math.random()*2)|0}else{const r=Math.random();if(r<.15){hi=7;lo=5+((Math.random()*2)|0)}else{hi=6;lo=(Math.random()*5)|0}}
+  games=win?[hi,lo]:[lo,hi];pts=[0,0];
   resultW=win?0:1;const inj=tourMatchDone(win,true);
   careerResultLines(win,rn,inj);mode='result';
   if(win)sfx.fanfare();else sfx.fault();
@@ -1741,13 +1967,13 @@ function update(){
           if(car.inj>0){sfx.fault();car.msg='LESIONADO: DESCANSE'}
           else if(!eligible()){sfx.fault();car.msg='SEM RANKING PARA ESTE'}
           else if(car.money<weekInfo().cost){sfx.fault();car.msg='SEM DINHEIRO P/ VIAGEM'}
-          else{enterTour();mode='ctour';cur=0}
+          else{enterTour();startFly()}
         }else if(cur===1){
           if(car.inj>0){sfx.fault();car.msg='LESIONADO: DESCANSE'}
           else if(car.money<400){sfx.fault();car.msg='SEM DINHEIRO'}
           else{car.money-=400;lvlUps=[];car.msg='TREINO: '+ATN[car.focus];gain(car.focus,1.3+(car.coach?.6:0));nextWeek('train')}
         }else if(cur===2){car.msg=car.inj>0?'RECUPERANDO':'DESCANSO: FISICO +35';nextWeek(car.inj>0?'inj':'rest')}
-        else if(cur===3){mode='crank';rkOff=Math.max(0,myRank()-8)}
+        else if(cur===3){mode='crank';rkBpt=car.circ==='BR';rkOff=rkBpt?Math.max(0,bptPos()-8):Math.max(0,myRank()-8)}
         else if(cur===4){mode='cpartner';cur=0}
         else if(cur===5){mode='cteam';cur=0}
         else if(cur===6){mode='cevo';cur=['vel','for','pre','top'].indexOf(car.focus)}
@@ -1759,7 +1985,7 @@ function update(){
       nav(3);
       if(prs(menu,'a')){
         const t=car.tour,o=tourOpp();
-        if(cur===0)startMatch('car',pairObj(o),clamp(teamSk(o)+DIFF_ADJ[car.diff??1],.2,3.7),CATS[t.code].bo3&&t.cur.length===2);
+        if(cur===0){startMatch('car',pairObj(o),clamp(teamSk(o)+DIFF_ADJ[car.diff??1],.2,3.7),false);if(CATS[t.code].nat)matchTo=2;else setTo=6}
         else if(cur===1)simCareerMatch();
         else{const inj=tourMatchDone(false,true);careerResultLines(false,'',inj);mode='cdone'}
       }
@@ -1769,12 +1995,15 @@ function update(){
       if(prs(menu,'a')||prs(menu,'start')){sfx.ui();const c=car.tour;car.msg=c&&c.champ===-1?'CAMPEAO EM '+c.city+'!':'VOLTANDO PRA CASA';nextWeek('played');if(mode!=='cseason'){mode='career';cur=0}}
       break;
     case 'crank':
-      if(prs(menu,'down'))rkOff=Math.min(rkOff+1,indivRank().length-12);
+      {const LN=rkBpt?bptList().length:indivRank().length;
+      if(prs(menu,'down'))rkOff=Math.max(0,Math.min(rkOff+1,LN-12));
+      if(prs(menu,'right'))rkOff=Math.max(0,Math.min(rkOff+12,LN-12));}
       if(prs(menu,'up'))rkOff=Math.max(0,rkOff-1);
-      if(prs(menu,'right'))rkOff=Math.min(rkOff+12,indivRank().length-12);
       if(prs(menu,'left'))rkOff=Math.max(0,rkOff-12);
-      if(back()||prs(menu,'a')){mode='career';cur=3}
+      if(prs(menu,'a')&&car.circ==='BR'){rkBpt=!rkBpt;rkOff=0;sfx.ui()}
+      else if(back()||prs(menu,'a')){rkBpt=false;mode='career';cur=3}
       break;
+    case 'cfly':stepFly();break;
     case 'cpartner':{
       const L=freeSorted();nav(L.length);
       if(prs(menu,'a')){
@@ -1808,7 +2037,7 @@ function update(){
       nav(4);
       if(prs(menu,'a')||prs(menu,'start')){
         if(cur===3){mode='cmenu';cur=slotMode==='new'?0:1}
-        else if(slotMode==='load'){if(save.slots[cur]){enterSlot(cur);kind='car';mode=car.retired?'cretire':car.week>=CAL.length?'cseason':car.tour?(car.tour.alive?'ctour':'cdone'):'career';cur=0;sfx.game()}else sfx.fault()}
+        else if(slotMode==='load'){if(save.slots[cur]){enterSlot(cur);kind='car';mode=car.retired?'cretire':car.week>=SEASON_W?'cseason':car.tour?(car.tour.alive?'ctour':'cdone'):'career';cur=0;sfx.game()}else sfx.fault()}
         else{if(save.slots[cur])slotConfirm=true;else beginCreate(cur)}
       }else if(back()){mode='cmenu';cur=slotMode==='new'?0:1}
       break;
@@ -2232,6 +2461,7 @@ function renderInner(){
   if(mode==='ctour'){dim(.86);drawCTour();return}
   if(mode==='cdone'){dim(.86);drawCDone();return}
   if(mode==='crank'){dim(.9);drawCRank();return}
+  if(mode==='cfly'){R(0,0,CW,CH,NAVY);drawFly();return}
   if(mode==='cpartner'){dim(.9);drawCPartner();return}
   if(mode==='cteam'){dim(.9);drawCTeam();return}
   if(mode==='cseason'){dim(.9);drawCSeason();return}
@@ -2418,11 +2648,11 @@ const DAILY=[
   {t:'OURO',d:['3 GAMES, TODOS','NO PONTO DE OURO'],cfg:{to:3,sk:2,gold:true},ok:w=>w===0},
   {t:'CANSADO',d:['FISICO PELA METADE:','VENCA 2 GAMES'],cfg:{to:2,sk:1.5,stam:.5},ok:w=>w===0},
 ];
-let matchTo=0,forceGold=false,stamCap=1,dailyPor=false;
+let matchTo=0,setTo=0,forceGold=false,stamCap=1,dailyPor=false;
 const dayKey=()=>{const d=new Date();return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate()};
 const todays=()=>DAILY[dayKey()%DAILY.length];
 function dailyState(){const d=save.daily||(save.daily={last:0,streak:0,total:0,done:{}});return d}
-function resetRules(){matchTo=0;forceGold=false;stamCap=1;dailyPor=false}
+function resetRules(){matchTo=0;setTo=0;forceGold=false;stamCap=1;dailyPor=false}
 function startChallenge(k){
   const key=dayKey(),C=k==='daily'?todays().cfg:{to:1,sk:1.6,gold:true};
   const pair=k==='daily'?key%PAIRS.length:(Math.random()*PAIRS.length)|0;
@@ -2489,17 +2719,18 @@ function bar(x,y,w,v,col){R(x,y,w,5,'#05071a');R(x+1,y+1,Math.round((w-2)*clamp(
 function drawCareerHub(){
   depthEnsure();
   const W=weekInfo(),{code,cat,city}=W,el=eligible(),pos=myTeamPos(),rk=myRank(),pa=PL_(car.partner),nop=weekOpts().length;
-  txt('T'+car.season+' SEM '+(car.week+1)+'/'+CAL.length+' '+car.age+' ANOS',80,34,MUT,'center');
+  txt('T'+car.season+' '+(car.circ==='BR'?'BPT':'GIRA')+' SEM '+(car.week+1)+'/'+SEASON_W,80,34,car.circ==='BR'?GRN:BLU,'center');
   const sel=cur===0&&nop>1;
   txt((nop>1?(sel?'< ':'  '):'')+city+(nop>1?(sel?' >':'  '):''),80,46,WHITE,'center');catBadge(code,80,60);
   if(nop>1)txt((car.pick||0)+1+'/2',152,60,MUT,'right');
-  txt('CAMPEAO '+cat.pts[0]+' PTS',80,74,ACC,'center');
-  txt(code==='FI'?(el?'CLASSIFICADO!':'SO TOP 8 DUPLAS'):(car.pick||0)===0&&car.wc===car.week?'CONVITE!':cat.req<99?'TOP '+cat.req+' DUPLAS':'ABERTO',80,86,el?GRN:RED,'center');
+  txt('CAMPEAO '+cat.pts[0]+(cat.nat?' BPT':' PTS'),80,74,ACC,'center');
+  txt(code==='MF'?(el?'CLASSIFICADO!':'SO TOP 8 DO BPT'):cat.nat?'ABERTO A TODOS':code==='FI'?(el?'CLASSIFICADO!':'SO TOP 8 DUPLAS'):(car.pick||0)===0&&car.wc===car.week?'CONVITE!':cat.req<99?'TOP '+cat.req+' DUPLAS':'ABERTO',80,86,el?GRN:RED,'center');
   txt(money$(W.cost)+(W.far?' LONGE':' PERTO'),80,98,W.far?ACC:MUT,'center');
   txt('FISICO',8,116,WHITE);bar(64,117,88,car.cond/100,car.cond<35?RED:car.cond<65?ACC:GRN);
   if(car.inj>0)txt('LESAO '+car.inj+' SEM',152,116,RED,'right');
-  txt('RANK #'+rk,8,128,WHITE);txt('DUPLA '+pos+'o',152,128,MUT,'right');
-  txt(money$(car.money),8,140,GRN);txt(car.myPts+' PTS',152,140,ACC,'right');
+  const br=car.circ==='BR';
+  txt('RANK #'+rk,8,128,WHITE);txt(br?'BPT '+bptPos()+'o':'DUPLA '+pos+'o',152,128,br?GRN:MUT,'right');
+  txt(money$(car.money),8,140,GRN);txt(br?bptOf(-1)+' BPT':car.myPts+' PTS',152,140,ACC,'right');
   txt(pa.n.split(' ')[0]+' '+'*'.repeat(stars(pa.sk)),8,152,MUT);bar(112,153,40,car.chem,BLU);
   const items=[car.inj>0?'(LESIONADO)':'JOGAR TORNEIO','TREINAR $400','DESCANSAR','RANKING','PARCEIRO','EQUIPE','EVOLUCAO','CARREIRA','SAIR'];
   items.forEach((s,i)=>{const on=i===cur,y=162+i*11;txt((on?'> ':'  ')+s,14,y,on?ACC:(i===0&&(!el||car.inj>0)?'#55507a':WHITE))});
@@ -2508,11 +2739,11 @@ function drawCareerHub(){
   if(nw)txt(nw.t.slice(0,19),80,274,MUT,'center');
 }
 function drawCTour(){
-  const t=car.tour,o=tourOpp(),op=pairObj(o),n=t.cur.length,fin=n===2,b3=CATS[t.code].bo3&&fin;
+  const t=car.tour,o=tourOpp(),op=pairObj(o),n=t.cur.length;
   txt(t.city,80,36,WHITE,'center');catBadge(t.code,80,50);
   txt(ROUNDN(n),80,64,ACC,'center',F16);
-  if(b3)txt('MELHOR DE 3',80,84,RED,'center');
-  const hh=h2hOf(o);if(hh.w+hh.l)txt((isRival(o)?'RIVAL! ':'CONFRONTO ')+hh.w+'V '+hh.l+'D',80,94,isRival(o)?RED:MUT,'center');
+  txt(CATS[t.code].nat?'MELHOR DE 3 GAMES':'SET DE 6 GAMES',80,84,CATS[t.code].nat?MUT:RED,'center');
+  const hh=h2hOf(o);if(hh.w+hh.l)txt((isRival(o)?'RIVAL! ':'CONFRONTO ')+hh.w+'V '+hh.l+'D',80,95,isRival(o)?RED:MUT,'center');
   txt('ADVERSARIOS',80,106,MUT,'center');
   const ri=indivRank(),rkOf=i=>ri.findIndex(x=>x.i===i)+1;
   op.p.forEach((pp,i)=>{const id=car.teams[o][i];txt(pp[0],80,118+i*12,WHITE,'center');txt('#'+rkOf(id),150,118+i*12,MUT,'right')});
@@ -2530,7 +2761,7 @@ function drawCDone(){
   if(champ){const bob=Math.round(Math.sin(frame*.08)*2);drawTrophy(80,40+bob,2);txt('CAMPEOES!',80,82,ACC,'center',F16);txt('B COMPARTILHA',80,234,BLU,'center')}
   else{txt(t.injured?'LESAO':'ELIMINADOS',80,60,t.injured?RED:WHITE,'center',F16);txt(ROUNDNA(Math.pow(2,idx)),80,82,MUT,'center')}
   txt(t.city,80,104,WHITE,'center');catBadge(t.code,80,118);
-  txt('PONTOS +'+(t.myPts||0),80,138,ACC,'center');
+  txt((CATS[t.code].nat?'PONTOS BPT +':'PONTOS +')+(t.myPts||0),80,138,ACC,'center');
   txt('PREMIO +'+money$(t.prize||0),80,152,GRN,'center');
   txt('VITORIAS '+t.won,80,166,WHITE,'center');
   if(!champ&&t.champ!==undefined)txt('CAMPEOES:',80,186,MUT,'center'),txt(teamKeyName(t.champ),80,198,WHITE,'center');
@@ -2538,14 +2769,22 @@ function drawCDone(){
   if(Math.floor(frame/28)%2)txt('A CONTINUA',80,250,ACC,'center');
 }
 function drawCRank(){
+  if(rkBpt){
+    const L=bptList();txt('RANKING BPT',80,34,GRN,'center',F16);
+    for(let i=0;i<12;i++){const e=L[rkOff+i];if(!e)break;const y=60+i*15,me=e.k===-1;
+      if(me)R(4,y-3,152,13,'#2b3470');if(i+rkOff<5)R(4,y-3,2,13,i+rkOff<3?ACC:GRN);
+      txt(String(rkOff+i+1),20,y,me?ACC:MUT,'right');txt(teamKeyName(e.k).slice(0,13),26,y,me?ACC:WHITE);txt(String(e.pts),154,y,me?ACC:MUT,'right')}
+    txt('TOP 5: CHANCE NA GIRA',80,240,GRN,'center');
+    txt('A MUNDIAL  B VOLTA',80,262,MUT,'center');return;
+  }
   const L=indivRank(),pid=car.partner;
   txt('RANKING',80,34,ACC,'center',F16);
   for(let i=0;i<12;i++){const e=L[rkOff+i];if(!e)break;const y=60+i*15,me=e.i===-1,par=e.i===pid;
     if(me||par)R(4,y-3,152,13,me?'#2b3470':'#1b2350');
     const nm=me?myName():e.n.split(' ')[0][0]+'.'+e.n.split(' ').pop();
     txt(String(rkOff+i+1),20,y,me?ACC:MUT,'right');txt(nm.slice(0,11),26,y,me?ACC:par?BLU:WHITE);txt(String(e.pts),154,y,me?ACC:MUT,'right')}
-  txt('DUPLA: '+myTeamPos()+'o DE 48',80,246,WHITE,'center');
-  txt('SETAS ROLAM  B VOLTA',80,262,MUT,'center');
+  txt('DUPLA: '+myTeamPos()+'o DE '+teamList().length,80,246,WHITE,'center');
+  txt(car.circ==='BR'?'A BPT  B VOLTA':'SETAS ROLAM  B VOLTA',80,262,MUT,'center');
 }
 function drawCPartner(){
   const L=freeSorted(),pa=PL_(car.partner),r=myRank();
@@ -2581,7 +2820,9 @@ function drawCSeason(){
   txt('PONTOS '+car.myPts,80,134,ACC,'center');
   txt('TITULOS '+car.seasonTitles,80,148,ACC,'center');
   txt('SALDO '+money$(car.money),80,162,GRN,'center');
-  const top=indivRank()[0];txt('NUMERO 1:',80,184,MUT,'center');txt(top.i===-1?myName():top.n,80,196,WHITE,'center');
+  if(car.bptFinal){txt('RANKING BPT '+car.bptFinal+'o',80,178,GRN,'center')}
+  else{const top=indivRank()[0];txt('NO 1 '+(top.i===-1?myName():top.n),80,178,MUT,'center')}
+  if(car.giraMsg){const go=car.nextCirc==='EU';txt(car.giraMsg,80,192,go?(Math.floor(frame/20)%2?ACC:GRN):car.nextCirc==='BR'&&car.circ==='EU'?RED:WHITE,'center')}
   txt('IDADE '+car.age+'  35% DOS PONTOS FICAM',80,210,MUT,'center');
   txt('B COMPARTILHA',80,224,BLU,'center');
   if(car.age>=FORCE_RETIRE){if(Math.floor(frame/28)%2)txt('A APOSENTAR',80,254,ACC,'center')}

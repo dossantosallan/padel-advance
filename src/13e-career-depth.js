@@ -1,8 +1,6 @@
 /* ---------- carreira estratégica: duas opções por semana, parceiro com vida própria,
    contratos de patrocínio, idade e aposentadoria, dificuldade ---------- */
 const ALT={BR:'BR',SI:'BR',GO:'BR',P2:'SI',P1:'GO',MA:'P2',FI:null};
-const ALTC=['JOINVILLE','BLUMENAU','LONDRINA','MARINGA','CASCAVEL','PASSO FUNDO','CRICIUMA','LAGES','JOACABA','ERECHIM','PELOTAS','CAXIAS','PONTA GROSSA','TOLEDO','ITAJAI','CAMBORIU','CANOAS','SANTA MARIA','XANXERE','CONCORDIA'];
-const BRCITY=new Set(['CHAPECO','FLORIPA','CURITIBA','SAO PAULO','PORTO ALEGRE','RIO']);
 const DIFF_N=['FACIL','NORMAL','DIFICIL'],DIFF_ADJ=[-.5,0,.45];
 const SPONS2=['RAIZ','VOLTA','IMPULSO','MARE','FAROL'];
 const RETIRE_AGE=34,FORCE_RETIRE=40;
@@ -10,24 +8,26 @@ let newDiff=1;
 function depthEnsure(){
   if(!car)return;
   if(car.pick===undefined)car.pick=0;if(car.pmor===undefined)car.pmor=.7;if(car.age===undefined)car.age=22;if(car.diff===undefined)car.diff=1;
-  if(car.contract===undefined)car.contract=null;
+  if(car.contract===undefined)car.contract=null;circEnsure();
   for(const p of car.players)if(p.age===undefined)p.age=19+((p.n.length*7+p.sk*13)|0)%16;
 }
-function weekOpts(){
-  const w=car.week,m={code:CAL[w],city:CITIES[w]};m.far=!BRCITY.has(m.city);
-  const o=[m],a=ALT[m.code];if(a)o.push({code:a,city:ALTC[w%ALTC.length],far:false});
-  return o.map(x=>({...x,cat:CATS[x.code],cost:Math.round(CATS[x.code].cost*(x.far?1.2:.6)),tired:x.far?6:2}));
-}
-function canEnter(o,i){const pos=myTeamPos();if(o.code==='FI')return pos<=8;return pos<=o.cat.req||(i===0&&car.wc===car.week)}
+function weekOpts(){circEnsure();return optsFor(car.circ,Math.min(car.week,SEASON_W-1))}
+function canEnter(o,i){
+  if(o.cat.nat)return o.code==='MF'?bptPos()<=8:true;
+  const pos=myTeamPos();if(o.code==='FI')return pos<=8;return pos<=o.cat.req||(i===0&&car.wc===car.week)}
 function defaultPick(){const o=weekOpts();car.pick=canEnter(o[0],0)||!o[1]?0:1}
 /* simula os torneios da semana que você não jogou; uma dupla não joga dois torneios na mesma semana */
 function simWeekAll(playedIdx,used){
-  const o=weekOpts(),ex=new Set(used||[]);
-  o.forEach((x,i)=>{
-    if(i===playedIdx)return;
-    const cur=buildDraw(x.code,false,ex);cur.forEach(k=>ex.add(k));
-    const t={code:x.code,city:x.city,cur,res:{},r:0,R:Math.log2(x.cat.size)};finishTour(t);
-  });
+  circEnsure();const ex=new Set(used||[]);
+  for(const circ of['EU','BR']){
+    if(circ==='BR'&&natPool().length<8)continue;
+    optsFor(circ,Math.min(car.week,SEASON_W-1)).forEach((x,i)=>{
+      if(circ===car.circ&&i===playedIdx)return;
+      const cur=buildDraw(x.code,false,ex);cur.forEach(k=>ex.add(k));
+      if(cur.filter(k=>k!==-2).length<2)return;
+      const t={code:x.code,city:x.city,cur,res:{},r:0,R:Math.log2(x.cat.size),quiet:circ!==car.circ&&!['MA','FI'].includes(x.code)};finishTour(t);
+    });
+  }
 }
 /* parceiro: confiança sobe com vitórias e títulos, cai com derrotas cedo; pode sair */
 function partnerAfterTour(t){

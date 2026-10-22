@@ -1,5 +1,5 @@
 /* ---------- vida da carreira: notícias, rivais, troféus, estatísticas e metas ---------- */
-const CAT_ORD=['BR','SI','GO','P2','P1','MA','FI'];
+const CAT_ORD=['CH','OP','MS','MF','BR','SI','GO','P2','P1','MA','FI'];
 const PARTNER_TALK=['QUER JOGAR MAIS NA REDE','ELOGIOU SUA BANDEJA','PEDIU MAIS TREINO','ESTA CONFIANTE','SONHA COM UM MAJOR','GOSTOU DA SEMANA'];
 function carEnsure(){if(!car)return;car.news=car.news||[];car.h2h=car.h2h||{};car.trophies=car.trophies||[];car.best=car.best||999;if(car.goal===undefined)car.goal=null}
 function pushNews(s){carEnsure();car.news.unshift({w:car.week+1,s:car.season,t:s});if(car.news.length>24)car.news.pop()}
@@ -13,10 +13,12 @@ function h2hNote(k,win){
 }
 function newGoal(){
   const pos=myTeamPos(),r=Math.random();let g;
-  const tier=pos>40?'BR':pos>32?'SI':pos>24?'GO':pos>16?'P2':pos>8?'P1':'MA';
-  if(r<.4){const st=tier==='BR'||tier==='SI'?2:3;g={k:'reach',c:tier,st,d:(st===2?'SEMI':'QUARTAS')+' NUM '+CATS[tier].s+' OU MAIOR'}}
+  const br=car.circ==='BR',bp=br?bptPos():0;
+  const tier=br?(bp>12?'CH':bp>5?'OP':'MS'):pos>40?'BR':pos>32?'SI':pos>24?'GO':pos>16?'P2':pos>8?'P1':'MA';
+  if(r<.4){const st=['BR','SI','CH','OP'].includes(tier)?2:3;g={k:'reach',c:tier,st,d:(st===2?'SEMI':'QUARTAS')+' NUM '+CATS[tier].s+' OU MAIOR'}}
   else if(r<.7){const n=3+((Math.random()*3)|0);g={k:'wins',n,prog:0,d:'VENCER '+n+' PARTIDAS'}}
-  else if(r<.85){const n=Math.max(1,myRank()-8);g={k:'rank',n,d:'CHEGAR AO TOP '+n}}
+  else if(r<.85&&!br){const n=Math.max(1,myRank()-8);g={k:'rank',n,d:'CHEGAR AO TOP '+n}}
+  else if(r<.85){const n=Math.max(1,bp-4);g={k:'bpt',n,d:'TOP '+n+' NO BPT'}}
   else g={k:'title',d:'GANHAR UM TITULO'};
   g.until=car.week+4;g.rew=Math.max(600,Math.round((600+Math.max(0,60-pos)*90)/100)*100);car.goal=g;
   pushNews('PATROCINADOR: '+g.d);
@@ -31,6 +33,7 @@ function goalOnWin(){const g=car.goal;if(g&&g.k==='wins'&&++g.prog>=g.n)goalDone
 function goalOnWeek(){
   const g=car.goal;
   if(g&&g.k==='rank'&&myRank()<=g.n)goalDone();
+  else if(g&&g.k==='bpt'&&car.circ==='BR'&&bptPos()<=g.n)goalDone();
   else if(g&&car.week>=g.until){pushNews('META NAO CUMPRIDA');car.goal=null}
   if(!car.goal&&car.week%4===0)newGoal();
 }
@@ -69,12 +72,12 @@ function drawCNews(){
 }
 function drawCTroph(){
   carEnsure();txt('TROFEUS',80,32,ACC,'center',F16);
-  CAT_ORD.forEach((c,i)=>{const n=car.trophies.filter(t=>t.c===c).length,x=i%4,y=i>>2,X=24+x*38,Y=58+y*60;
-    drawTrophyC(X,Y,1,n?CATS[c].col:'#2b3470');txt(CATS[c].s.slice(0,6),X,Y+20,n?CATS[c].col:'#55507a','center');txt('x'+n,X,Y+31,n?WHITE:'#55507a','center')});
-  txt('TITULOS '+car.trophies.length,80,186,WHITE,'center');
-  txt('MELHOR RANKING #'+(car.best<999?car.best:'-'),80,200,MUT,'center');
+  CAT_ORD.forEach((c,i)=>{const n=car.trophies.filter(t=>t.c===c).length,x=i%4,y=i>>2,X=24+x*38,Y=54+y*44;
+    drawTrophyC(X,Y,1,n?CATS[c].col:'#2b3470');txt(CATS[c].s.slice(0,5),X,Y+18,n?CATS[c].col:'#55507a','center');txt('x'+n,X,Y+28,n?WHITE:'#55507a','center')});
+  txt('TITULOS '+car.trophies.length,80,190,WHITE,'center');
+  txt('MELHOR RANKING #'+(car.best<999?car.best:'-'),80,203,MUT,'center');
   const last=car.trophies[car.trophies.length-1];
-  if(last)txt('ULTIMO: '+last.city,80,214,ACC,'center');
+  if(last)txt('ULTIMO: '+last.city,80,216,ACC,'center');
   txt('TEMPORADA '+car.season,80,228,MUT,'center');
   txt('A COMPARTILHA  B VOLTA',80,262,MUT,'center');
 }

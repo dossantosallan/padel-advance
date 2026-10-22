@@ -39,7 +39,8 @@ try{
   save.me.name='TESTE';
   beginCreate(0);save.me.name='TESTE';save.attr={vel:45,for:45,pre:45,top:45};startPts=0;finishCreate();
   if(car.needOffer){car.needOffer=false;offerContract();signContract(1)}
-  let weeks=0,played=0,errors=[];
+  let weeks=0,played=0,errors=[];const circs=[],bpts=[];
+  const c0=car.circ,firstCity=weekOpts()[0].city,teamsN=teamList().length,pool=natPool().length;
   for(let s=0;s<3;s++){
     for(let w=0;w<20;w++){
       const o=weekOpts();car.pick=o.length>1&&Math.random()<.4?1:0;if(!eligible())car.pick=0;
@@ -55,11 +56,22 @@ try{
       for(const k in save.attr)if(save.attr[k]<40||save.attr[k]>99)errors.push('atributo fora da escala '+k);
       if(mode==='cseason')break;
     }
+    circs.push(car.circ);bpts.push(car.bptFinal||0);
     newSeason();
   }
+  out.circuit={c0,firstCity,teamsN,pool,circs,bpts,bptLen:bptList().length};
+  // chance de ir para a gira
+  const gira={};for(const pos of[1,3,5,8]){let n=0;for(let i=0;i<400;i++){car.circ='BR';car.trophies=[];car.bpt={};const L=bptList().filter(t=>t.k!==-1);L.forEach((t,j)=>car.bpt[t.k]=1000-j*10);car.bpt[-1]=L.length>=pos?1000-(pos-1)*10+5:0;decideCircuit();if(car.nextCirc==='EU')n++}gira[pos]=n/400}
+  out.gira=gira;
+  // duração das partidas
+  const len={};startMatch('friendly',0,1.5);
+  setTo=6;games=[5,5];pts=[3,0];point(0,'WINNER!');len.s65=games.join('-')+' '+sub;
+  pts=[3,0];point(0,'WINNER!');len.s75=games.join('-')+' '+sub;
+  resetRules();matchTo=2;games=[1,0];pts=[3,0];point(0,'WINNER!');len.m2=games.join('-')+' '+sub;resetRules();
+  out.len=len;
   out.career={weeks,played,rank:myRank(),age:car.age,attr:save.attr,money:car.money,news:car.news.length,errors};
   // aposentadoria forçada
-  car.age=FORCE_RETIRE;car.week=CAL.length;mode='cseason';retire();out.retire={mode,retired:car.retired,hof:(save.hof||[]).length};
+  car.age=FORCE_RETIRE;car.week=SEASON_W;mode='cseason';retire();out.retire={mode,retired:car.retired,hof:(save.hof||[]).length};
   leaveSlot();
   // lições: a bola de cada lição chega do jeito certo
   const L={};
@@ -91,6 +103,9 @@ with tempfile.TemporaryDirectory() as td:
         if 'fatal' in o:check('node: sem erro fatal',False,o['fatal'][:300])
         else:
             c=o['career'];check('carreira: 3 temporadas',not c['errors'] and c['weeks']>=55,f"{c['weeks']} semanas, {c['played']} torneios, rank #{c['rank']}, idade {c['age']}, attr {c['attr']}"+('; '+'; '.join(c['errors'][:3]) if c['errors'] else ''))
+            ci=o['circuit'];check('circuito: começa no BPT',ci['c0']=='BR' and ci['firstCity']=='JOINVILLE' and ci['pool']>=24 and ci['bptLen']>=25,json.dumps(ci))
+            g=o['gira'];check('gira: chance por posição no BPT',g['8']==0 and 0.08<g['5']<0.24 and 0.25<g['3']<0.47 and 0.5<g['1']<0.72,json.dumps(g))
+            L=o['len'];check('duração: set de 6 e melhor de 3 games',L['s65'].startswith('6-5') and 'SET' not in L['s65'] and L['s75'].startswith('7-5') and 'SET' in L['s75'] and L['m2'].startswith('2-0') and 'SET' in L['m2'],json.dumps(L))
             check('carreira: aposentadoria',o['retire']['retired'] and o['retire']['mode']=='cretire',str(o['retire']))
             for li,v in o['lessons'].items():check(f'escola: lição {int(li)+1}',v['ok'],json.dumps(v['st_']))
             check('demonstração: pontos acontecem',o['demo']['points']>20,f"{o['demo']['points']} pontos em 30000 quadros")
@@ -100,7 +115,7 @@ try:
     from playwright.sync_api import sync_playwright
 except ImportError:
     check('navegador',False,'playwright não instalado');sys.exit(1)
-EXPOSE="enterDemo();applyScreen();window.__T={get mode(){return mode},setMode:m=>{mode=m;cur=0},P,b,pad1,save,set st(v){st=v},get st(){return st},startMatch,beginCreate,finishCreate,get car(){return car},enterTour,offerContract,startTrain,applyBtn,shareCard,get sharing(){return sharing},set paused(v){paused=v},applyScreen,packSave,unpackSave,startChallenge,buildCrowd,setCourt:i=>{save.opts.court=i;buildCrowd()},COURTS,get games(){return games},set games(v){games=v},point:(w,y)=>point(w,y),get msg(){return msg}};"
+EXPOSE="enterDemo();applyScreen();window.__T={get mode(){return mode},setMode:m=>{mode=m;cur=0},P,b,pad1,save,set st(v){st=v},get st(){return st},startMatch,beginCreate,finishCreate,get car(){return car},enterTour,offerContract,startTrain,applyBtn,shareCard,get sharing(){return sharing},set paused(v){paused=v},applyScreen,packSave,unpackSave,startChallenge,buildCrowd,setCourt:i=>{save.opts.court=i;buildCrowd()},COURTS,startFly,get fly(){return fly},set rkBpt(v){rkBpt=v},cityScene,NATC,EUC,get games(){return games},set games(v){games=v},point:(w,y)=>point(w,y),get msg(){return msg}};"
 td=tempfile.mkdtemp()
 try:
     for n in ['manifest.webmanifest','sw.js']:shutil.copy(os.path.join(ROOT,n),td)
@@ -145,7 +160,8 @@ try:
         for m in modes:
             n0=len(errs);pg.evaluate(f"__T.setMode('{m}')");pg.wait_for_timeout(120)
             if len(errs)>n0:bad.append(m+': '+errs[-1][:80])
-        steps=[('contrato',"__T.offerContract()"),('pre-jogo',"__T.enterTour();__T.setMode('ctour')"),('fim de torneio',"__T.setMode('cdone')"),
+        steps=[('contrato',"__T.offerContract()"),('pre-jogo',"__T.enterTour();__T.setMode('ctour')"),('voo',"__T.startFly()"),('voo chegada',"__T.fly.t=160"),('ranking bpt',"__T.setMode('crank');__T.rkBpt=true"),
+               ('cenas das cidades',"[...__T.NATC,...__T.EUC].forEach(e=>{__T.cityScene(e[0],8,100);if(e[2])__T.cityScene(e[2],8,100)})"),('fim de torneio',"__T.setMode('cdone')"),
                ('aposentadoria',"__T.car.retired=true;__T.setMode('cretire')"),('escola',"__T.startTrain(0)"),('pausa',"__T.paused=true")]
         for nm,code in steps:
             n0=len(errs)

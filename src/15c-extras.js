@@ -62,11 +62,11 @@ const DAILY=[
   {t:'OURO',d:['3 GAMES, TODOS','NO PONTO DE OURO'],cfg:{to:3,sk:2,gold:true},ok:w=>w===0},
   {t:'CANSADO',d:['FISICO PELA METADE:','VENCA 2 GAMES'],cfg:{to:2,sk:1.5,stam:.5},ok:w=>w===0},
 ];
-let matchTo=0,forceGold=false,stamCap=1,dailyPor=false;
+let matchTo=0,setTo=0,forceGold=false,stamCap=1,dailyPor=false;
 const dayKey=()=>{const d=new Date();return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate()};
 const todays=()=>DAILY[dayKey()%DAILY.length];
 function dailyState(){const d=save.daily||(save.daily={last:0,streak:0,total:0,done:{}});return d}
-function resetRules(){matchTo=0;forceGold=false;stamCap=1;dailyPor=false}
+function resetRules(){matchTo=0;setTo=0;forceGold=false;stamCap=1;dailyPor=false}
 function startChallenge(k){
   const key=dayKey(),C=k==='daily'?todays().cfg:{to:1,sk:1.6,gold:true};
   const pair=k==='daily'?key%PAIRS.length:(Math.random()*PAIRS.length)|0;

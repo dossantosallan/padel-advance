@@ -4,17 +4,18 @@ function bar(x,y,w,v,col){R(x,y,w,5,'#05071a');R(x+1,y+1,Math.round((w-2)*clamp(
 function drawCareerHub(){
   depthEnsure();
   const W=weekInfo(),{code,cat,city}=W,el=eligible(),pos=myTeamPos(),rk=myRank(),pa=PL_(car.partner),nop=weekOpts().length;
-  txt('T'+car.season+' SEM '+(car.week+1)+'/'+CAL.length+' '+car.age+' ANOS',80,34,MUT,'center');
+  txt('T'+car.season+' '+(car.circ==='BR'?'BPT':'GIRA')+' SEM '+(car.week+1)+'/'+SEASON_W,80,34,car.circ==='BR'?GRN:BLU,'center');
   const sel=cur===0&&nop>1;
   txt((nop>1?(sel?'< ':'  '):'')+city+(nop>1?(sel?' >':'  '):''),80,46,WHITE,'center');catBadge(code,80,60);
   if(nop>1)txt((car.pick||0)+1+'/2',152,60,MUT,'right');
-  txt('CAMPEAO '+cat.pts[0]+' PTS',80,74,ACC,'center');
-  txt(code==='FI'?(el?'CLASSIFICADO!':'SO TOP 8 DUPLAS'):(car.pick||0)===0&&car.wc===car.week?'CONVITE!':cat.req<99?'TOP '+cat.req+' DUPLAS':'ABERTO',80,86,el?GRN:RED,'center');
+  txt('CAMPEAO '+cat.pts[0]+(cat.nat?' BPT':' PTS'),80,74,ACC,'center');
+  txt(code==='MF'?(el?'CLASSIFICADO!':'SO TOP 8 DO BPT'):cat.nat?'ABERTO A TODOS':code==='FI'?(el?'CLASSIFICADO!':'SO TOP 8 DUPLAS'):(car.pick||0)===0&&car.wc===car.week?'CONVITE!':cat.req<99?'TOP '+cat.req+' DUPLAS':'ABERTO',80,86,el?GRN:RED,'center');
   txt(money$(W.cost)+(W.far?' LONGE':' PERTO'),80,98,W.far?ACC:MUT,'center');
   txt('FISICO',8,116,WHITE);bar(64,117,88,car.cond/100,car.cond<35?RED:car.cond<65?ACC:GRN);
   if(car.inj>0)txt('LESAO '+car.inj+' SEM',152,116,RED,'right');
-  txt('RANK #'+rk,8,128,WHITE);txt('DUPLA '+pos+'o',152,128,MUT,'right');
-  txt(money$(car.money),8,140,GRN);txt(car.myPts+' PTS',152,140,ACC,'right');
+  const br=car.circ==='BR';
+  txt('RANK #'+rk,8,128,WHITE);txt(br?'BPT '+bptPos()+'o':'DUPLA '+pos+'o',152,128,br?GRN:MUT,'right');
+  txt(money$(car.money),8,140,GRN);txt(br?bptOf(-1)+' BPT':car.myPts+' PTS',152,140,ACC,'right');
   txt(pa.n.split(' ')[0]+' '+'*'.repeat(stars(pa.sk)),8,152,MUT);bar(112,153,40,car.chem,BLU);
   const items=[car.inj>0?'(LESIONADO)':'JOGAR TORNEIO','TREINAR $400','DESCANSAR','RANKING','PARCEIRO','EQUIPE','EVOLUCAO','CARREIRA','SAIR'];
   items.forEach((s,i)=>{const on=i===cur,y=162+i*11;txt((on?'> ':'  ')+s,14,y,on?ACC:(i===0&&(!el||car.inj>0)?'#55507a':WHITE))});
@@ -23,11 +24,11 @@ function drawCareerHub(){
   if(nw)txt(nw.t.slice(0,19),80,274,MUT,'center');
 }
 function drawCTour(){
-  const t=car.tour,o=tourOpp(),op=pairObj(o),n=t.cur.length,fin=n===2,b3=CATS[t.code].bo3&&fin;
+  const t=car.tour,o=tourOpp(),op=pairObj(o),n=t.cur.length;
   txt(t.city,80,36,WHITE,'center');catBadge(t.code,80,50);
   txt(ROUNDN(n),80,64,ACC,'center',F16);
-  if(b3)txt('MELHOR DE 3',80,84,RED,'center');
-  const hh=h2hOf(o);if(hh.w+hh.l)txt((isRival(o)?'RIVAL! ':'CONFRONTO ')+hh.w+'V '+hh.l+'D',80,94,isRival(o)?RED:MUT,'center');
+  txt(CATS[t.code].nat?'MELHOR DE 3 GAMES':'SET DE 6 GAMES',80,84,CATS[t.code].nat?MUT:RED,'center');
+  const hh=h2hOf(o);if(hh.w+hh.l)txt((isRival(o)?'RIVAL! ':'CONFRONTO ')+hh.w+'V '+hh.l+'D',80,95,isRival(o)?RED:MUT,'center');
   txt('ADVERSARIOS',80,106,MUT,'center');
   const ri=indivRank(),rkOf=i=>ri.findIndex(x=>x.i===i)+1;
   op.p.forEach((pp,i)=>{const id=car.teams[o][i];txt(pp[0],80,118+i*12,WHITE,'center');txt('#'+rkOf(id),150,118+i*12,MUT,'right')});
@@ -45,7 +46,7 @@ function drawCDone(){
   if(champ){const bob=Math.round(Math.sin(frame*.08)*2);drawTrophy(80,40+bob,2);txt('CAMPEOES!',80,82,ACC,'center',F16);txt('B COMPARTILHA',80,234,BLU,'center')}
   else{txt(t.injured?'LESAO':'ELIMINADOS',80,60,t.injured?RED:WHITE,'center',F16);txt(ROUNDNA(Math.pow(2,idx)),80,82,MUT,'center')}
   txt(t.city,80,104,WHITE,'center');catBadge(t.code,80,118);
-  txt('PONTOS +'+(t.myPts||0),80,138,ACC,'center');
+  txt((CATS[t.code].nat?'PONTOS BPT +':'PONTOS +')+(t.myPts||0),80,138,ACC,'center');
   txt('PREMIO +'+money$(t.prize||0),80,152,GRN,'center');
   txt('VITORIAS '+t.won,80,166,WHITE,'center');
   if(!champ&&t.champ!==undefined)txt('CAMPEOES:',80,186,MUT,'center'),txt(teamKeyName(t.champ),80,198,WHITE,'center');
@@ -53,14 +54,22 @@ function drawCDone(){
   if(Math.floor(frame/28)%2)txt('A CONTINUA',80,250,ACC,'center');
 }
 function drawCRank(){
+  if(rkBpt){
+    const L=bptList();txt('RANKING BPT',80,34,GRN,'center',F16);
+    for(let i=0;i<12;i++){const e=L[rkOff+i];if(!e)break;const y=60+i*15,me=e.k===-1;
+      if(me)R(4,y-3,152,13,'#2b3470');if(i+rkOff<5)R(4,y-3,2,13,i+rkOff<3?ACC:GRN);
+      txt(String(rkOff+i+1),20,y,me?ACC:MUT,'right');txt(teamKeyName(e.k).slice(0,13),26,y,me?ACC:WHITE);txt(String(e.pts),154,y,me?ACC:MUT,'right')}
+    txt('TOP 5: CHANCE NA GIRA',80,240,GRN,'center');
+    txt('A MUNDIAL  B VOLTA',80,262,MUT,'center');return;
+  }
   const L=indivRank(),pid=car.partner;
   txt('RANKING',80,34,ACC,'center',F16);
   for(let i=0;i<12;i++){const e=L[rkOff+i];if(!e)break;const y=60+i*15,me=e.i===-1,par=e.i===pid;
     if(me||par)R(4,y-3,152,13,me?'#2b3470':'#1b2350');
     const nm=me?myName():e.n.split(' ')[0][0]+'.'+e.n.split(' ').pop();
     txt(String(rkOff+i+1),20,y,me?ACC:MUT,'right');txt(nm.slice(0,11),26,y,me?ACC:par?BLU:WHITE);txt(String(e.pts),154,y,me?ACC:MUT,'right')}
-  txt('DUPLA: '+myTeamPos()+'o DE 48',80,246,WHITE,'center');
-  txt('SETAS ROLAM  B VOLTA',80,262,MUT,'center');
+  txt('DUPLA: '+myTeamPos()+'o DE '+teamList().length,80,246,WHITE,'center');
+  txt(car.circ==='BR'?'A BPT  B VOLTA':'SETAS ROLAM  B VOLTA',80,262,MUT,'center');
 }
 function drawCPartner(){
   const L=freeSorted(),pa=PL_(car.partner),r=myRank();
@@ -96,7 +105,9 @@ function drawCSeason(){
   txt('PONTOS '+car.myPts,80,134,ACC,'center');
   txt('TITULOS '+car.seasonTitles,80,148,ACC,'center');
   txt('SALDO '+money$(car.money),80,162,GRN,'center');
-  const top=indivRank()[0];txt('NUMERO 1:',80,184,MUT,'center');txt(top.i===-1?myName():top.n,80,196,WHITE,'center');
+  if(car.bptFinal){txt('RANKING BPT '+car.bptFinal+'o',80,178,GRN,'center')}
+  else{const top=indivRank()[0];txt('NO 1 '+(top.i===-1?myName():top.n),80,178,MUT,'center')}
+  if(car.giraMsg){const go=car.nextCirc==='EU';txt(car.giraMsg,80,192,go?(Math.floor(frame/20)%2?ACC:GRN):car.nextCirc==='BR'&&car.circ==='EU'?RED:WHITE,'center')}
   txt('IDADE '+car.age+'  35% DOS PONTOS FICAM',80,210,MUT,'center');
   txt('B COMPARTILHA',80,224,BLU,'center');
   if(car.age>=FORCE_RETIRE){if(Math.floor(frame/28)%2)txt('A APOSENTAR',80,254,ACC,'center')}

@@ -75,10 +75,9 @@ function careerResultLines(win,rn,inj){
 }
 function simCareerMatch(){
   lvlUps=[];mst=null;const t=car.tour,o=tourOpp(),win=Math.random()<winP(-1,o),rn=ROUNDN(t.cur.length);gainSpread(win?.22:.14);
-  const best3=CATS[t.code].bo3&&t.cur.length===2;
   kind='car';demo=false;twoP=false;bo3=false;sets=[0,0];oppPair=pairObj(o);
-  const lo=(Math.random()*3)|0;games=win?[4,lo]:[lo,4];pts=[0,0];
-  if(best3){bo3=true;sets=win?[2,(Math.random()*2)|0]:[(Math.random()*2)|0,2]}
+  let hi,lo;if(CATS[t.code].nat){hi=2;lo=(Math.random()*2)|0}else{const r=Math.random();if(r<.15){hi=7;lo=5+((Math.random()*2)|0)}else{hi=6;lo=(Math.random()*5)|0}}
+  games=win?[hi,lo]:[lo,hi];pts=[0,0];
   resultW=win?0:1;const inj=tourMatchDone(win,true);
   careerResultLines(win,rn,inj);mode='result';
   if(win)sfx.fanfare();else sfx.fault();
@@ -192,13 +191,13 @@ function update(){
           if(car.inj>0){sfx.fault();car.msg='LESIONADO: DESCANSE'}
           else if(!eligible()){sfx.fault();car.msg='SEM RANKING PARA ESTE'}
           else if(car.money<weekInfo().cost){sfx.fault();car.msg='SEM DINHEIRO P/ VIAGEM'}
-          else{enterTour();mode='ctour';cur=0}
+          else{enterTour();startFly()}
         }else if(cur===1){
           if(car.inj>0){sfx.fault();car.msg='LESIONADO: DESCANSE'}
           else if(car.money<400){sfx.fault();car.msg='SEM DINHEIRO'}
           else{car.money-=400;lvlUps=[];car.msg='TREINO: '+ATN[car.focus];gain(car.focus,1.3+(car.coach?.6:0));nextWeek('train')}
         }else if(cur===2){car.msg=car.inj>0?'RECUPERANDO':'DESCANSO: FISICO +35';nextWeek(car.inj>0?'inj':'rest')}
-        else if(cur===3){mode='crank';rkOff=Math.max(0,myRank()-8)}
+        else if(cur===3){mode='crank';rkBpt=car.circ==='BR';rkOff=rkBpt?Math.max(0,bptPos()-8):Math.max(0,myRank()-8)}
         else if(cur===4){mode='cpartner';cur=0}
         else if(cur===5){mode='cteam';cur=0}
         else if(cur===6){mode='cevo';cur=['vel','for','pre','top'].indexOf(car.focus)}
@@ -210,7 +209,7 @@ function update(){
       nav(3);
       if(prs(menu,'a')){
         const t=car.tour,o=tourOpp();
-        if(cur===0)startMatch('car',pairObj(o),clamp(teamSk(o)+DIFF_ADJ[car.diff??1],.2,3.7),CATS[t.code].bo3&&t.cur.length===2);
+        if(cur===0){startMatch('car',pairObj(o),clamp(teamSk(o)+DIFF_ADJ[car.diff??1],.2,3.7),false);if(CATS[t.code].nat)matchTo=2;else setTo=6}
         else if(cur===1)simCareerMatch();
         else{const inj=tourMatchDone(false,true);careerResultLines(false,'',inj);mode='cdone'}
       }
@@ -220,12 +219,15 @@ function update(){
       if(prs(menu,'a')||prs(menu,'start')){sfx.ui();const c=car.tour;car.msg=c&&c.champ===-1?'CAMPEAO EM '+c.city+'!':'VOLTANDO PRA CASA';nextWeek('played');if(mode!=='cseason'){mode='career';cur=0}}
       break;
     case 'crank':
-      if(prs(menu,'down'))rkOff=Math.min(rkOff+1,indivRank().length-12);
+      {const LN=rkBpt?bptList().length:indivRank().length;
+      if(prs(menu,'down'))rkOff=Math.max(0,Math.min(rkOff+1,LN-12));
+      if(prs(menu,'right'))rkOff=Math.max(0,Math.min(rkOff+12,LN-12));}
       if(prs(menu,'up'))rkOff=Math.max(0,rkOff-1);
-      if(prs(menu,'right'))rkOff=Math.min(rkOff+12,indivRank().length-12);
       if(prs(menu,'left'))rkOff=Math.max(0,rkOff-12);
-      if(back()||prs(menu,'a')){mode='career';cur=3}
+      if(prs(menu,'a')&&car.circ==='BR'){rkBpt=!rkBpt;rkOff=0;sfx.ui()}
+      else if(back()||prs(menu,'a')){rkBpt=false;mode='career';cur=3}
       break;
+    case 'cfly':stepFly();break;
     case 'cpartner':{
       const L=freeSorted();nav(L.length);
       if(prs(menu,'a')){
@@ -259,7 +261,7 @@ function update(){
       nav(4);
       if(prs(menu,'a')||prs(menu,'start')){
         if(cur===3){mode='cmenu';cur=slotMode==='new'?0:1}
-        else if(slotMode==='load'){if(save.slots[cur]){enterSlot(cur);kind='car';mode=car.retired?'cretire':car.week>=CAL.length?'cseason':car.tour?(car.tour.alive?'ctour':'cdone'):'career';cur=0;sfx.game()}else sfx.fault()}
+        else if(slotMode==='load'){if(save.slots[cur]){enterSlot(cur);kind='car';mode=car.retired?'cretire':car.week>=SEASON_W?'cseason':car.tour?(car.tour.alive?'ctour':'cdone'):'career';cur=0;sfx.game()}else sfx.fault()}
         else{if(save.slots[cur])slotConfirm=true;else beginCreate(cur)}
       }else if(back()){mode='cmenu';cur=slotMode==='new'?0:1}
       break;

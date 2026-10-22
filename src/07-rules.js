@@ -58,7 +58,7 @@ function point(w,why){
     games[w]++;pts=[0,0];serveTeam=1-serveTeam;
     sub='GAME '+teamName(w);
     sfx.game();ptimer=Math.max(ptimer,140);
-    const won=matchTo?games[w]>=matchTo:(games[w]>=4&&games[w]-games[l]>=2)||games[w]>=5;
+    const won=matchTo?games[w]>=matchTo:setTo?(games[w]>=setTo&&games[w]-games[l]>=2)||games[w]>setTo:(games[w]>=4&&games[w]-games[l]>=2)||games[w]>=5;
     if(won&&bo3&&!demo){sets[w]++;if(sets[w]<2){sub='SET '+teamName(w)+' '+sets[0]+'-'+sets[1];games=[0,0];after=()=>setupServe();return}}
     if(won){
       if(demo)after=()=>{games=[0,0];setupServe()};
