@@ -1208,7 +1208,7 @@ function render(){
 
 
 /* ---------- carregamento e abertura ---------- */
-const TIPS=['BANDEJA E MAIS SEGURA|QUE O REMATE','SEGURE A PARA|CARREGAR A FORCA','DEIXE A BOLA BATER|NO VIDRO E VOLTAR','LOB NO FUNDO TIRA|A DUPLA DA REDE','REMATE NA LATERAL|PODE SAIR POR 4','CANSOU? ENCURTE|OS PONTOS','VIBORA: SEGURE|CIMA E APERTE A','O SAQUE E CRUZADO|E POR BAIXO'];
+const TIPS=['BANDEJA E MAIS|SEGURA QUE REMATE','SEGURE A PARA|CARREGAR A FORCA','DEIXE A BOLA|VOLTAR DO VIDRO','LOB NO FUNDO TIRA|A DUPLA DA REDE','REMATE NA LATERAL|PODE SAIR POR 4','CANSOU? ENCURTE|OS PONTOS','VIBORA: SEGURE|CIMA E APERTE A','O SAQUE E CRUZADO|E POR BAIXO'];
 let bootT=0,bootP=0,bootStep=0,bootReady=false,fontOk=false,introT=0,tapAny=false;const tip=TIPS[(Math.random()*TIPS.length)|0];
 try{(document.fonts?document.fonts.load('16px "Press Start 2P"'):Promise.resolve()).then(()=>{fontOk=true},()=>{fontOk=true})}catch(_){fontOk=true}
 setTimeout(()=>{fontOk=true},2500);
