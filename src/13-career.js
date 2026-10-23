@@ -81,7 +81,7 @@ function enterTour(){
 const tourOpp=()=>{const t=car.tour,i=t.cur.indexOf(-1);return t.cur[i^1]};
 const tourIsFinal=()=>car.tour.cur.length===2;
 function tourMatchDone(win,sim){
-  const t=car.tour,cat=CATS[t.code],oppK=tourOpp();
+  const t=car.tour,cat=CATS[t.code],oppK=tourOpp();t.lastOpp=oppK;
   h2hNote(oppK,win);if(win)goalOnWin();
   car.cond=clamp(car.cond-(sim?(cat.nat?4:7):(cat.nat?5:9)),0,100);
   car.chem=Math.min(1,car.chem+.04);

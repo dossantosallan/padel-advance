@@ -120,6 +120,10 @@ function drawCCal(){
   txt('CALENDARIO',80,28,ACC,'center',F16);
   txt('T'+car.season+(br?' BPT NACIONAL':' GIRA EUROPEIA'),80,46,br?GRN:BLU,'center');
   const histOf=w=>(car.hist||[]).find(h=>h.w===w);
+  if(calMap){drawSeasonMap(cur);const e=C[cur],h=histOf(cur);
+    txt('S'+(cur+1)+' '+e[0].slice(0,11)+' '+CAL_AB[e[1]],80,242,CATS[e[1]].col,'center');
+    txt(h?(h.res==='CAMPEAO'?'CAMPEAO!':h.res.slice(0,20)):cur<car.week?'NAO JOGOU':cur===car.week?'PROXIMA PARADA':'',80,254,h&&h.res==='CAMPEAO'?ACC:MUT,'center');
+    txt('A LISTA  B VOLTA',80,272,'#55507a','center');return}
   for(let w=0;w<SEASON_W;w++){
     const y=58+w*9,e=C[w],cat=CATS[e[1]],now=w===car.week,past=w<car.week,on=w===cur,h=histOf(w);
     if(on)R(2,y-1,156,9,'#2b3470');if(now)R(2,y-1,2,9,ACC);
@@ -138,5 +142,5 @@ function drawCCal(){
   else if(w<car.week)txt('NAO JOGOU',80,y0,MUT,'center');
   else{const m=o[0];txt('CAMPEAO '+m.cat.pts[0]+(m.cat.nat?' BPT':' PTS')+' '+money$(m.cost),80,y0,WHITE,'center');
     txt(o[1]?'OU '+o[1].city.slice(0,10)+' '+CAL_AB[o[1].code]:m.code==='MF'?'SO TOP 8 DO BPT':m.code==='FI'?'SO TOP 8 DUPLAS':m.cat.req<99?'TOP '+m.cat.req+' DUPLAS':'ABERTO A TODOS',80,y0+10,MUT,'center')}
-  txt('C=CAMPEAO x=ELIMINADO',80,272,'#55507a','center');
+  txt('A MAPA  B VOLTA',80,272,'#55507a','center');
 }

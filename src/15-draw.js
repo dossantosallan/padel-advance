@@ -333,6 +333,7 @@ function renderInner(){
   if(mode==='cdone'){dim(.86);drawCDone();return}
   if(mode==='crank'){dim(.9);drawCRank();return}
   if(mode==='ccal'){dim(.92);drawCCal();return}
+  if(mode==='cint'){dim(.92);drawCInt();return}
   if(mode==='cfly'){R(0,0,CW,CH,NAVY);drawFly();return}
   if(mode==='cpartner'){dim(.9);drawCPartner();return}
   if(mode==='cteam'){dim(.9);drawCTeam();return}

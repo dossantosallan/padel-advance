@@ -217,7 +217,7 @@ function update(){
       break;
     case 'cdone':
       if(back()&&car.tour&&car.tour.champ===-1){shareCard('title');break}
-      if(prs(menu,'a')||prs(menu,'start')){sfx.ui();const c=car.tour;car.msg=c&&c.champ===-1?'CAMPEAO EM '+c.city+'!':'VOLTANDO PRA CASA';nextWeek('played');if(mode!=='cseason'){mode='career';cur=0}}
+      if(prs(menu,'a')||prs(menu,'start')){sfx.ui();const c=car.tour;if(c&&!c.intDone){c.intDone=true;if(startInterview())break}finishTourWeek()}
       break;
     case 'crank':
       {const LN=rkBpt?bptList().length:indivRank().length;
@@ -229,7 +229,9 @@ function update(){
       else if(back()||prs(menu,'a')){rkBpt=false;mode='career';cur=3}
       break;
     case 'cfly':stepFly();break;
-    case 'ccal':nav(SEASON_W);if(back()||prs(menu,'a')||prs(menu,'start')){mode='career';cur=8}break;
+    case 'ccal':{nav(SEASON_W);const dv=prs(menu,'right')-prs(menu,'left');if(dv){cur=(cur+SEASON_W+dv)%SEASON_W;sfx.ui()}
+      if(prs(menu,'a')){calMap=!calMap;sfx.ui()}else if(back()||prs(menu,'start')){mode='career';cur=8}break;}
+    case 'cint':stepInterview();break;
     case 'cpartner':{
       const L=freeSorted();nav(L.length);
       if(prs(menu,'a')){

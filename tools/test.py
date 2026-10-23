@@ -115,7 +115,7 @@ try:
     from playwright.sync_api import sync_playwright
 except ImportError:
     check('navegador',False,'playwright não instalado');sys.exit(1)
-EXPOSE="enterDemo();applyScreen();window.__T={get mode(){return mode},setMode:m=>{mode=m;cur=0},P,b,pad1,save,set st(v){st=v},get st(){return st},startMatch,beginCreate,finishCreate,get car(){return car},enterTour,offerContract,startTrain,applyBtn,shareCard,get sharing(){return sharing},set paused(v){paused=v},applyScreen,packSave,unpackSave,startChallenge,buildCrowd,setCourt:i=>{save.opts.court=i;buildCrowd()},COURTS,startFly,get fly(){return fly},set rkBpt(v){rkBpt=v},cityScene,NATC,EUC,get games(){return games},set games(v){games=v},point:(w,y)=>point(w,y),get msg(){return msg}};"
+EXPOSE="enterDemo();applyScreen();window.__T={get mode(){return mode},setMode:m=>{mode=m;cur=0},P,b,pad1,save,set st(v){st=v},get st(){return st},startMatch,beginCreate,finishCreate,get car(){return car},enterTour,offerContract,startTrain,applyBtn,shareCard,get sharing(){return sharing},set paused(v){paused=v},applyScreen,packSave,unpackSave,startChallenge,buildCrowd,setCourt:i=>{save.opts.court=i;buildCrowd()},COURTS,startFly,get fly(){return fly},set rkBpt(v){rkBpt=v},set calMap(v){calMap=v},startInterview,answerInterview,cityScene,NATC,EUC,get games(){return games},set games(v){games=v},point:(w,y)=>point(w,y),get msg(){return msg}};"
 td=tempfile.mkdtemp()
 try:
     for n in ['manifest.webmanifest','sw.js']:shutil.copy(os.path.join(ROOT,n),td)
@@ -160,7 +160,7 @@ try:
         for m in modes:
             n0=len(errs);pg.evaluate(f"__T.setMode('{m}')");pg.wait_for_timeout(120)
             if len(errs)>n0:bad.append(m+': '+errs[-1][:80])
-        steps=[('contrato',"__T.offerContract()"),('pre-jogo',"__T.enterTour();__T.setMode('ctour')"),('voo',"__T.startFly()"),('voo chegada',"__T.fly.t=160"),('ranking bpt',"__T.setMode('crank');__T.rkBpt=true"),
+        steps=[('contrato',"__T.offerContract()"),('pre-jogo',"__T.enterTour();__T.setMode('ctour')"),('voo',"__T.startFly()"),('voo chegada',"__T.fly.t=160"),('mapa bpt',"__T.setMode('ccal');__T.calMap=true"),('entrevista',"__T.car.tour.champ=-1;__T.car.tour.injured=false;__T.startInterview()"),('resposta',"__T.answerInterview(0)"),('ranking bpt',"__T.setMode('crank');__T.rkBpt=true"),
                ('cenas das cidades',"[...__T.NATC,...__T.EUC].forEach(e=>{__T.cityScene(e[0],8,100);if(e[2])__T.cityScene(e[2],8,100)})"),('fim de torneio',"__T.setMode('cdone')"),
                ('aposentadoria',"__T.car.retired=true;__T.setMode('cretire')"),('escola',"__T.startTrain(0)"),('pausa',"__T.paused=true")]
         for nm,code in steps:

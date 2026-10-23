@@ -31,7 +31,7 @@ function attrBonus(k){
   return v;
 }
 const myName=()=>save.me.name||'VOCE';
-let rkBpt=false,oppPair=null,bo3=false,sets=[0,0],cpage=0,nameTarget='me',rkOff=0;
+let rkBpt=false,calMap=false,oppPair=null,bo3=false,sets=[0,0],cpage=0,nameTarget='me',rkOff=0;
 const teamName=t=>twoP?(t?'J2':'J1'):(t?(oppPair||PAIRS[0]).n:(kind==='car'&&car?teamKeyName(-1):(save.me.team||myName())));
 let nameBuf='',nameCur=0;const typeQ=[];
 const golden=()=>forceGold||save.opts.golden;
