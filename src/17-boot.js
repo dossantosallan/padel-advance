@@ -44,7 +44,7 @@ function drawIntro(){
   R(0,0,CW,CH,'#05060f');
   if(t>=52){
     const p=clamp((t-52)/26,0,1),h=Math.round(CH*p);
-    cx.save();cx.beginPath();cx.rect(0,(CH-h)/2,CW,h);cx.clip();cx.drawImage(getBg(),0,0);drawCrowd();cx.drawImage(getCourt(),0,0);cx.restore();
+    cx.save();cx.beginPath();cx.rect(0,(CH-h)/2,CW,h);cx.clip();cx.drawImage(getBg(),0,0,CW,CH);drawCrowd();cx.drawImage(getCourt(),0,0,CW,CH);cx.restore();
     cx.fillStyle=`rgba(5,6,15,${.55*p})`;cx.fillRect(0,0,CW,CH);
   }
   if(t<52){
