@@ -183,7 +183,7 @@ function update(){
       break;}
     case 'career':{
       if(car.needOffer){car.needOffer=false;offerContract();break}
-      const IT=9;nav(IT);
+      const IT=10;nav(IT);
       if(cur===0){const o=weekOpts(),dv=prs(menu,'right')-prs(menu,'left');if(dv&&o.length>1){car.pick=((car.pick||0)+1)%o.length;sfx.ui()}}
       if(prs(menu,'a')){
         sfx.ui();
@@ -202,6 +202,7 @@ function update(){
         else if(cur===5){mode='cteam';cur=0}
         else if(cur===6){mode='cevo';cur=['vel','for','pre','top'].indexOf(car.focus)}
         else if(cur===7){mode='cmore';cur=0}
+        else if(cur===8){mode='ccal';cur=Math.min(car.week,SEASON_W-1)}
         else{leaveSlot();enterDemo()}
       }else if(back()){leaveSlot();enterDemo()}
       break;}
@@ -228,6 +229,7 @@ function update(){
       else if(back()||prs(menu,'a')){rkBpt=false;mode='career';cur=3}
       break;
     case 'cfly':stepFly();break;
+    case 'ccal':nav(SEASON_W);if(back()||prs(menu,'a')||prs(menu,'start')){mode='career';cur=8}break;
     case 'cpartner':{
       const L=freeSorted();nav(L.length);
       if(prs(menu,'a')){

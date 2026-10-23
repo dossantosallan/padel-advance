@@ -2119,7 +2119,7 @@ function update(){
       break;}
     case 'career':{
       if(car.needOffer){car.needOffer=false;offerContract();break}
-      const IT=9;nav(IT);
+      const IT=10;nav(IT);
       if(cur===0){const o=weekOpts(),dv=prs(menu,'right')-prs(menu,'left');if(dv&&o.length>1){car.pick=((car.pick||0)+1)%o.length;sfx.ui()}}
       if(prs(menu,'a')){
         sfx.ui();
@@ -2138,6 +2138,7 @@ function update(){
         else if(cur===5){mode='cteam';cur=0}
         else if(cur===6){mode='cevo';cur=['vel','for','pre','top'].indexOf(car.focus)}
         else if(cur===7){mode='cmore';cur=0}
+        else if(cur===8){mode='ccal';cur=Math.min(car.week,SEASON_W-1)}
         else{leaveSlot();enterDemo()}
       }else if(back()){leaveSlot();enterDemo()}
       break;}
@@ -2164,6 +2165,7 @@ function update(){
       else if(back()||prs(menu,'a')){rkBpt=false;mode='career';cur=3}
       break;
     case 'cfly':stepFly();break;
+    case 'ccal':nav(SEASON_W);if(back()||prs(menu,'a')||prs(menu,'start')){mode='career';cur=8}break;
     case 'cpartner':{
       const L=freeSorted();nav(L.length);
       if(prs(menu,'a')){
@@ -2621,6 +2623,7 @@ function renderInner(){
   if(mode==='ctour'){dim(.86);drawCTour();return}
   if(mode==='cdone'){dim(.86);drawCDone();return}
   if(mode==='crank'){dim(.9);drawCRank();return}
+  if(mode==='ccal'){dim(.92);drawCCal();return}
   if(mode==='cfly'){R(0,0,CW,CH,NAVY);drawFly();return}
   if(mode==='cpartner'){dim(.9);drawCPartner();return}
   if(mode==='cteam'){dim(.9);drawCTeam();return}
@@ -2892,8 +2895,8 @@ function drawCareerHub(){
   txt('RANK #'+rk,8,128,WHITE);txt(br?'BPT '+bptPos()+'o':'DUPLA '+pos+'o',152,128,br?GRN:MUT,'right');
   txt(money$(car.money),8,140,GRN);txt(br?bptOf(-1)+' BPT':car.myPts+' PTS',152,140,ACC,'right');
   txt(pa.n.split(' ')[0]+' '+'*'.repeat(stars(pa.sk)),8,152,MUT);bar(112,153,40,car.chem,BLU);
-  const items=[car.inj>0?'(LESIONADO)':'JOGAR TORNEIO','TREINAR $400','DESCANSAR','RANKING','PARCEIRO','EQUIPE','EVOLUCAO','CARREIRA','SAIR'];
-  items.forEach((s,i)=>{const on=i===cur,y=162+i*11;txt((on?'> ':'  ')+s,14,y,on?ACC:(i===0&&(!el||car.inj>0)?'#55507a':WHITE))});
+  const items=[car.inj>0?'(LESIONADO)':'JOGAR TORNEIO','TREINAR $400','DESCANSAR','RANKING','PARCEIRO','EQUIPE','EVOLUCAO','CARREIRA','CALENDARIO','SAIR'];
+  items.forEach((s,i)=>{const on=i===cur,y=160+i*10;txt((on?'> ':'  ')+s,14,y,on?ACC:(i===0&&(!el||car.inj>0)?'#55507a':WHITE))});
   carEnsure();const nw=car.news[0];
   if(car.msg)txt(car.msg.slice(0,19),80,262,BLU,'center');
   if(nw)txt(nw.t.slice(0,19),80,274,MUT,'center');
@@ -2988,6 +2991,32 @@ function drawCSeason(){
   if(car.age>=FORCE_RETIRE){if(Math.floor(frame/28)%2)txt('A APOSENTAR',80,254,ACC,'center')}
   else if(car.age>=RETIRE_AGE){['CONTINUAR','APOSENTAR'].forEach((s,i)=>txt((cur===i?'> ':'  ')+s,40,242+i*12,cur===i?ACC:WHITE))}
   else if(Math.floor(frame/28)%2)txt('A NOVA TEMPORADA',80,254,ACC,'center');
+}
+const CAL_AB={CH:'CHL',OP:'OPN',MS:'MST',MF:'MF',BR:'BRZ',SI:'SLV',GO:'GLD',P2:'P2',P1:'P1',MA:'MAJ',FI:'FIN'};
+function drawCCal(){
+  depthEnsure();const br=car.circ==='BR',C=calOf(car.circ);
+  txt('CALENDARIO',80,28,ACC,'center',F16);
+  txt('T'+car.season+(br?' BPT NACIONAL':' GIRA EUROPEIA'),80,46,br?GRN:BLU,'center');
+  const histOf=w=>(car.hist||[]).find(h=>h.w===w);
+  for(let w=0;w<SEASON_W;w++){
+    const y=58+w*9,e=C[w],cat=CATS[e[1]],now=w===car.week,past=w<car.week,on=w===cur,h=histOf(w);
+    if(on)R(2,y-1,156,9,'#2b3470');if(now)R(2,y-1,2,9,ACC);
+    const dim=past&&!on;
+    txt(String(w+1).padStart(2,' '),20,y,now?ACC:dim?'#55507a':MUT,'right');
+    txt(e[0].slice(0,11),26,y,dim?'#6a6698':on?ACC:WHITE);
+    txt(CAL_AB[e[1]],140,y,dim?'#55507a':cat.col,'right');
+    let mk='',mc=MUT;
+    if(h){if(h.res==='CAMPEAO'){mk='C';mc=ACC}else{mk='x';mc=RED}}
+    else if(past){mk='-';mc='#55507a'}else if(now){mk='<';mc=ACC}
+    if(h&&h.code!==e[1]&&h.res!=='CAMPEAO')mc=MUT;
+    if(mk)txt(mk,156,y,mc,'right');
+  }
+  const w=cur,e=C[w],o=optsFor(car.circ,w),h=histOf(w),y0=242;
+  if(h)txt((h.res==='CAMPEAO'?'CAMPEAO EM ':'')+h.city.slice(0,h.res==='CAMPEAO'?9:20),80,y0,h.res==='CAMPEAO'?ACC:WHITE,'center'),h.res!=='CAMPEAO'&&txt(h.res.slice(0,20),80,y0+10,MUT,'center');
+  else if(w<car.week)txt('NAO JOGOU',80,y0,MUT,'center');
+  else{const m=o[0];txt('CAMPEAO '+m.cat.pts[0]+(m.cat.nat?' BPT':' PTS')+' '+money$(m.cost),80,y0,WHITE,'center');
+    txt(o[1]?'OU '+o[1].city.slice(0,10)+' '+CAL_AB[o[1].code]:m.code==='MF'?'SO TOP 8 DO BPT':m.code==='FI'?'SO TOP 8 DUPLAS':m.cat.req<99?'TOP '+m.cat.req+' DUPLAS':'ABERTO A TODOS',80,y0+10,MUT,'center')}
+  txt('C=CAMPEAO x=ELIMINADO',80,272,'#55507a','center');
 }
 /* ---------- carregamento e abertura ---------- */
 const TIPS=['BANDEJA E MAIS|SEGURA QUE REMATE','SEGURE A PARA|CARREGAR A FORCA','DEIXE A BOLA|VOLTAR DO VIDRO','LOB NO FUNDO TIRA|A DUPLA DA REDE','REMATE NA LATERAL|PODE SAIR POR 4','CANSOU? ENCURTE|OS PONTOS','VIBORA: SEGURE|CIMA E APERTE A','O SAQUE E CRUZADO|E POR BAIXO','BAIXO + B PERTO DO|VIDRO: CONTRAPARED','BOLA LONGE? APERTE|A: PEIXINHO','POR 3 NA LATERAL?|CORRA PELA PORTA'];

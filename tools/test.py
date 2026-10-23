@@ -155,7 +155,7 @@ try:
             check(f'botão {key.upper()} responde',v==1)
         # todas as telas
         pg.evaluate("__T.beginCreate(1);__T.save.me.name='TESTE';__T.finishCreate();__T.car.needOffer=false")
-        modes=['setup','title','chal','backup','school','friendly','twop','create','name','options','cmenu','cslots','cattr','career','crank','cpartner','cteam','cevo','cmore','cnews','ctroph','cstats','cseason']
+        modes=['setup','title','chal','backup','school','friendly','twop','create','name','options','cmenu','cslots','cattr','career','crank','cpartner','cteam','cevo','cmore','cnews','ctroph','cstats','ccal','cseason']
         bad=[]
         for m in modes:
             n0=len(errs);pg.evaluate(f"__T.setMode('{m}')");pg.wait_for_timeout(120)
