@@ -3,6 +3,8 @@ let toss=null,chase=null,hitstop=0,shake=0,lastShot={team:0,type:'drive',deep:tr
 const hq={fh:.6,bh:.6};
 function onEvent(e,v){
   if(e==='floor'&&v>.3)sfx.bounce();
+  if(e==='floor'&&v>.25)fxDust(b.x,b.y,Math.min(1,v/2));
+  if(e==='wall'&&Math.hypot(b.vx,b.vy)>.6)fxGlass(b.x,b.y,b.z,v);
   if(e==='wall')(v==='fence'?sfx.fence:sfx.wall)();
   if(e==='corner')sfx.corner();
   if(e==='out')sfx.out();
@@ -39,8 +41,8 @@ function onEvent(e,v){
     return point(hitT,v==='door'?'POR 4!':'POR 3!');
   }
 }
-function ptsLabels(){const[a,c]=pts;if(a>=3&&c>=3){if(a===c)return['40','40'];return a>c?['AD','40']:['40','AD']}return[PL[a],PL[c]]}
-function callLine(){const[a,c]=pts;if(a>=3&&c>=3){if(a===c)return golden()?'PONTO DE OURO':'IGUAIS';return'VANT. '+teamName(a>c?0:1)}const l=ptsLabels();return l[0]+' - '+l[1]}
+function ptsLabels(){if(tb)return[String(pts[0]),String(pts[1])];const[a,c]=pts;if(a>=3&&c>=3){if(a===c)return['40','40'];return a>c?['AD','40']:['40','AD']}return[PL[a],PL[c]]}
+function callLine(){if(tb)return'TIE-BREAK '+pts[0]+'-'+pts[1];const[a,c]=pts;if(a>=3&&c>=3){if(a===c)return golden()?'PONTO DE OURO':'IGUAIS';return'VANT. '+teamName(a>c?0:1)}const l=ptsLabels();return l[0]+' - '+l[1]}
 function point(w,why){
   if(kind==='train'&&!demo){trainOutcome(w,why);return}
   st='point';ptimer=105;faults=0;chase=null;
@@ -49,12 +51,15 @@ function point(w,why){
   if(mst&&!demo&&lastHitter===P[0]){if(w===0&&big)mst.win++;if(w===1&&['FORA!','NA REDE','NAO PASSOU'].includes(why))mst.err++}
   if(!demo&&humanWon&&big&&Math.random()<.6)exclaim={s:EXC[(Math.random()*EXC.length)|0],t:95};
   if(['WINNER!','POR 3!','POR 4!','NA FITA!','PONTO DELES'].includes(why)){cheer=why.startsWith('POR')?100:55;applause(humanWon?30:12,humanWon?.06:.03)}
-  if(why.startsWith('POR'))shake=16;
+  if(why.startsWith('POR')){shake=16;if(!demo)fxConfetti()}
+  if(lastHitter&&['FORA!','NA REDE','NAO PASSOU'].includes(why)&&lastHitter.team===l)lastHitter.errs=(lastHitter.errs||0)+1;
   if(w===0&&why.startsWith('POR'))dailyPor=true;
   if(!demo)setMoods(w,why);
   replayPending=!demo&&(why==='POR 3!'||why==='POR 4!');
   if(replayPending)ptimer=80;
-  if(pts[w]>=4&&(golden()||pts[w]-pts[l]>=2)){
+  const gw=tb?(pts[w]>=7&&pts[w]-pts[l]>=2):(pts[w]>=4&&(golden()||pts[w]-pts[l]>=2));
+  if(gw){
+    const wasTb=tb;tb=false;
     games[w]++;pts=[0,0];serveTeam=1-serveTeam;
     sub='GAME '+teamName(w);
     sfx.game();ptimer=Math.max(ptimer,140);
@@ -62,10 +67,11 @@ function point(w,why){
     if(won&&bo3&&!demo){sets[w]++;if(sets[w]<2){sub='SET '+teamName(w)+' '+sets[0]+'-'+sets[1];games=[0,0];after=()=>setupServe();return}}
     if(won){
       if(demo)after=()=>{games=[0,0];setupServe()};
-      else{after=()=>endMatch(w);sub='GAME, SET!'}
+      else{after=()=>endMatch(w);sub='GAME, SET!';if(P.some(p=>p.team===w&&isHuman(p)))fxConfetti()}
       return;
     }
-  }else{sub=callLine();sfx.point(w)}
+    if(setTo&&!wasTb&&games[0]===setTo&&games[1]===setTo){tb=true;tbFirst=serveTeam;sub='TIE-BREAK!';ptimer=Math.max(ptimer,160)}
+  }else{sub=callLine();sfx.point(w);if(tb&&!demo&&(pts[0]+pts[1])%6===0){msg='TROCA DE LADO';ptimer=Math.max(ptimer,170)}}
   if(msg.startsWith('GAME')||sub.startsWith('GAME')){if(!demo&&(games[0]+games[1])%2===1){msg='TROCA DE LADO';ptimer=Math.max(ptimer,170)}}
   after=()=>setupServe();
 }
@@ -77,6 +83,7 @@ function fault(){
 function setupServe(keepFault){
   P.forEach(p=>{if(p.homeX0!=null)p.homeX=p.homeX0});
   if(!keepFault)faults=0;
+  if(tb)serveTeam=tbServe();
   const even=(pts[0]+pts[1])%2===0;
   server=serveTeam===0?(even?P[0]:P[1]):(even?P[2]:P[3]);
   const leftBox=server.homeX>50;
@@ -89,10 +96,10 @@ function setupServe(keepFault){
     else if(p===recv){p.x=p.homeX>50?78:22;p.y=rT===0?190:10}
     else{p.x=p.homeX;p.y=rT===0?162:38}
     Object.assign(p,{tx:p.x,ty:p.y,vx:0,vy:0,swing:0,cool:0,moving:false,charging:false,charge:0,lunge:0,relPow:0,dive:0,split:0,react:0,readDelay:0,tossing:false,diveTried:false});
-    p.stam=Math.min(p===P[0]?stamCap:1,p.stam+.16*(p===P[0]&&kind==='car'&&car?(.4+.6*car.cond/100):1));p.mood=0;
+    p.stam=Math.min(p===P[0]?stamCap:1,p.stam+.16*(p===P[0]&&kind==='car'&&car?(.4+.6*car.cond/100):1));p.mood=0;p.hf=false;p.hfUp=false;
   });
   b.vx=b.vy=b.vz=0;b.w=0;b.lastTeam=serveTeam;b.bounces=0;b.serving=false;b.mustBounce=false;b.spin='none';b.out=null;b.outAx=null;b.cord=false;b.contra=false;b.trail=[];
-  toss=null;chase=null;marker=null;st='serve';timer=0;
+  toss=null;chase=null;marker=null;st='serve';timer=0;updatePressure();
 }
 /* Saque: o sacador quica a bola no chão e bate na subida, abaixo da cintura */
 function startToss(s,pow,ctype){

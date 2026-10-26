@@ -172,6 +172,8 @@ function drawSpriteHD(p,X,Y){
   if(run){if(f===0){lx=Xl-3;ll=1}else if(f===2){rx2=Xl+2;rl=1}else{lx=Xl-1;rx2=Xl}}
   if(crouch||lunge){lx=Xl-3;rx2=Xl+2}
   if(lunge){if(b.x>p.x)rx2=Xl+3;else lx=Xl-4}
+  /* passo lateral: pernas abrem e fecham, sem trote */
+  if(run&&p.swing===0&&Math.abs(p.vx||0)>Math.abs(p.vy||0)*1.6&&st==='play'){ll=rl=0;if(f%2){lx=Xl-3;rx2=Xl+2}else{lx=Xl-1;rx2=Xl}}
   const hipP=py(Bl-4),LW=u(3);
   for(const[x,lift]of[[lx,ll],[rx2,rl]]){const foot=py(Yl-1-ps.jump-lift),x0=px(x)-1,out=x<Xl?-1:1;
     Rh(x0,hipP,LW,Math.max(2,foot-hipP),skin);Rh(x0+LW-1,hipP,1,Math.max(2,foot-hipP),skD);
@@ -276,6 +278,7 @@ function drawHUDHD(){
       Rh(xG+48,y+2,24,20,ACC);Rh(xG+48,y+2,24,1,'#fff2a0');cx.font=HUD_FONT;cx.textAlign='center';cx.fillStyle='#05071a';cx.fillText(lab[t],xG+60,y+8);
     };
     row(5,0);row(33,1);
+    if(pressure&&(st==='serve'||st==='play')&&(frame>>4)%2){cx.font=HUD_FONT;const w=cx.measureText(pressure).width+16;Rh(160-w/2,68,w,16,'#05071a');Rh(160-w/2+1,69,w-2,14,'#c0302a');Rh(160-w/2+1,69,w-2,1,'#ff7a6a');htxt(pressure,160,72,WHITE,'center')}
     if(tag){Rh(254,5,60,52,'#121838');Rh(254,5,60,1,CATS[tag.code].col);
       htxt(CATS[tag.code].s.slice(0,7),284,10,CATS[tag.code].col,'center');htxt(({2:'FINAL',4:'SEMI',8:'QUART',16:'OIT',32:'1aR'})[tag.cur.length]||'',284,24,WHITE,'center');
       htxt('P:'+partnerMode[0][0],284,40,P[1].lblT>0?ACC:MUT,'center')}

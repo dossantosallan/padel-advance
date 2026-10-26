@@ -66,7 +66,7 @@ let matchTo=0,setTo=0,forceGold=false,stamCap=1,dailyPor=false;
 const dayKey=()=>{const d=new Date();return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate()};
 const todays=()=>DAILY[dayKey()%DAILY.length];
 function dailyState(){const d=save.daily||(save.daily={last:0,streak:0,total:0,done:{}});return d}
-function resetRules(){matchTo=0;setTo=0;forceGold=false;stamCap=1;dailyPor=false}
+function resetRules(){tb=false;pressure=null;fx.length=0;matchTo=0;setTo=0;forceGold=false;stamCap=1;dailyPor=false}
 function startChallenge(k){
   const key=dayKey(),C=k==='daily'?todays().cfg:{to:1,sk:1.6,gold:true};
   const pair=k==='daily'?key%PAIRS.length:(Math.random()*PAIRS.length)|0;
@@ -101,6 +101,8 @@ function setMoods(w,why){
     if(big)p.mood=p.team===w?1:-1;
     else if(err){if(p===lastHitter)p.mood=-1;else if(p.team===w&&Math.random()<.5)p.mood=1}
   }
+  if(big&&!demo){const m=P.filter(p=>p.team===w&&!p.hidden);if(m.length===2)m.forEach(p=>{p.hf=true;p.hfUp=false})}
+  if(err&&lastHitter&&isHuman(lastHitter)){const mate=P.find(p=>p.team===lastHitter.team&&p!==lastHitter&&!p.hidden);if(mate)mate.mood=-2}
 }
 function drawChangeEnds(){
   const y=96;cx.fillStyle='rgba(13,19,51,.95)';cx.fillRect(12,y,136,76);R(12,y,136,1,ACC);R(12,y+75,136,1,ACC);

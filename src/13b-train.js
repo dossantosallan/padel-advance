@@ -45,6 +45,7 @@ function trainFeed(){
   afterHit(P[2]);
 }
 function trainOutcome(w,why){
+  if(careerDrill){drillOutcome(w,why);return}
   st='point';chase=null;replayPending=false;sub='';
   if(trainCur){
     const good=trainCur.ok(w,why);
@@ -62,6 +63,7 @@ function trainOutcome(w,why){
 }
 function drawTrainHUD(){
   R(0,0,CW,31,NAVY);R(0,31,CW,1,'#2b3470');
+  if(careerDrill){const D=DRILLS[careerDrill.i];txt('TREINO: '+D.n,6,7,ACC);txt('BOLA '+Math.min(careerDrill.balls+1,8)+'/8',6,19,WHITE);txt('ACERTOS '+careerDrill.hits,CW-6,19,GRN,'right');return}
   if(trainCur){txt(trainCur.t,6,7,ACC);txt(train.hits+'/'+trainCur.n,CW-6,7,WHITE,'right');txt('ESCOLA DE PADEL',6,19,MUT)}
   else{txt('TREINO: '+FREE_N[train.ft],6,7,ACC);txt('ACERTOS '+train.hits,6,19,GRN);txt('ERROS '+train.miss,CW-6,19,RED,'right')}
   if(trainCur&&train.intro>0&&!paused){train.intro--;const L=trainCur.l;cx.fillStyle='rgba(5,7,26,.9)';cx.fillRect(8,36,144,42);R(8,36,144,1,BLU);R(8,77,144,1,BLU);L.forEach((l,i)=>txt(l,80,41+i*12,i===L.length-1?ACC:WHITE,'center'))}

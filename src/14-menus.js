@@ -182,6 +182,7 @@ function update(){
       break;}
     case 'career':careerUIInput();break;
     case 'ctw':case 'cdeco':case 'cgar':subInput();break;
+    case 'ctrain':case 'cdrill':drillInput();break;
     case 'ctour':
       nav(3);
       if(prs(menu,'a')){
@@ -309,7 +310,7 @@ function update(){
           else if(pauseCur===1){setCam(1-save.opts.cam);sfx.ui()}
           else if(pauseCur===3){save.opts.full=!save.opts.full;store();applyScreen();sfx.ui()}
           else if(pauseCur===2){save.opts.sound=!save.opts.sound;store();unlock();if(save.opts.sound)beep(660,.05)}
-          else if(kind==='train'){paused=false;mode='school';cur=train.li==null?LESSONS.length:train.li}
+          else if(kind==='train'){if(careerDrill)abortCareerDrill();else{paused=false;mode='school';cur=train.li==null?LESSONS.length:train.li}}
           else if(kind==='car'&&car&&car.tour){paused=false;resultW=1;const inj=tourMatchDone(false,false);careerResultLines(false,'',inj);mode='cdone'}
           else enterDemo();
         }

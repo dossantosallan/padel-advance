@@ -69,6 +69,19 @@ try{
   pts=[3,0];point(0,'WINNER!');len.s75=games.join('-')+' '+sub;
   resetRules();matchTo=2;games=[1,0];pts=[3,0];point(0,'WINNER!');len.m2=games.join('-')+' '+sub;resetRules();
   out.len=len;
+  // tie-break em 6-6
+  const tbr={};startMatch('friendly',0,1.5);setTo=6;games=[6,5];serveTeam=0;pts=[3,0];point(1,'WINNER!');pts=[0,3];point(1,'WINNER!');
+  tbr.start=tb+' '+games.join('-')+' '+ptsLabels().join('-');
+  for(let i=0;i<6;i++)point(0,'WINNER!');for(let i=0;i<5;i++)point(1,'WINNER!');tbr.mid=tb+' '+ptsLabels().join('-');
+  point(0,'WINNER!');tbr.end=tb+' '+games.join('-')+' '+sub;
+  // pontos decisivos
+  resetRules();setTo=6;tb=false;st='serve';games=[2,2];serveTeam=1;pts=[3,1];updatePressure();tbr.bp=pressure;
+  games=[5,3];serveTeam=0;pts=[3,1];updatePressure();tbr.mp=pressure;pts=[1,1];updatePressure();tbr.none=pressure;
+  resetRules();out.tb=tbr;
+  // treino jogável
+  const dr={};car.money=5000;car.inj=0;startCareerDrill(1);dr.kind=kind;dr.money=car.money;
+  for(let i=0;i<8;i++){drillOutcome(0,'WINNER!');if(after){const f=after;after=null;f()}}
+  dr.mode=mode;dr.res=drillResult&&drillResult.hits+'/'+drillResult.max;out.drill=dr;kind='car';mode='career';
   out.career={weeks,played,rank:myRank(),age:car.age,attr:save.attr,money:car.money,news:car.news.length,errors};
   // aposentadoria forçada
   car.age=FORCE_RETIRE;car.week=SEASON_W;mode='cseason';retire();out.retire={mode,retired:car.retired,hof:(save.hof||[]).length};
@@ -106,6 +119,9 @@ with tempfile.TemporaryDirectory() as td:
             ci=o['circuit'];check('circuito: começa no BPT',ci['c0']=='BR' and ci['firstCity']=='JOINVILLE' and ci['pool']>=24 and ci['bptLen']>=25,json.dumps(ci))
             g=o['gira'];check('gira: chance por posição no BPT',g['8']==0 and 0.08<g['5']<0.24 and 0.25<g['3']<0.47 and 0.5<g['1']<0.72,json.dumps(g))
             L=o['len'];check('duração: set de 6 e melhor de 3 games',L['s65'].startswith('6-5') and 'SET' not in L['s65'] and L['s75'].startswith('7-5') and 'SET' in L['s75'] and L['m2'].startswith('2-0') and 'SET' in L['m2'],json.dumps(L))
+            t_=o['tb'];check('tie-break em 6-6',t_['start'].startswith('true 6-6 0-0') and t_['mid']=='true 6-5' and t_['end'].startswith('false 7-6') and 'SET' in t_['end'],json.dumps(t_))
+            check('pontos decisivos',t_['bp']=='BREAK POINT' and t_['mp']=='MATCH POINT' and t_['none'] is None,json.dumps(t_))
+            d_=o['drill'];check('treino jogavel na carreira',d_['kind']=='train' and d_['mode']=='cdrill' and d_['res'] is not None,json.dumps(d_))
             check('carreira: aposentadoria',o['retire']['retired'] and o['retire']['mode']=='cretire',str(o['retire']))
             for li,v in o['lessons'].items():check(f'escola: lição {int(li)+1}',v['ok'],json.dumps(v['st_']))
             check('demonstração: pontos acontecem',o['demo']['points']>20,f"{o['demo']['points']} pontos em 30000 quadros")
@@ -163,7 +179,7 @@ try:
             check(f'botão {key.upper()} responde',v==1)
         # todas as telas
         pg.evaluate("__T.beginCreate(1);__T.save.me.name='TESTE';__T.finishCreate();__T.car.needOffer=false")
-        modes=['setup','title','chal','backup','school','friendly','twop','create','name','options','cmenu','cslots','cattr','career','crank','cpartner','cteam','cevo','cmore','cnews','ctroph','cstats','ccal','ctw','cdeco','cgar','cseason']
+        modes=['setup','title','chal','backup','school','friendly','twop','create','name','options','cmenu','cslots','cattr','career','crank','cpartner','cteam','cevo','cmore','cnews','ctroph','cstats','ccal','ctw','cdeco','cgar','ctrain','cseason']
         bad=[]
         for m in modes:
             n0=len(errs);pg.evaluate(f"__T.setMode('{m}')");pg.wait_for_timeout(120)

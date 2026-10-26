@@ -178,7 +178,8 @@ function drawTabBar(){
 }
 function careerAct(what){
   if(what==='play'){if(car.inj>0){sfx.fault();car.msg='LESIONADO: DESCANSE'}else if(!eligible()){sfx.fault();car.msg='SEM RANKING PARA ESTE'}else if(car.money<weekInfo().cost){sfx.fault();car.msg='SEM DINHEIRO P/ VIAGEM'}else{enterTour();startFly()}}
-  else if(what==='train'){if(car.inj>0){sfx.fault();car.msg='LESIONADO: DESCANSE'}else if(car.money<400){sfx.fault();car.msg='SEM DINHEIRO'}else{car.money-=400;lvlUps=[];car.msg='TREINO: '+ATN[car.focus];gain(car.focus,1.3+(car.coach?.6:0));nextWeek('train')}}
+  else if(what==='train'){if(car.inj>0){sfx.fault();car.msg='LESIONADO: DESCANSE'}else{mode='ctrain';uiFocus=null}}
+  else if(what==='trainQuick'){if(car.inj>0){sfx.fault();car.msg='LESIONADO: DESCANSE'}else if(car.money<400){sfx.fault();car.msg='SEM DINHEIRO'}else{car.money-=400;lvlUps=[];car.msg='TREINO: '+ATN[car.focus];gain(car.focus,1.3+(car.coach?.6:0));nextWeek('train')}}
   else if(what==='rest'){car.msg=car.inj>0?'RECUPERANDO':'DESCANSO: FISICO +35';nextWeek(car.inj>0?'inj':'rest')}
   if(mode==='cseason')return;
 }

@@ -103,6 +103,8 @@ function pline(x0,y0,x1,y1,c){x0=Math.round(x0);y0=Math.round(y0);x1=Math.round(
 function along(path,t){const n=path.length-1,f=clamp(t*n,0,n-1e-6),i=Math.floor(f),u=f-i;return[lerp(path[i][0],path[i+1][0],u),lerp(path[i][1],path[i+1][1],u)]}
 function pose(p,X,B){
   const m=rmOf(p),s=m*(p.hand==='bh'?-1:1),over=OVER.includes(p.stype);
+  if(st==='point'&&p.hfUp&&!demo){const d=p.hfDir||1;return{r:[X+d*4,B-21],free:[X-d*2,B-8],jump:(frame>>3)%2?1:0,tw:0}}   /* toca aqui */
+  if(st==='point'&&p.mood===-2&&p.swing===0&&!demo){const c=(frame>>3)%2;return{r:[X+(c?1:3),B-12],free:[X-(c?1:3),B-12],jump:0,tw:0}}   /* parceiro aplaude e apoia */
   if(p.mood&&st==='point'&&p.swing===0&&!demo){
     if(p.mood>0)return{r:[X+m*2,B-21],free:[X-m*3,B-20],jump:(frame>>3)%2?2:0,tw:0};   /* comemora: braços para cima */
     return{r:[X+m*3,B-4],free:[X-1,B-14],jump:0,tw:0};                                  /* frustração: mão na cabeça */
@@ -230,6 +232,7 @@ function drawWorld(){
   if(kind==='train'&&!demo)items.push({y:4,f:drawMachine});
   items.push({y:NET,f:drawNet},{y:b.y+.01,f:drawBall});
   items.sort((a,c)=>a.y-c.y).forEach(i=>i.f());
+  drawFxHD();
   if(flash){const[fx,fy]=proj(flash.x,flash.y,flash.z),X=Math.round(fx),Y=Math.round(fy)-1,r=flash.t>3?2:1;R(X-r,Y,2*r+1,1,'#ffffff');R(X,Y-r,1,2*r+1,'#ffffff')}
 }
 function drawHUD(){
@@ -328,6 +331,8 @@ function renderInner(){
   }
   if(mode==='career'){drawCareerUI();return}
   if(mode==='ctw'){drawTrophyWall();return}
+  if(mode==='ctrain'){drawDrillMenu();return}
+  if(mode==='cdrill'){drawDrillDone();return}
   if(mode==='cdeco'){drawDeco();return}
   if(mode==='cgar'){drawGarage();return}
   if(mode==='school'){drawSchool();return}

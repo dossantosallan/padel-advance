@@ -7,7 +7,7 @@ function humanStep(h){
   if(isServer&&toss)return;
   if((pa||pb)&&!isServer&&h.swing===0&&canHit(h)&&reachInfo(h,1)===2){diveHit(h,pb?'lob':'drive');return}
   if(!h.charging&&(pa||pb)&&(h.swing===0||isServer)){h.charging=true;h.charge=0;h.ctype=pa?'a':'b';h.lastD=1e9;h.hand=handFor(h);h.aim=0}
-  if(h.charging&&!isServer){if(C.left)h.aim=Math.max(-2,(h.aim||0)-1/14);if(C.right)h.aim=Math.min(2,(h.aim||0)+1/14)}
+  if(h.charging&&!isServer){const as=pressure?1/9:1/14;if(C.left)h.aim=Math.max(-2,(h.aim||0)-as);if(C.right)h.aim=Math.min(2,(h.aim||0)+as)}
   if(h.charging){
     h.charge=Math.min(1,h.charge+1/(44-2*attrOf(h).for));
     if(isServer){if(!C[h.ctype])startToss(h,.25+.75*h.charge,h.ctype)}
@@ -76,6 +76,7 @@ function stepGame(){
     else p.stam=Math.min(1,p.stam+.0004);
   }
   for(let i=parts.length-1;i>=0;i--)if(--parts[i].t<=0)parts.splice(i,1);
+  stepFx();if(!demo)stepCelebrate();
   if(flash&&--flash.t<=0)flash=null;
   if(st==='serve'){
     if(toss){

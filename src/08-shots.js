@@ -51,6 +51,7 @@ function contraLaunch(p,e){
 function doHit(p,type,tx,deep,pow,q,dy,short){
   const toTop=p.team===0,yy=a=>toTop?a:L-a,rm=rmOf(p),hs=p.hand==='bh'?-1:1;
   pow*=.75+.25*p.stam;
+  if(pressure&&isHuman(p))pow=clamp(pow+rnd(-.09,.09),.2,1);
   if(b.bounces===0&&type==='drive')type='volley';
   if(type==='drive'||type==='lob'||type==='drop'||type==='chiquita')tx+=(dy+1)*2.4*rm*hs;
   let ty,sp,w=0,kick=false,mn;
@@ -71,7 +72,7 @@ function doHit(p,type,tx,deep,pow,q,dy,short){
   let e=(1-q)*12+pow*pow*5,kickMul=1,bad=null;
   if(type==='volley')e*=.7;
   if(isHuman(p)){
-    const a=attrOf(p);sp*=.9+.04*a.for;e*=1.3-.1*a.pre;if(OVER.includes(type))e*=1.25-.1*a.top;kickMul=(.9+.05*a.for)*(.94+.03*a.top);
+    const a=attrOf(p);sp*=.9+.04*a.for;e*=1.3-.1*a.pre;if(pressure)e*=Math.max(.9,1.4-.06*a.pre);if(OVER.includes(type))e*=1.25-.1*a.top;kickMul=(.9+.05*a.for)*(.94+.03*a.top);
   }else{
     const S=STY[p.style]||STY.equil,partner=isPartner(p);
     e+=partner?3:Math.max(2.5,13-3*sk(p))*.5;
@@ -97,7 +98,7 @@ function doHit(p,type,tx,deep,pow,q,dy,short){
   if(isHuman(p)){p.lbl=type==='contra'?'CONTRAPARED':q>.82?(LB[type]?LB[type]+'!':'PERFEITO'):dy<-4?'CEDO':dy>2.5?'TARDE':(LB[type]||'');p.lblT=p.lbl?42:0}
   else if(LB[type]&&type!=='lob'&&type!=='volley'){p.lbl=LB[type];p.lblT=42}
   if(type==='smash'||type==='vibora'||type==='rulo'||type==='bajada')sfx.smash();else if(type==='lob'||type==='contra')sfx.lob();else sfx.hit(pow,q,type);
-  if(type==='smash'||type==='rulo')hitstop=4;else if(isHuman(p)&&q>.82)hitstop=3;
+  if(type==='smash'||type==='rulo'){hitstop=4;if(pow>.7)shake=Math.max(shake,6)}else if(isHuman(p)&&q>.82)hitstop=3;
   lastShot={team:p.team,type,deep:Math.abs(p.y-NET)>70,q};b.land=null;lastHitter=p;
   if(p===P[0]&&mst&&!demo)mst.shots[type]=(mst.shots[type]||0)+1;
   afterHit(p);
@@ -135,6 +136,10 @@ function aiHit(p){
   else if(oppNet&&Math.abs(p.y-NET)>55&&b.z<8&&Math.random()<.15)type='chiquita';
   else if(b.z<12&&((oppNet&&Math.random()<S.lobNet*.6)||Math.random()<S.lob*.6))type='lob';
   else if(Math.random()<S.drop&&Math.abs(p.y-NET)<50)type='drop';
+  /* tática: globo em quem está colado na rede, deixadinha em quem está no fundo */
+  const netOpp=opp.filter(q=>Math.abs(q.y-NET)<30),deepOpp=opp.filter(q=>Math.abs(q.y-NET)>62);
+  if(type==='drive'&&b.z<12&&netOpp.length&&Math.random()<.2)type='lob';
+  else if(type==='drive'&&deepOpp.length===2&&Math.abs(p.y-NET)<40&&Math.random()<.16)type='drop';
   /* alvo: espaço vazio, o backhand do jogador humano, o mais cansado ou o meio da dupla */
   let best=50,bs=-1;
   for(const c of[12,30,50,70,88]){const s=Math.min(...opp.map(q=>Math.abs(q.x-c)))+Math.random()*10;if(s>bs){bs=s;best=c}}
@@ -142,6 +147,10 @@ function aiHit(p){
   if(hu&&r2<.22+clamp((hq.fh-hq.bh)*1.2,0,.3))best=clamp(hu.x-rmOf(hu)*12,8,92);
   else if(r2<.5&&Math.abs(opp[0].stam-opp[1].stam)>.18){const t=opp[0].stam<opp[1].stam?opp[0]:opp[1];best=clamp(t.x+rnd(-6,6),8,92)}
   else if(r2<.68)best=clamp((opp[0].x+opp[1].x)/2,15,85);
+  /* quem está errando mais recebe mais bolas */
+  const e0=opp[0].errs||0,e1=opp[1].errs||0;if(Math.abs(e0-e1)>=2&&Math.random()<.3){const t=e0>e1?opp[0]:opp[1];best=clamp(t.x+rnd(-5,5),8,92)}
+  if(type==='lob'&&netOpp.length&&Math.random()<.7)best=clamp(netOpp[(Math.random()*netOpp.length)|0].x+rnd(-6,6),10,90);
+  if(type==='drop'&&deepOpp.length)best=clamp(deepOpp[0].x+rnd(-8,8),12,88);
   if(S.lefty&&Math.random()<.4)best=Math.random()<.5?12:88;
   if(type==='smash'&&Math.random()<.4)best=Math.random()<.5?10:90;
   const s=isPartner(p)?1.6:sk(p);
