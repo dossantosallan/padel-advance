@@ -325,9 +325,6 @@ function touchInit(){
   try{
     const st=document.createElement('style');st.textContent=`
 #tov{position:fixed;inset:0;z-index:20;display:none;touch-action:none;-webkit-user-select:none;user-select:none}
-body.full #tov{display:block}
-body.full .controls,body.full .ss{display:none!important}
-body.full{background:#0b0f2a}
 .tb{position:absolute;transform:translate(-50%,-50%);border:0;padding:0;font:16px var(--pixel);color:#05071a;display:flex;align-items:center;justify-content:center;touch-action:none;cursor:pointer;
   box-shadow:0 5px 0 rgba(0,0,0,.45),inset 0 -4px 0 rgba(0,0,0,.25),inset 0 3px 0 rgba(255,255,255,.35);border-radius:50%;outline:3px solid #05071a}
 .tb small{position:absolute;top:100%;margin-top:9px;font:8px var(--pixel);color:#f4f6ff;text-shadow:1px 1px 0 #05071a;white-space:nowrap}
@@ -367,7 +364,7 @@ body.full{background:#0b0f2a}
       ['pointerup','pointercancel','lostpointercapture'].forEach(t=>el.addEventListener(t,up))});
     tov.addEventListener('pointerdown',joyDown);tov.addEventListener('pointermove',joyMove);
     ['pointerup','pointercancel'].forEach(t=>tov.addEventListener(t,joyUp));
-    cv.addEventListener('pointerup',e=>{if(!document.body.classList.contains('full'))canvasTapAt(e.clientX,e.clientY)});
+    cv.addEventListener('pointerup',e=>canvasTapAt(e.clientX,e.clientY));
     addEventListener('resize',ctlLayout);ctlLayout();
   }catch(_){}
 }
@@ -3803,9 +3800,8 @@ function drawTabCareer(){
 }
 function drawTabOpts(){
   uT('OPCOES',160,12,ACC,'center',16);
-  const it=[['team','EQUIPE E PATROCINIO','FISIO, TECNICO, RAQUETE',()=>{mode='cteam';cur=0}],['gear','CONTROLES','POSICAO E TAMANHO',()=>{optRet='career';openCtlEditor()}],
-    ['gear','OPCOES DO JOGO','QUADRA, CAMERA, SOM',()=>{optRet='career';mode='options';cur=0}],['exit','SALVAR E SAIR','VOLTA AO MENU',()=>{leaveSlot();enterDemo()}]];
-  it.forEach(([ic,lab,sub,fn],i)=>{const y=44+i*66,f=uiHit('o'+i,6,y,308,58,fn);uPanel(6,y,308,58,'#1a2254',i===3?RED:'#3a4488');uIcon(ic,16,y+12,2);uT(lab,58,y+15,WHITE);uT(sub,58,y+33,MUT);if(f)uFocus(6,y,308,58)});
+  const it=[['team','EQUIPE E PATROCINIO','FISIO, TECNICO, RAQUETE',()=>{mode='cteam';cur=0}],['gear','OPCOES DO JOGO','QUADRA, CAMERA, SOM',()=>{optRet='career';mode='options';cur=0}],['exit','SALVAR E SAIR','VOLTA AO MENU',()=>{leaveSlot();enterDemo()}]];
+  it.forEach(([ic,lab,sub,fn],i)=>{const y=44+i*66,f=uiHit('o'+i,6,y,308,58,fn);uPanel(6,y,308,58,'#1a2254',i===it.length-1?RED:'#3a4488');uIcon(ic,16,y+12,2);uT(lab,58,y+15,WHITE);uT(sub,58,y+33,MUT);if(f)uFocus(6,y,308,58)});
   uT('DIFICULDADE: '+DIFF_N[car.diff??1],160,320,MUT,'center');uT('(MUDE EM EQUIPE)',160,334,'#55507a','center');
 }
 function careerUIInput(){

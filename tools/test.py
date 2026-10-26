@@ -153,10 +153,9 @@ try:
             pg.evaluate(f"__T.save.opts.full={'true' if full else 'false'};__T.applyScreen()")
             for vp in [(390,844),(844,390)]:
                 pg.set_viewport_size({'width':vp[0],'height':vp[1]});pg.wait_for_timeout(250)
-                if full:joy_ok(f"analogico flutuante {'retrato' if vp[0]<vp[1] else 'paisagem'}");continue
                 for bsz in range(4):
                     pg.evaluate(f"__T.save.opts.btn={bsz};__T.applyBtn()");pg.wait_for_timeout(80)
-                    dpad_ok(f"direcional gba {'retrato' if vp[0]<vp[1] else 'paisagem'} tamanho {['P','M','G','GG'][bsz]}")
+                    dpad_ok(f"direcional {'cheia' if full else 'gba'} {'retrato' if vp[0]<vp[1] else 'paisagem'} tamanho {['P','M','G','GG'][bsz]}")
         pg.set_viewport_size({'width':390,'height':844});pg.evaluate("__T.save.opts.full=false;__T.applyScreen();__T.save.opts.btn=1;__T.applyBtn()");pg.wait_for_timeout(200)
         for bid,key in [('bA','a'),('bB','b')]:
             r=pg.evaluate(f"(()=>{{const r=document.getElementById('{bid}').getBoundingClientRect();return[r.left+r.width/2,r.top+r.height/2]}})()")

@@ -243,9 +243,8 @@ function drawTabCareer(){
 }
 function drawTabOpts(){
   uT('OPCOES',160,12,ACC,'center',16);
-  const it=[['team','EQUIPE E PATROCINIO','FISIO, TECNICO, RAQUETE',()=>{mode='cteam';cur=0}],['gear','CONTROLES','POSICAO E TAMANHO',()=>{optRet='career';openCtlEditor()}],
-    ['gear','OPCOES DO JOGO','QUADRA, CAMERA, SOM',()=>{optRet='career';mode='options';cur=0}],['exit','SALVAR E SAIR','VOLTA AO MENU',()=>{leaveSlot();enterDemo()}]];
-  it.forEach(([ic,lab,sub,fn],i)=>{const y=44+i*66,f=uiHit('o'+i,6,y,308,58,fn);uPanel(6,y,308,58,'#1a2254',i===3?RED:'#3a4488');uIcon(ic,16,y+12,2);uT(lab,58,y+15,WHITE);uT(sub,58,y+33,MUT);if(f)uFocus(6,y,308,58)});
+  const it=[['team','EQUIPE E PATROCINIO','FISIO, TECNICO, RAQUETE',()=>{mode='cteam';cur=0}],['gear','OPCOES DO JOGO','QUADRA, CAMERA, SOM',()=>{optRet='career';mode='options';cur=0}],['exit','SALVAR E SAIR','VOLTA AO MENU',()=>{leaveSlot();enterDemo()}]];
+  it.forEach(([ic,lab,sub,fn],i)=>{const y=44+i*66,f=uiHit('o'+i,6,y,308,58,fn);uPanel(6,y,308,58,'#1a2254',i===it.length-1?RED:'#3a4488');uIcon(ic,16,y+12,2);uT(lab,58,y+15,WHITE);uT(sub,58,y+33,MUT);if(f)uFocus(6,y,308,58)});
   uT('DIFICULDADE: '+DIFF_N[car.diff??1],160,320,MUT,'center');uT('(MUDE EM EQUIPE)',160,334,'#55507a','center');
 }
 function careerUIInput(){

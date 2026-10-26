@@ -10,9 +10,6 @@ function touchInit(){
   try{
     const st=document.createElement('style');st.textContent=`
 #tov{position:fixed;inset:0;z-index:20;display:none;touch-action:none;-webkit-user-select:none;user-select:none}
-body.full #tov{display:block}
-body.full .controls,body.full .ss{display:none!important}
-body.full{background:#0b0f2a}
 .tb{position:absolute;transform:translate(-50%,-50%);border:0;padding:0;font:16px var(--pixel);color:#05071a;display:flex;align-items:center;justify-content:center;touch-action:none;cursor:pointer;
   box-shadow:0 5px 0 rgba(0,0,0,.45),inset 0 -4px 0 rgba(0,0,0,.25),inset 0 3px 0 rgba(255,255,255,.35);border-radius:50%;outline:3px solid #05071a}
 .tb small{position:absolute;top:100%;margin-top:9px;font:8px var(--pixel);color:#f4f6ff;text-shadow:1px 1px 0 #05071a;white-space:nowrap}
@@ -52,7 +49,7 @@ body.full{background:#0b0f2a}
       ['pointerup','pointercancel','lostpointercapture'].forEach(t=>el.addEventListener(t,up))});
     tov.addEventListener('pointerdown',joyDown);tov.addEventListener('pointermove',joyMove);
     ['pointerup','pointercancel'].forEach(t=>tov.addEventListener(t,joyUp));
-    cv.addEventListener('pointerup',e=>{if(!document.body.classList.contains('full'))canvasTapAt(e.clientX,e.clientY)});
+    cv.addEventListener('pointerup',e=>canvasTapAt(e.clientX,e.clientY));
     addEventListener('resize',ctlLayout);ctlLayout();
   }catch(_){}
 }
