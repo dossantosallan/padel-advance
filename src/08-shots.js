@@ -19,6 +19,7 @@ function reachInfo(p,sc){
 }
 const toMyWall=p=>p.team===0?b.vy>0:b.vy<0;
 function afterHit(p){
+  b.pb=predictBounce();
   /* split step e leitura da bola pela dupla que vai receber */
   for(const q of P){
     if(q.team===p.team)continue;
@@ -58,13 +59,15 @@ function doHit(p,type,tx,deep,pow,q,dy,short){
   else if(type==='bajada'){ty=yy(lerp(40,14,pow));sp=2.7+1.3*pow;w=.45;mn=1.5}
   else if(type==='rulo'){ty=yy(rnd(34,46));sp=2.9+1.2*pow;kick=true;w=.9}
   else if(type==='smash'){const side=tx<20||tx>80;ty=yy(side?rnd(56,64):rnd(46,60));sp=2.6+1.2*pow;kick=true;w=.3}
-  else if(type==='bandeja'){ty=yy(lerp(26,10,pow));sp=1.7+.6*pow;w=-.7}
-  else if(type==='vibora'){tx=tx<50?rnd(6,14):rnd(86,94);ty=yy(lerp(36,16,pow));sp=2.2+.8*pow;w=-.9}
+  else if(type==='bandeja'){ty=yy(lerp(26,10,pow));sp=2.5+.8*pow;w=-.7;mn=1}
+  else if(type==='vibora'){tx=tx<50?rnd(6,14):rnd(86,94);ty=yy(lerp(36,16,pow));sp=2.9+1*pow;w=-.9;mn=1}
   else if(type==='drop'){ty=yy(lerp(88,70,pow));sp=1+.6*pow;w=-1}
-  else if(type==='volley'){ty=yy(short?rnd(76,84):deep?lerp(30,12,pow):lerp(64,30,pow));sp=1.6+.8*pow;w=-.25}
+  else if(type==='volley'){ty=yy(short?rnd(76,84):deep?lerp(30,12,pow):lerp(64,30,pow));sp=2+.9*pow;w=-.25}
   else if(type==='contra'){ty=0;sp=1}
-  else{ty=yy(deep?lerp(20,6,pow):lerp(46,16,pow));sp=(1.9+1.2*pow)*(p.hand==='bh'?.94:1)*1.05;w=p.hand==='bh'?.3:.5}
+  else{ty=yy(deep?lerp(20,6,pow):lerp(46,16,pow));sp=(2.6+1.3*pow)*(p.hand==='bh'?.94:1);w=p.hand==='bh'?.1:.2}
   sp*=.85+.15*q;
+  /* bola baixa (perto do chão): sai com mais margem sobre a rede e um pouco menos rápida */
+  if(b.z<6&&(type==='drive'||type==='volley')){sp*=.88;mn=Math.max(mn||0,2.6)}
   let e=(1-q)*12+pow*pow*5,kickMul=1,bad=null;
   if(type==='volley')e*=.7;
   if(isHuman(p)){
@@ -73,7 +76,7 @@ function doHit(p,type,tx,deep,pow,q,dy,short){
     const S=STY[p.style]||STY.equil,partner=isPartner(p);
     e+=partner?3:Math.max(2.5,13-3*sk(p))*.5;
     const inSp=Math.hypot(b.vx,b.vy);
-    const ue=((partner?.12:Math.max(.06,.22-.04*sk(p)))*S.ue+Math.max(0,inSp-1.8)*.12+({smash:.08,vibora:.05,bandeja:-.04,volley:-.03}[type]||0))*.95;
+    const ue=((partner?.12:Math.max(.06,.22-.04*sk(p)))*S.ue+Math.max(0,inSp-1.8)*.12+({smash:.08,vibora:.05,bandeja:-.04,volley:-.03}[type]||0))*.68;
     if(type!=='contra'&&Math.random()<ue){const r=Math.random();bad=r<.38?'net':r<.72?'long':'wide'}
   }
   const kz=b.z;
@@ -129,8 +132,8 @@ function aiHit(p){
   if(b.offWall&&b.z>9&&Math.abs(p.y-NET)>55&&Math.random()<.5)type='bajada';
   else if(b.z>17&&Math.abs(p.y-NET)<48){type=(b.z>19&&r<S.smash)?'smash':Math.random()<S.vib?'vibora':'bandeja';if(type==='smash'&&Math.random()<.25)type='rulo'}
   else if(b.z>19&&r<.3)type='bandeja';
-  else if(oppNet&&Math.abs(p.y-NET)>55&&Math.random()<.15)type='chiquita';
-  else if((oppNet&&Math.random()<S.lobNet)||Math.random()<S.lob)type='lob';
+  else if(oppNet&&Math.abs(p.y-NET)>55&&b.z<8&&Math.random()<.15)type='chiquita';
+  else if(b.z<12&&((oppNet&&Math.random()<S.lobNet*.6)||Math.random()<S.lob*.6))type='lob';
   else if(Math.random()<S.drop&&Math.abs(p.y-NET)<50)type='drop';
   /* alvo: espaço vazio, o backhand do jogador humano, o mais cansado ou o meio da dupla */
   let best=50,bs=-1;

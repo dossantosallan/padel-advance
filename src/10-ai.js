@@ -11,7 +11,7 @@ function predictFor(team){
       else if((e==='wall'&&s.bounces===0&&sideOf(s.y)===team)||e==='out')stop=true;
     });
     if(stop)break;
-    if(sideOf(s.y)===team&&s.z<=19&&!(s.mustBounce&&s.bounces===0))out.push({x:s.x,y:s.y,t});
+    if(sideOf(s.y)===team&&s.z<=19&&!(s.mustBounce&&s.bounces===0))out.push({x:s.x,y:s.y,t,b:s.bounces});
   }
   return out;
 }
@@ -29,6 +29,8 @@ function homeYFor(p,weHit){
     const t=lastShot.type;
     if(t==='lob')v=net+4;
     else if(['bandeja','vibora','smash','volley','drop'].includes(t))v=net;
+    else if(t==='chiquita')v=net;
+    else if(t==='drive'||t==='bajada'||t==='contra')v=lastShot.q>.72?(back+net)/2+6:lastShot.deep?back+4:(back+net)/2;
     else v=lastShot.deep?(back+net)/2:net;
   }else{
     v=back;
@@ -47,11 +49,13 @@ function planTeam(team){
   const over=q=>hu&&(team===0?q.y>hu.y+8:q.y<hu.y-8)&&Math.hypot(q.x-hu.x,q.y-hu.y)/humanSpeed(hu)>q.t+4;
   const skip=q=>hu&&(hu.homeX>50?q.x>54:q.x<46)&&!over(q);
   let best=null;
+  const pb=b.pb,inCourt=pb&&sideOf(pb.y)===team&&pb.x>=0&&pb.x<=W&&pb.y>=0&&pb.y<=L;
   for(const p of mates){
     if(p.dive>0)continue;
-    const sp=aiSpeed(p)*.92;
+    const sp=aiSpeed(p)*.92,deepP=Math.abs(p.y-NET)>55;
     for(const q of cand){
       if(skip(q))continue;
+      if(deepP&&inCourt&&q.b===0&&cand.some(c=>c.b>0))continue;
       if(Math.hypot(q.x-p.x,q.y-p.y)<=sp*q.t+6){if(!best||q.t<best.q.t)best={p,q};break}
     }
   }

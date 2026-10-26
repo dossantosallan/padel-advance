@@ -98,6 +98,8 @@ function stepGame(){
       const ri=reachInfo(p,.78);
       /* contrapared da IA: bola passou e vai para o vidro do fundo */
       if(ri===1&&depthOf(p)>1&&toMyWall(p)&&Math.min(b.y,L-b.y)<20&&b.z<14&&Math.random()<.04){doHit(p,'contra',50,false,.6,rnd(.5,.9),0);if(st!=='play')break;continue}
+      /* no fundo, deixa quicar quando a bola vai cair dentro */
+      if(ri===1&&b.bounces===0&&Math.abs(p.y-NET)>55&&b.z>.6&&b.pb&&sideOf(b.pb.y)===p.team&&b.pb.y>=0&&b.pb.y<=L&&b.pb.x>=0&&b.pb.x<=W)continue;
       if(ri===1){
         const miss=isPartner(p)?.03:Math.max(.01,.10-.027*sk(p));
         if(Math.random()<miss){p.cool=45;p.charging=false;p.swing=SW;p.stype='drive'}else aiHit(p);
