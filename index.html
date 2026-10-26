@@ -183,7 +183,7 @@ const fy=y=>CAM.h*gRaw(y)/gRaw(L);
 const zs=y=>CAM.wn/100*kf(y)*CAM.zf;
 const proj=(x,y,z)=>[80+(x-50)*CAM.wn/100*kf(y),CAM.oy+fy(y)-z*zs(y)];
 const yAt=sy=>{let lo=-60,hi=L+60;for(let i=0;i<32;i++){const m=(lo+hi)/2;if(CAM.oy+fy(m)<sy)lo=m;else hi=m}return(lo+hi)/2};
-const SPEED=.85,SW=18;
+const SPEED=.8075,SW=18;
 const F8='8px "Press Start 2P", monospace',F16='16px "Press Start 2P", monospace';
 const ACC='#ffd23f',RED='#ff5a52',WHITE='#f4f6ff',MUT='#8f8ac8',NAVY='#0d1333',GRN='#5bff7a',BLU='#7fd0ff';
 const PL=['0','15','30','40'];
@@ -940,7 +940,7 @@ function chaseReturn(){
 }
 /* ---------- IA ---------- */
 const aiSpeed=p=>(isPartner(p)?1.05:(.82+.11*sk(p))*1.05)*stamF(p);
-const humanSpeed=p=>(twoP?1.25:1.12+.045*attrOf(p).vel)*stamF(p);
+const humanSpeed=p=>(twoP?1.25:1.12+.045*attrOf(p).vel)*.9*stamF(p);
 function predictFor(team){
   const s={x:b.x,y:b.y,z:b.z,vx:b.vx,vy:b.vy,vz:b.vz,w:b.w,sv:b.sv,bounces:b.bounces,mustBounce:b.mustBounce,spin:b.spin,kickV:b.kickV,out:b.out,corner:b.corner||0};
   const out=[];

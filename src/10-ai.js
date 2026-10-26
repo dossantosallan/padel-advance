@@ -1,6 +1,6 @@
 /* ---------- IA ---------- */
 const aiSpeed=p=>(isPartner(p)?1.05:(.82+.11*sk(p))*1.05)*stamF(p);
-const humanSpeed=p=>(twoP?1.25:1.12+.045*attrOf(p).vel)*stamF(p);
+const humanSpeed=p=>(twoP?1.25:1.12+.045*attrOf(p).vel)*.9*stamF(p);
 function predictFor(team){
   const s={x:b.x,y:b.y,z:b.z,vx:b.vx,vy:b.vy,vz:b.vz,w:b.w,sv:b.sv,bounces:b.bounces,mustBounce:b.mustBounce,spin:b.spin,kickV:b.kickV,out:b.out,corner:b.corner||0};
   const out=[];

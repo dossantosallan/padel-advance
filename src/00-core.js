@@ -16,7 +16,7 @@ const fy=y=>CAM.h*gRaw(y)/gRaw(L);
 const zs=y=>CAM.wn/100*kf(y)*CAM.zf;
 const proj=(x,y,z)=>[80+(x-50)*CAM.wn/100*kf(y),CAM.oy+fy(y)-z*zs(y)];
 const yAt=sy=>{let lo=-60,hi=L+60;for(let i=0;i<32;i++){const m=(lo+hi)/2;if(CAM.oy+fy(m)<sy)lo=m;else hi=m}return(lo+hi)/2};
-const SPEED=.85,SW=18;
+const SPEED=.8075,SW=18;
 const F8='8px "Press Start 2P", monospace',F16='16px "Press Start 2P", monospace';
 const ACC='#ffd23f',RED='#ff5a52',WHITE='#f4f6ff',MUT='#8f8ac8',NAVY='#0d1333',GRN='#5bff7a',BLU='#7fd0ff';
 const PL=['0','15','30','40'];
