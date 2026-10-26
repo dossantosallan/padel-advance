@@ -279,7 +279,7 @@ function renderInner(){
     cx.fillStyle='#ef3e36';cx.fillText('PADEL',82,44);cx.fillStyle=WHITE;cx.fillText('PADEL',80,42);
     txt('ADVANCE',80,64,ACC,'center');
     menuList(TITLE_ITEMS(),88,15,cur);
-    txt(save.me.name?save.me.name:'CRIE SEU ATLETA',80,196,save.me.name?WHITE:ACC,'center');
+    if(save.me.name)txt(save.me.name,80,196,WHITE,'center');
     if(car)txt('TEMP '+car.season+' SEM '+(car.week+1)+' #'+myRank(),80,212,MUT,'center');
     if(Math.floor(frame/28)%2)txt('A ESCOLHE',80,250,ACC,'center');
     return;

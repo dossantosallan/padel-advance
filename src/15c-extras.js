@@ -113,7 +113,7 @@ function stepSetup(){
   nav(3);const dv=prs(menu,'right')-prs(menu,'left')||(cur<2&&prs(menu,'a')?1:0);
   if(dv&&cur===0){setCam(1-save.opts.cam);sfx.ui()}
   else if(dv&&cur===1){save.opts.full=!save.opts.full;applyScreen();store();sfx.ui()}
-  if(cur===2&&(prs(menu,'a')||prs(menu,'start'))){save.setupDone=true;store();sfx.game();enterDemo();if(!save.me.name){mode='create';cur=0}return}
+  if(cur===2&&(prs(menu,'a')||prs(menu,'start'))){save.setupDone=true;store();sfx.game();enterDemo();return}
   quiet=true;stepGame();quiet=false;
 }
 function drawSetup(){

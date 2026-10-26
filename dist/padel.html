@@ -2264,7 +2264,7 @@ function endMatch(w){
   if(w===0||twoP)sfx.fanfare();
 }
 const tourOppId=()=>{const t=save.tour,ids=t.rounds[t.round];return ids[ids.indexOf(-1)^1]};
-const TITLE_ITEMS=()=>['CARREIRA','DESAFIOS','ESCOLA','AMISTOSO','2 JOGADORES','PERSONAGEM','OPCOES'];
+const TITLE_ITEMS=()=>['CARREIRA','DESAFIOS','ESCOLA','AMISTOSO','2 JOGADORES','OPCOES'];
 function careerResultLines(win,rn,inj){
   const t=car.tour;
   if(inj){resLines=['LESAO!','FORA POR '+car.inj+' SEM.'];resNext='cdone';return}
@@ -2291,16 +2291,15 @@ function update(){
     case 'boot':stepBoot();break;
     case 'intro':stepIntro();break;
     case 'title':{
-      nav(7);
+      nav(6);
       if(prs(menu,'a')||prs(menu,'start')){
         sfx.ui();
-        if(!save.me.name&&cur!==6){mode='create';cpage=0;cur=0}
-        else if(cur===0){mode='cmenu';cur=0}
+        /* o atleta só é criado dentro do modo carreira */
+        if(cur===0){mode='cmenu';cur=0}
         else if(cur===1){mode='chal';cur=0}
         else if(cur===2){mode='school';cur=0}
         else if(cur===3){mode='friendly';cur=0}
         else if(cur===4){mode='twop'}
-        else if(cur===5){mode='create';cpage=0;cur=0}
         else{mode='options';cur=0}
       }else{quiet=true;stepGame();quiet=false}
       break;}
@@ -2812,7 +2811,7 @@ function renderInner(){
     cx.fillStyle='#ef3e36';cx.fillText('PADEL',82,44);cx.fillStyle=WHITE;cx.fillText('PADEL',80,42);
     txt('ADVANCE',80,64,ACC,'center');
     menuList(TITLE_ITEMS(),88,15,cur);
-    txt(save.me.name?save.me.name:'CRIE SEU ATLETA',80,196,save.me.name?WHITE:ACC,'center');
+    if(save.me.name)txt(save.me.name,80,196,WHITE,'center');
     if(car)txt('TEMP '+car.season+' SEM '+(car.week+1)+' #'+myRank(),80,212,MUT,'center');
     if(Math.floor(frame/28)%2)txt('A ESCOLHE',80,250,ACC,'center');
     return;
@@ -3119,7 +3118,7 @@ function stepSetup(){
   nav(3);const dv=prs(menu,'right')-prs(menu,'left')||(cur<2&&prs(menu,'a')?1:0);
   if(dv&&cur===0){setCam(1-save.opts.cam);sfx.ui()}
   else if(dv&&cur===1){save.opts.full=!save.opts.full;applyScreen();store();sfx.ui()}
-  if(cur===2&&(prs(menu,'a')||prs(menu,'start'))){save.setupDone=true;store();sfx.game();enterDemo();if(!save.me.name){mode='create';cur=0}return}
+  if(cur===2&&(prs(menu,'a')||prs(menu,'start'))){save.setupDone=true;store();sfx.game();enterDemo();return}
   quiet=true;stepGame();quiet=false;
 }
 function drawSetup(){
@@ -3926,7 +3925,7 @@ function stepIntro(){
   if(tapAny||prs(menu,'a')||prs(menu,'start')||prs(menu,'b')){tapAny=false;if(t<PRESS_T)introT=PRESS_T;else finishIntro()}
   if(t>PRESS_T+420)finishIntro();
 }
-function finishIntro(){sfx.ui();buildCrowd();enterDemo();if(firstRun&&!save.setupDone){mode='setup';cur=0;return}if(!save.me.name){mode='create';cur=0}}
+function finishIntro(){sfx.ui();buildCrowd();enterDemo();if(firstRun&&!save.setupDone){mode='setup';cur=0;return}}
 function drawBoot(){
   R(0,0,CW,CH,NAVY);
   for(let y=0;y<CH;y+=4)for(let x=2;x<CW;x+=6)R(x+((y>>2)%2)*3,y,1,1,'#141b44');

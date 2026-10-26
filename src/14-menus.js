@@ -65,7 +65,7 @@ function endMatch(w){
   if(w===0||twoP)sfx.fanfare();
 }
 const tourOppId=()=>{const t=save.tour,ids=t.rounds[t.round];return ids[ids.indexOf(-1)^1]};
-const TITLE_ITEMS=()=>['CARREIRA','DESAFIOS','ESCOLA','AMISTOSO','2 JOGADORES','PERSONAGEM','OPCOES'];
+const TITLE_ITEMS=()=>['CARREIRA','DESAFIOS','ESCOLA','AMISTOSO','2 JOGADORES','OPCOES'];
 function careerResultLines(win,rn,inj){
   const t=car.tour;
   if(inj){resLines=['LESAO!','FORA POR '+car.inj+' SEM.'];resNext='cdone';return}
@@ -92,16 +92,15 @@ function update(){
     case 'boot':stepBoot();break;
     case 'intro':stepIntro();break;
     case 'title':{
-      nav(7);
+      nav(6);
       if(prs(menu,'a')||prs(menu,'start')){
         sfx.ui();
-        if(!save.me.name&&cur!==6){mode='create';cpage=0;cur=0}
-        else if(cur===0){mode='cmenu';cur=0}
+        /* o atleta só é criado dentro do modo carreira */
+        if(cur===0){mode='cmenu';cur=0}
         else if(cur===1){mode='chal';cur=0}
         else if(cur===2){mode='school';cur=0}
         else if(cur===3){mode='friendly';cur=0}
         else if(cur===4){mode='twop'}
-        else if(cur===5){mode='create';cpage=0;cur=0}
         else{mode='options';cur=0}
       }else{quiet=true;stepGame();quiet=false}
       break;}
