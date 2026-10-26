@@ -141,13 +141,22 @@ try:
                 dx,dy=pg.evaluate("[__T.P[0].x-50,__T.P[0].y-150]");pg.mouse.up();pg.wait_for_timeout(60)
                 if (ex and dx*ex<4) or (ey and dy*ey<4) or (ex==0 and abs(dx)>3) or (ey==0 and abs(dy)>3):bad.append(f'{name}: dx={dx:.0f} dy={dy:.0f}')
             check(label,not bad,'; '.join(bad))
+        def joy_ok(label):
+            W,H=pg.evaluate("[innerWidth,innerHeight]");x0,y0=W*.22,H*.8;bad=[]
+            for name,(ex,ey) in [('baixo',(0,1)),('cima',(0,-1)),('esq',(-1,0)),('dir',(1,0))]:
+                pg.evaluate("__T.st='play';__T.b.lastTeam=0;Object.assign(__T.P[0],{x:50,y:150,vx:0,vy:0})")
+                pg.mouse.move(x0,y0);pg.mouse.down();pg.mouse.move(x0+ex*45,y0+ey*45,steps=4);pg.wait_for_timeout(250)
+                dx,dy=pg.evaluate("[__T.P[0].x-50,__T.P[0].y-150]");pg.mouse.up();pg.wait_for_timeout(60)
+                if (ex and dx*ex<4) or (ey and dy*ey<4) or (ex==0 and abs(dx)>3) or (ey==0 and abs(dy)>3):bad.append(f'{name}: dx={dx:.0f} dy={dy:.0f}')
+            check(label,not bad,'; '.join(bad))
         for full in [False,True]:
             pg.evaluate(f"__T.save.opts.full={'true' if full else 'false'};__T.applyScreen()")
             for vp in [(390,844),(844,390)]:
                 pg.set_viewport_size({'width':vp[0],'height':vp[1]});pg.wait_for_timeout(250)
+                if full:joy_ok(f"analogico flutuante {'retrato' if vp[0]<vp[1] else 'paisagem'}");continue
                 for bsz in range(4):
                     pg.evaluate(f"__T.save.opts.btn={bsz};__T.applyBtn()");pg.wait_for_timeout(80)
-                    dpad_ok(f"direcional {'cheia' if full else 'gba'} {'retrato' if vp[0]<vp[1] else 'paisagem'} tamanho {['P','M','G','GG'][bsz]}")
+                    dpad_ok(f"direcional gba {'retrato' if vp[0]<vp[1] else 'paisagem'} tamanho {['P','M','G','GG'][bsz]}")
         pg.set_viewport_size({'width':390,'height':844});pg.evaluate("__T.save.opts.full=false;__T.applyScreen();__T.save.opts.btn=1;__T.applyBtn()");pg.wait_for_timeout(200)
         for bid,key in [('bA','a'),('bB','b')]:
             r=pg.evaluate(f"(()=>{{const r=document.getElementById('{bid}').getBoundingClientRect();return[r.left+r.width/2,r.top+r.height/2]}})()")
@@ -155,7 +164,7 @@ try:
             check(f'botão {key.upper()} responde',v==1)
         # todas as telas
         pg.evaluate("__T.beginCreate(1);__T.save.me.name='TESTE';__T.finishCreate();__T.car.needOffer=false")
-        modes=['setup','title','chal','backup','school','friendly','twop','create','name','options','cmenu','cslots','cattr','career','crank','cpartner','cteam','cevo','cmore','cnews','ctroph','cstats','ccal','cseason']
+        modes=['setup','title','chal','backup','school','friendly','twop','create','name','options','cmenu','cslots','cattr','career','crank','cpartner','cteam','cevo','cmore','cnews','ctroph','cstats','ccal','ctw','cdeco','cgar','cseason']
         bad=[]
         for m in modes:
             n0=len(errs);pg.evaluate(f"__T.setMode('{m}')");pg.wait_for_timeout(120)

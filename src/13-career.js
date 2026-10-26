@@ -83,7 +83,7 @@ const tourIsFinal=()=>car.tour.cur.length===2;
 function tourMatchDone(win,sim){
   const t=car.tour,cat=CATS[t.code],oppK=tourOpp();t.lastOpp=oppK;
   h2hNote(oppK,win);if(win)goalOnWin();
-  car.cond=clamp(car.cond-(sim?(cat.nat?4:7):(cat.nat?5:9)),0,100);
+  car.cond=clamp(car.cond-(sim?(cat.nat?4:7):(cat.nat?5:9))*happyDrain(),0,100);
   car.chem=Math.min(1,car.chem+.04);
   if(win){t.won++;save.wins++;partnerAfterWin();contractWin()}
   t.mine=win?-1:tourOpp();
@@ -108,7 +108,7 @@ function nextWeek(action){
   carEnsure();const r0=myRank();
   depthEnsure();
   if(action!=='played')simWeekAll(-1);else simWeekAll(car.pickPlayed,car.usedKeys);
-  const rec={played:6,train:15,rest:35,inj:25}[action]||10;
+  const rec=({played:6,train:15,rest:35,inj:25}[action]||10)+(action==='train'?happyTrain():0);
   car.cond=clamp(car.cond+rec,0,100);
   if(car.inj>0&&action!=='played')car.inj--;
   car.tour=null;car.week++;

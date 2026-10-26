@@ -87,7 +87,7 @@ const nameMax=()=>nameTarget==='team'?10:8;
 function nav(n){if(prs(menu,'up')){cur=(cur+n-1)%n;sfx.ui()}if(prs(menu,'down')){cur=(cur+1)%n;sfx.ui()}}
 const back=()=>prs(menu,'b');
 function update(){
-  readInput();frame++;if(sharing)return;if(cheer>0)cheer--;
+  readInput();frame++;joyGuide();if(sharing)return;if(cheer>0)cheer--;
   switch(mode){
     case 'boot':stepBoot();break;
     case 'intro':stepIntro();break;
@@ -147,7 +147,7 @@ function update(){
         else if(cur===8){o.tips=!o.tips;if(o.tips)save.tipsSeen={}}
         store();
       }
-      if(back()||prs(menu,'start'))enterDemo();
+      if(back()||prs(menu,'start')){if(optRet){optRet=null;mode='career'}else enterDemo()}
       break;}
     case 'create':{
       const me=save.me,dv=prs(menu,'right')-prs(menu,'left'),cyc=(k,n)=>{me[k]=(me[k]+n+dv)%n};
@@ -165,8 +165,8 @@ function update(){
         if(!me.name||(cpage===0&&cur===0))openName('me');
         else if(cpage===0&&(cur===11||prs(menu,'start'))){cpage=1;cur=0}
         else if(cpage===1&&cur===0&&!prs(menu,'start'))openName('team');
-        else if(cpage===1&&(cur===4||prs(menu,'start'))){store();if(creatingSlot!=null){mode='cattr';cur=0}else enterDemo()}
-      }else if(back()){if(cpage===1){cpage=0;cur=11}else if(creatingSlot!=null)cancelCreate();else if(me.name){store();enterDemo()}else openName('me')}
+        else if(cpage===1&&(cur===4||prs(menu,'start'))){store();if(creatingSlot!=null){mode='cattr';cur=0}else if(createRet){createRet=null;mode='career'}else enterDemo()}
+      }else if(back()){if(cpage===1){cpage=0;cur=11}else if(creatingSlot!=null)cancelCreate();else if(me.name){store();if(createRet){createRet=null;mode='career'}else enterDemo()}else openName('me')}
       break;}
     case 'name':{
       const put=ch=>{if(ch==='<')nameBuf=nameBuf.slice(0,-1);else if(nameBuf.length<nameMax()&&!(ch===' '&&(!nameBuf||nameBuf.endsWith(' '))))nameBuf+=ch;sfx.ui()};
@@ -181,31 +181,8 @@ function update(){
       else if(prs(menu,'a')){if(nameCur===28)done();else put(NAMEGRID[nameCur])}
       else if(prs(menu,'b')){if(nameBuf)put('<');else if(nameTarget==='team'){mode='create';cpage=1;cur=0}else if(save.me.name){mode='create';cpage=0;cur=0}}
       break;}
-    case 'career':{
-      if(car.needOffer){car.needOffer=false;offerContract();break}
-      const IT=10;nav(IT);
-      if(cur===0){const o=weekOpts(),dv=prs(menu,'right')-prs(menu,'left');if(dv&&o.length>1){car.pick=((car.pick||0)+1)%o.length;sfx.ui()}}
-      if(prs(menu,'a')){
-        sfx.ui();
-        if(cur===0){
-          if(car.inj>0){sfx.fault();car.msg='LESIONADO: DESCANSE'}
-          else if(!eligible()){sfx.fault();car.msg='SEM RANKING PARA ESTE'}
-          else if(car.money<weekInfo().cost){sfx.fault();car.msg='SEM DINHEIRO P/ VIAGEM'}
-          else{enterTour();startFly()}
-        }else if(cur===1){
-          if(car.inj>0){sfx.fault();car.msg='LESIONADO: DESCANSE'}
-          else if(car.money<400){sfx.fault();car.msg='SEM DINHEIRO'}
-          else{car.money-=400;lvlUps=[];car.msg='TREINO: '+ATN[car.focus];gain(car.focus,1.3+(car.coach?.6:0));nextWeek('train')}
-        }else if(cur===2){car.msg=car.inj>0?'RECUPERANDO':'DESCANSO: FISICO +35';nextWeek(car.inj>0?'inj':'rest')}
-        else if(cur===3){mode='crank';rkBpt=car.circ==='BR';rkOff=rkBpt?Math.max(0,bptPos()-8):Math.max(0,myRank()-8)}
-        else if(cur===4){mode='cpartner';cur=0}
-        else if(cur===5){mode='cteam';cur=0}
-        else if(cur===6){mode='cevo';cur=['vel','for','pre','top'].indexOf(car.focus)}
-        else if(cur===7){mode='cmore';cur=0}
-        else if(cur===8){mode='ccal';cur=Math.min(car.week,SEASON_W-1)}
-        else{leaveSlot();enterDemo()}
-      }else if(back()){leaveSlot();enterDemo()}
-      break;}
+    case 'career':careerUIInput();break;
+    case 'ctw':case 'cdeco':case 'cgar':subInput();break;
     case 'ctour':
       nav(3);
       if(prs(menu,'a')){
@@ -299,7 +276,7 @@ function update(){
       break;
     case 'cnews':case 'ctroph':case 'cstats':
       if(mode==='ctroph'&&prs(menu,'a')){shareCard('season');break}
-      if(back()||prs(menu,'a')){mode='cmore';cur={cnews:0,ctroph:1,cstats:2}[mode]}
+      if(back()||prs(menu,'a')){if(uiRet){uiRet=null;mode='career'}else{mode='cmore';cur={cnews:0,ctroph:1,cstats:2}[mode]}}
       break;
     case 'school':{
       const n=LESSONS.length+1;nav(n);

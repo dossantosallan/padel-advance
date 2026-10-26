@@ -326,7 +326,10 @@ function renderInner(){
     txt('A EVOLUI',80,240,save.xp?ACC:MUT,'center');txt('B VOLTA',80,256,MUT,'center');
     return;
   }
-  if(mode==='career'){dim(.86);drawCareerHub();return}
+  if(mode==='career'){drawCareerUI();return}
+  if(mode==='ctw'){drawTrophyWall();return}
+  if(mode==='cdeco'){drawDeco();return}
+  if(mode==='cgar'){drawGarage();return}
   if(mode==='school'){drawSchool();return}
   if(mode==='chal'){dim(.88);drawChal();return}
   if(mode==='backup'){dim(.9);drawBackup();return}
