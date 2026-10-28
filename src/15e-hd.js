@@ -154,7 +154,7 @@ function digitH(d,x,y,c){const s=DIG[d];for(let i=0;i<15;i++)if(s[i]==='1')Rh(x+
 /* X,Y em pixels físicos (pés). Devolve o topo da cabeça em pixels físicos. */
 function drawSpriteHD(p,X,Y){
   /* K = pixels físicos por unidade lógica do boneco (o desenho é maior que a escala da quadra, só no visual) */
-  const K=2.5,k=K/2,u=n=>Math.max(1,Math.round(n*k));
+  const K=spriteK(),k=K/2,u=n=>Math.max(1,Math.round(n*k));
   const skin=p.skin||'#f2c18d',shoe=p.shoe||'#e8e8e8',front=p.team===1,skD=shd(skin,-.22),skL=shd(skin,.15);
   const sh=p.shirt,shD=shd(sh,-.3),shL=shd(sh,.28),pt=p.shorts||'#1b1b2a',ptD=shd(pt,-.28),hr=p.hair||'#3b2416',hrL=shd(hr,.25);
   const Xl=X/2,Yl=Y/2,px=v=>Math.round(X+(v-Xl)*K),py=v=>Math.round(Y+(v-Yl)*K);

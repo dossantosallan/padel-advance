@@ -359,11 +359,11 @@ function renderInner(){
   if(mode==='cseason'){dim(.9);drawCSeason();return}
   if(mode==='options'){
     dim(.82);txt('OPCOES',80,40,ACC,'center',F16);const o=save.opts;
-    const rows=[['QUADRA',COURTS[o.court].n],['CAMERA',CAMS[o.cam].n],['40-40',o.golden?'OURO':'VANTAGEM'],['QUIQUE',o.marker?'MARCA':'NAO'],['BOTOES',BTNS[o.btn][0]],['SOM',o.sound?'SIM':'NAO'],['TELA',o.full?'CHEIA':'GBA'],['MUSICA',o.music?'SIM':'NAO'],['DICAS',o.tips?'SIM':'NAO'],['BACKUP','>'],['TEMPO GOLPE',o.timing!==false?'SIM':'NAO']];
+    const rows=[['QUADRA',COURTS[o.court].n],['CAMERA',CAMS[o.cam].n],['40-40',o.golden?'OURO':'VANTAGEM'],['QUIQUE',o.marker?'MARCA':'NAO'],['BOTOES',BTNS[o.btn][0]],['SOM',o.sound?'SIM':'NAO'],['TELA',o.full?'CHEIA':'GBA'],['MUSICA',o.music?'SIM':'NAO'],['DICAS',o.tips?'SIM':'NAO'],['BACKUP','>'],['TEMPO GOLPE',o.timing!==false?'SIM':'NAO'],['TORCIDA',o.crowd?'SIM':'NAO']];
     rows.forEach(([l,v],i)=>{const y=58+i*15,on=cur===i;txt(l,10,y,on?ACC:WHITE);txt(v,150,y,on?ACC:MUT,'right');
       if(on&&Math.floor(frame/16)%2)txt('<',150-v.length*8-12,y,ACC)});
-    txt('CAMISA E VISUAL',80,232,MUT,'center');txt('EM PERSONAGEM',80,242,MUT,'center');
-    txt('B VOLTAR',80,264,MUT,'center');
+    txt('CAMISA E VISUAL',80,242,MUT,'center');txt('EM PERSONAGEM',80,252,MUT,'center');
+    txt('B VOLTAR',80,270,MUT,'center');
     return;
   }
   if(mode==='create'){

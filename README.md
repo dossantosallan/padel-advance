@@ -45,6 +45,7 @@ O `build.py` gera `index.html` (site/app instalável) e `dist/padel.html` (pági
 - Desafio do dia (com sequência) e partida relâmpago de 1 game
 - Backup: exportar e restaurar todo o progresso (Opções → Backup)
 - Comemoração e frustração dos jogadores, troca de lado, torcida com bandeiras e 7 quadras (incluindo panorâmica, coberta e praia)
+- Luz de refletores, sombras suaves e arena sem torcida com câmera mais próxima (a torcida volta em Opções → Torcida)
 - Amistoso com o atleta de qualquer carreira
 - Modo carreira: calendário de 20 semanas, categorias FIP Bronze/Silver/Gold, P2, P1, Major e Finals com pontuação no estilo Premier Padel, ranking da liga, salário de patrocínio, prêmios, cansaço e lesões, parceiros e raquetes
 - Criação de personagem: nome, lado (direita/esquerda), mão, estilo, visual, acessórios e uniforme da dupla
