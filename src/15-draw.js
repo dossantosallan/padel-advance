@@ -200,8 +200,8 @@ function drawPlayer(p){
     else{const bb=Math.floor(frame/10)%2;R(X-1,B-19+bb,3,1,mc);R(X,B-18+bb,1,1,mc)}
     if(p.stam<.95){R(X-5,Y+2,10,1,'#05071a');R(X-5,Y+2,Math.round(10*p.stam),1,p.stam<.35?RED:p.stam<.65?ACC:GRN)}
   }
-  if(!demo&&st==='serve'&&timer<110&&games[0]+games[1]===0&&pts[0]+pts[1]===0&&p.first)txt(p.first,clamp(X,24,136),Y+3,p.team===0?WHITE:MUT,'center');
-  if(p.lblT>0&&!demo&&!(st==='serve'&&server===p&&isHuman(p)&&!p.lbl)){const lx=clamp(X,34,126);txt(p.lbl,lx,B-31,p.team===0?ACC:WHITE,'center')}
+  if(!demo&&st==='serve'&&timer<110&&games[0]+games[1]===0&&pts[0]+pts[1]===0&&p.first){cx.font=F8;const fw=Math.ceil(cx.measureText(p.first).width/2)+2;txt(p.first,clamp(X,fw,CW-fw),Y+3,p.team===0?WHITE:MUT,'center')}
+  if(p.lblT>0&&!demo&&!(st==='serve'&&server===p&&isHuman(p)&&!p.lbl)){cx.font=F8;const hw=Math.ceil(cx.measureText(p.lbl).width/2)+2,lx=clamp(X,hw,CW-hw);txt(p.lbl,lx,B-31,p.team===0?ACC:WHITE,'center')}
 }
 function drawNet(){
   drawNetHD();return;
