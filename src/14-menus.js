@@ -130,8 +130,9 @@ function update(){
       if(back()||prs(menu,'start')){store();if(nextAfterPlayer==='career'&&car){mode='career';cur=6}else enterDemo()}
       break;
     case 'options':{
-      nav(12);const dv=prs(menu,'right')-prs(menu,'left')||(prs(menu,'a')?1:0);
-      if(cur===10&&dv){save.opts.timing=!save.opts.timing;store();sfx.ui()}
+      nav(13);const dv=prs(menu,'right')-prs(menu,'left')||(prs(menu,'a')?1:0);
+      if(cur===12&&dv){save.opts.spr=save.opts.spr===false;for(const k in UIC)delete UIC[k];store();sfx.ui()}
+      else if(cur===10&&dv){save.opts.timing=!save.opts.timing;store();sfx.ui()}
       else if(cur===11&&dv){save.opts.crowd=!save.opts.crowd;applyLook();buildCrowd();store();sfx.ui()}
       else if(cur===9){if(prs(menu,'a')){mode='backup';cur=0;sfx.ui()}}
       else if(dv){

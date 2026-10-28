@@ -45,6 +45,7 @@ O `build.py` gera `index.html` (site/app instalável) e `dist/padel.html` (pági
 - Desafio do dia (com sequência) e partida relâmpago de 1 game
 - Backup: exportar e restaurar todo o progresso (Opções → Backup)
 - Comemoração e frustração dos jogadores, troca de lado, torcida com bandeiras e 7 quadras (incluindo panorâmica, coberta e praia)
+- Bonecos novos em pixel art desenhada (15 poses: espera, corrida, saque, direita, revés, smash, smash saltando e peixinho, de costas e de frente), recoloridos com camisa, short, pele, cabelo, tênis e raquete de cada atleta; os bonecos clássicos continuam em Opções → Bonecos. A arte fica em `art/jogador/` e a conversão em `tools/sprites/`
 - Luz de refletores, sombras suaves e arena sem torcida com câmera mais próxima (a torcida volta em Opções → Torcida)
 - Amistoso com o atleta de qualquer carreira
 - Modo carreira: calendário de 20 semanas, categorias FIP Bronze/Silver/Gold, P2, P1, Major e Finals com pontuação no estilo Premier Padel, ranking da liga, salário de patrocínio, prêmios, cansaço e lesões, parceiros e raquetes
